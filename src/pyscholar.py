@@ -70,6 +70,27 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+def status_request(resp=""):
+    """Return status of request"""
+    if resp=="":
+        status_code="Incorrect"
+        status_text="Not received the request to verify"
+        return (False,status_code,status_text)
+    elif resp.status_code!=200:
+        status_code=""
+        status_text=""
+        resp=resp.json()
+        resp=resp[u'service-error'][u'status']
+        status_code+=resp[u'statusCode']
+        status_text+=resp[u'statusText']
+        print status_code
+        print status_text
+        return (False,status_code,status_text)
+    else:
+        status_code="Correct"
+        status_text="Correct"
+        return (True,status_code,status_text)
+
 
 def search_author():
     """A wrapper to the Scopus API"""
@@ -91,8 +112,10 @@ def get_papers(list_scopus_id_author=[]):
         for id_author in list_scopus_id_author:
             searchQuery = "query=AU-ID("+str(id_author)+")"
             resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
-            if resp.status_code != 200:
-                print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
+            valid=status_request(resp)
+            if not valid[0]:
+                print valid[1]
+                print valid[2]
                 return None
             else:
                 id_papers=[]
