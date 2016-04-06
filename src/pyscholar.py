@@ -3,6 +3,8 @@ import json
 import requests
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
+search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
+
 
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
@@ -74,11 +76,39 @@ def search_author():
     #Pense que seria bueno un wrapper que provea todo lo del api
     pass
 
-def get_papers(scopus_id):
-    """Returns the list of scopus id's of the papers of the given
-    author by scopus id"""
+def get_papers(list_scopus_id_author=[]):
+    """Returns a dictionary where the key is the ID of the 
+    author and the value associated with the key 
+    is a list of the ids of the papers that belong to the author."""
+
+    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    fields = "&field=identifier"
+    papers_by_author=dict()
+    if len(list_scopus_id_author)==0:
+        print "Give me a list with at least one Id"
+        return None
+    else:
+        for id_author in list_scopus_id_author:
+            searchQuery = "query=AU-ID("+str(id_author)+")"
+            resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+            if resp.status_code != 200:
+                print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
+                return None
+            else:
+                id_papers=[]
+                data = resp.json()
+                data = data['search-results']
+                if data["opensearch:totalResults"] == '0':
+                    print "None"
+                    return None
+                else:
+                    for entry in data['entry']:
+                        paperId = entry['dc:identifier'].split(':')
+                        id_papers.append(paperId[1])
+                    papers_by_author[id_author]=id_papers
+    return papers_by_author
     #Hay que considerar que pudieran tener aliases
-    pass
+    
     
 
 #FIN DE TODO LIST
