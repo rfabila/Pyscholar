@@ -126,6 +126,34 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
                 authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
+def count_citations_by_id_paper(list_scopus_id_paper=[]):
+    """Returns a dictionary where the key is the ID of the 
+    paper and the value associated with the key is the 
+    number citations """
+
+    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    fields = "?field=dc:description,citedby-count"
+    cited_by_count=dict()
+    if len(list_scopus_id_paper)==0:
+        print "Give me a list with at least one Id"
+        return None
+    else:
+        for id_paper in list_scopus_id_paper:
+            searchQuery = str(id_paper)
+            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+            valid=status_request(resp)
+            if not valid[0]:
+                print valid[1]
+                print valid[2]
+                return None
+            else:
+                number_citations=[]
+                data=resp.json()
+                data=data["abstracts-retrieval-response"]["coredata"]
+                number_citations.append(data['citedby-count'])
+                cited_by_count[id_paper]=number_citations
+    return cited_by_count
+
 
 def get_papers(list_scopus_id_author=[]):
     """Returns a dictionary where the key is the ID of the 
