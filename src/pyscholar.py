@@ -97,6 +97,23 @@ def search_author():
     #Pense que seria bueno un wrapper que provea todo lo del api
     pass
 
+def get_coauthors(id_author=""):
+    """
+    Returns a list of co-authors 
+    associated with an id of an author.
+    """
+    l_temp=[id_author]
+    papers_author=get_papers(l_temp)
+    list_authors=[]
+    for paper in papers_author[id_author]:
+        paper_list=[paper]
+        authors=get_ids_authors_by_id_paper(paper_list)
+        for author in authors[paper]:
+            if author not in list_authors and author!=id_author:
+                list_authors.append(author)
+
+    return (id_author,list_authors)
+
 def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a list 
