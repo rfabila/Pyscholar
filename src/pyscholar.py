@@ -92,6 +92,28 @@ def status_request(resp=""):
         return (True,status_code,status_text)
 
 
+def get_title_abstract_by_idpaper(id_paper=""):
+    """Returns a tuple with the id_paper,title and abstract of each paper """
+
+    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    fields = "?field=dc:description,title"
+    if id_paper=="":
+        print "Give me a list with at least one Id"
+        return None
+    else:
+        searchQuery = (id_paper)
+        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        valid=status_request(resp)
+        if not valid[0]:
+            print valid[1]
+            print valid[2]
+            return None
+        else:
+            data=resp.json()
+            data=data["abstracts-retrieval-response"]["coredata"]
+            return (id_paper,data['dc:title'],data['dc:description'])
+
+
 def search_author():
     """A wrapper to the Scopus API"""
     #Pense que seria bueno un wrapper que provea todo lo del api
