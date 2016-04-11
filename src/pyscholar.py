@@ -16,6 +16,10 @@ Scopus_ids_merged_lists={}
 #despues mejoraremos
 #Vean https://en.wikipedia.org/wiki/Disjoint-set_data_structure
 
+class My_Exception_Scopus(Exception):
+    pass
+
+
 def _add_scopus_id(scopus_id):
     """Adds a scopus id to the merged list. Returns False if the ID
     is already in the merged list and false otherwise"""
@@ -70,6 +74,19 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+
+def Exception_Request(request):
+    """Launch a Exception"""
+    if request.status_code!=200:
+        resp=request.json()
+        resp=resp[u'service-error'][u'status']
+        status_code=""
+        status_text=""
+        status_code+=resp[u'statusCode']
+        status_text+=resp[u'statusText']
+        raise My_Exception_Scopus({"status_code":status_code,"status_text":status_text})
+
+
 def status_request(resp=""):
     """Return status of request"""
     if resp=="":
@@ -206,15 +223,11 @@ def get_papers(list_scopus_id_author=[]):
         print "Give me a list with at least one Id"
         return None
     else:
-        for id_author in list_scopus_id_author:
-            searchQuery = "query=AU-ID("+str(id_author)+")"
-            resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
-            valid=status_request(resp)
-            if not valid[0]:
-                print valid[1]
-                print valid[2]
-                return None
-            else:
+        try:
+            for id_author in list_scopus_id_author:
+                searchQuery = "query=AU-ID("+str(id_author)+")"
+                resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+                Exception_Request(resp)
                 id_papers=[]
                 data = resp.json()
                 data = data['search-results']
@@ -226,7 +239,12 @@ def get_papers(list_scopus_id_author=[]):
                         paperId = entry['dc:identifier'].split(':')
                         id_papers.append(paperId[1])
                     papers_by_author[id_author]=id_papers
-    return papers_by_author
+            return papers_by_author
+        except My_Exception_Scopus as e:
+            details = e.args[0]
+            print("status_code: "+details["status_code"])
+            print("status_text: "+details["status_text"])
+    
     #Hay que considerar que pudieran tener aliases
     
     
