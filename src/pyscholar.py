@@ -1,5 +1,4 @@
 from scopus_key import MY_API_KEY
-import json
 import requests
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
@@ -16,8 +15,15 @@ Scopus_ids_merged_lists={}
 #despues mejoraremos
 #Vean https://en.wikipedia.org/wiki/Disjoint-set_data_structure
 
-class My_Exception_Scopus(Exception):
-    pass
+class Scopus_Exception(Exception):
+    def __init__(self, resp):
+        self.code = resp.status_code
+        resp = resp.json()
+        resp = resp[u'service-error'][u'status']
+        self.statusCode=resp[u'statusCode']
+        self.statusText=resp[u'statusText']
+    def __str__(self):
+        return "%s: %s"%(self.statusCode, self.statusText)
 
 
 def _add_scopus_id(scopus_id):
@@ -75,60 +81,21 @@ def _get_alias_id(scopus_id):
 
 ###FIN DE FUNCIONES de IDs
 
-def Exception_Request(request):
-    """Launch a Exception"""
-    if request.status_code!=200:
-        resp=request.json()
-        resp=resp[u'service-error'][u'status']
-        status_code=""
-        status_text=""
-        status_code+=resp[u'statusCode']
-        status_text+=resp[u'statusText']
-        raise My_Exception_Scopus({"status_code":status_code,"status_text":status_text})
-
-
-def status_request(resp=""):
-    """Return status of request"""
-    if resp=="":
-        status_code="Incorrect"
-        status_text="Not received the request to verify"
-        return (False,status_code,status_text)
-    elif resp.status_code!=200:
-        status_code=""
-        status_text=""
-        resp=resp.json()
-        resp=resp[u'service-error'][u'status']
-        status_code+=resp[u'statusCode']
-        status_text+=resp[u'statusText']
-        print status_code
-        print status_text
-        return (False,status_code,status_text)
-    else:
-        status_code="Correct"
-        status_text="Correct"
-        return (True,status_code,status_text)
-
 
 def get_title_abstract_by_idpaper(id_paper=""):
     """Returns a tuple with the id_paper,title and abstract of each paper """
 
     headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "?field=dc:description,title"
-    if id_paper=="":
-        print "Give me a list with at least one Id"
-        return None
-    else:
-        searchQuery = (id_paper)
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-        valid=status_request(resp)
-        if not valid[0]:
-            print valid[1]
-            print valid[2]
-            return None
-        else:
-            data=resp.json()
-            data=data["abstracts-retrieval-response"]["coredata"]
-            return (id_paper,data['dc:title'],data['dc:description'])
+    
+    searchQuery = (id_paper)
+    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    if resp.status_code != 200:
+        raise Scopus_Exception(resp)
+    
+    data=resp.json()
+    data=data["abstracts-retrieval-response"]["coredata"]
+    return (id_paper,data['dc:title'],data['dc:description'])
 
 
 def search_author():
@@ -161,25 +128,19 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
     headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
-    if len(list_scopus_id_paper)==0:
-        print "Give me a list with at least one Id"
-        return None
-    else:
-        for id_paper in list_scopus_id_paper:
-            searchQuery = str(id_paper)
-            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-            valid=status_request(resp)
-            if not valid[0]:
-                print valid[1]
-                print valid[2]
-                return None
-            else:
-                id_authors=[]
-                data=resp.json()
-                data=data["abstracts-retrieval-response"]["authors"]["author"]
-                for author in data:
-                    id_authors.append(author["@auid"])     
-                authors_by_id_paper[id_paper]=id_authors
+    
+    for id_paper in list_scopus_id_paper:
+        searchQuery = str(id_paper)
+        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+            
+        id_authors=[]
+        data=resp.json()
+        data=data["abstracts-retrieval-response"]["authors"]["author"]
+        for author in data:
+            id_authors.append(author["@auid"])     
+        authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
 def count_citations_by_id_paper(list_scopus_id_paper=[]):
@@ -190,24 +151,18 @@ def count_citations_by_id_paper(list_scopus_id_paper=[]):
     headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "?field=dc:description,citedby-count"
     cited_by_count=dict()
-    if len(list_scopus_id_paper)==0:
-        print "Give me a list with at least one Id"
-        return None
-    else:
-        for id_paper in list_scopus_id_paper:
-            searchQuery = str(id_paper)
-            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-            valid=status_request(resp)
-            if not valid[0]:
-                print valid[1]
-                print valid[2]
-                return None
-            else:
-                number_citations=[]
-                data=resp.json()
-                data=data["abstracts-retrieval-response"]["coredata"]
-                number_citations.append(data['citedby-count'])
-                cited_by_count[id_paper]=number_citations
+        
+    for id_paper in list_scopus_id_paper:
+        searchQuery = str(id_paper)
+        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp) 
+        
+        number_citations=[]
+        data=resp.json()
+        data=data["abstracts-retrieval-response"]["coredata"]
+        number_citations.append(data['citedby-count'])
+        cited_by_count[id_paper]=number_citations
     return cited_by_count
 
 
@@ -219,35 +174,27 @@ def get_papers(list_scopus_id_author=[]):
     headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "&field=identifier"
     papers_by_author=dict()
-    if len(list_scopus_id_author)==0:
-        print "Give me a list with at least one Id"
-        return None
-    else:
-        try:
-            for id_author in list_scopus_id_author:
-                searchQuery = "query=AU-ID("+str(id_author)+")"
-                resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
-                Exception_Request(resp)
-                id_papers=[]
-                data = resp.json()
-                data = data['search-results']
-                if data["opensearch:totalResults"] == '0':
-                    print "None"
-                    return None
-                else:
-                    for entry in data['entry']:
-                        paperId = entry['dc:identifier'].split(':')
-                        id_papers.append(paperId[1])
-                    papers_by_author[id_author]=id_papers
-            return papers_by_author
-        except My_Exception_Scopus as e:
-            details = e.args[0]
-            print("status_code: "+details["status_code"])
-            print("status_text: "+details["status_text"])
+    
+    for id_author in list_scopus_id_author:
+        searchQuery = "query=AU-ID("+str(id_author)+")"
+        resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+        
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+            
+        id_papers=[]
+        data = resp.json()
+        data = data['search-results']
+        if data["opensearch:totalResults"] == '0':
+            return None
+        else:
+            for entry in data['entry']:
+                paperId = entry['dc:identifier'].split(':')
+                id_papers.append(paperId[1])
+            papers_by_author[id_author]=id_papers
+    return papers_by_author
     
     #Hay que considerar que pudieran tener aliases
-    
-    
 
 #FIN DE TODO LIST
 
@@ -271,8 +218,7 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
     resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
     
     if resp.status_code != 200:
-        print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
-        return None
+       raise Scopus_Exception(resp)
     
     data = resp.json()
     #print "-----------JSON----------"
