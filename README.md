@@ -1,6 +1,12 @@
 # Pyscholar
 -----------
+![pyversion](https://img.shields.io/badge/python-2.7-brightgreen.svg) ![license](https://img.shields.io/badge/license-GNU-blue.svg)
+-----------
 A library to create collaboration science networks.
+### Prerequisites
+-------------
+- Python >= 2.7
+- IPython >=1.2.1
 
 ### Installation
 -----------
@@ -50,9 +56,3 @@ This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE
 
 [df1]: <http://dev.elsevier.com/myapikey.html>
 [df2]: <https://github.com/rfabila/Pyscholar/blob/master/LICENSE>
-
-
-
-
-
-
