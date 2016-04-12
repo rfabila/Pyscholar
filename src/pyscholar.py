@@ -5,6 +5,8 @@ search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
 
+headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
 Scopus_ids_merged_lists={}
@@ -84,8 +86,7 @@ def _get_alias_id(scopus_id):
 
 def get_title_abstract_by_idpaper(id_paper=""):
     """Returns a tuple with the id_paper,title and abstract of each paper """
-
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    
     fields = "?field=dc:description,title"
     
     searchQuery = (id_paper)
@@ -105,18 +106,18 @@ def search_author():
 
 def get_coauthors(id_author=""):
     """
-    Returns a list of co-authors 
+    Returns a set of co-authors 
     associated with an id of an author.
     """
     l_temp=[id_author]
     papers_author=get_papers(l_temp)
-    list_authors=[]
+    list_authors=set()
     for paper in papers_author[id_author]:
         paper_list=[paper]
         authors=get_ids_authors_by_id_paper(paper_list)
         for author in authors[paper]:
             if author not in list_authors and author!=id_author:
-                list_authors.append(author)
+                list_authors.add(author)
 
     return (id_author,list_authors)
 
@@ -125,7 +126,6 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
     paper and the value associated with the key is a list 
     of the ids of the authors who wrote the paper"""
 
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
     
@@ -148,7 +148,6 @@ def count_citations_by_id_paper(list_scopus_id_paper=[]):
     paper and the value associated with the key is the 
     number citations """
 
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
     fields = "?field=dc:description,citedby-count"
     cited_by_count=dict()
         
@@ -170,8 +169,7 @@ def get_papers(list_scopus_id_author=[]):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
     is a list of the ids of the papers that belong to the author."""
-
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    
     fields = "&field=identifier"
     papers_by_author=dict()
     
@@ -200,9 +198,7 @@ def get_papers(list_scopus_id_author=[]):
 
 def find_author_scopus_id_by_name(firstName="", lastName=""):
     """Searches for an author scopus id given its name."""
-    
-    
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+
     searchQuery = "query="
 
     if firstName:
