@@ -1,6 +1,5 @@
 # Pyscholar
-![pyversion](https://img.shields.io/badge/python-2.7-brightgreen.svg)
-![license](https://img.shields.io/badge/license-GNU-blue.svg)
+![pyversion](https://img.shields.io/badge/python-2.7-brightgreen.svg) ![license](https://img.shields.io/badge/license-GNU-blue.svg)
 -----------
 A library to create collaboration science networks.
 ### Prerequisites
