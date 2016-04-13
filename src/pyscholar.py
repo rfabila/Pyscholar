@@ -83,6 +83,16 @@ def _get_alias_id(scopus_id):
 
 ###FIN DE FUNCIONES de IDs
 
+def get_common_papers(id_author_1="",id_author_2=""):
+    """Returns the intercession of papers between two authors"""
+    if id_author_1=="" and id_author_2=="":
+        print "Give me the two Authors"
+    else:
+        papers_author_1=get_papers([id_author_1])
+        papers_author_2=get_papers([id_author_2])
+        papers_in_common=papers_author_1[id_author_1].intersection(papers_author_2[id_author_2])
+    return papers_in_common    
+
 
 def get_title_abstract_by_idpaper(id_paper=""):
     """Returns a tuple with the id_paper,title and abstract of each paper """
@@ -106,20 +116,29 @@ def search_author():
 
 def get_coauthors(id_author=""):
     """
-    Returns a set of co-authors 
-    associated with an id of an author.
+    Returns a  tuple with the nex elements,
+    1.-Id_author
+    2.-Set of co-authors associated with an id of an author.
+    3.-A dictionary where the key is the ID of the co-authors 
+     and the value associated is a set with the ids of the papers between
+     the author and co-author.
     """
     l_temp=[id_author]
     papers_author=get_papers(l_temp)
     list_authors=set()
+    papers_with_coauthors=dict()
     for paper in papers_author[id_author]:
         paper_list=[paper]
         authors=get_ids_authors_by_id_paper(paper_list)
         for author in authors[paper]:
             if author not in list_authors and author!=id_author:
                 list_authors.add(author)
+                papers_with_coauthors[author]=[paper]
+            elif author!=id_author:
+                papers_with_coauthors[author].append(paper)
 
-    return (id_author,list_authors)
+
+    return (id_author,list_authors,papers_with_coauthors)
 
 def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
     """Returns a dictionary where the key is the ID of the 
@@ -168,7 +187,7 @@ def count_citations_by_id_paper(list_scopus_id_paper=[]):
 def get_papers(list_scopus_id_author=[]):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
-    is a list of the ids of the papers that belong to the author."""
+    is a set of the ids of the papers that belong to the author."""
     
     fields = "&field=identifier"
     papers_by_author=dict()
@@ -180,7 +199,7 @@ def get_papers(list_scopus_id_author=[]):
         if resp.status_code != 200:
             raise Scopus_Exception(resp)
             
-        id_papers=[]
+        id_papers=set()
         data = resp.json()
         data = data['search-results']
         if data["opensearch:totalResults"] == '0':
@@ -188,7 +207,7 @@ def get_papers(list_scopus_id_author=[]):
         else:
             for entry in data['entry']:
                 paperId = entry['dc:identifier'].split(':')
-                id_papers.append(paperId[1])
+                id_papers.add(paperId[1])
             papers_by_author[id_author]=id_papers
     return papers_by_author
     
