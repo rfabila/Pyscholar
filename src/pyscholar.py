@@ -198,10 +198,10 @@ def count_citations_by_id_paper(list_scopus_id_paper=[]):
         if resp.status_code != 200:
             raise Scopus_Exception(resp) 
         
-        number_citations=[]
+        number_citations=0
         data=resp.json()
         data=data["abstracts-retrieval-response"]["coredata"]
-        number_citations.append(data['citedby-count'])
+        number_citations=int(data['citedby-count'])
         cited_by_count[id_paper]=number_citations
     return cited_by_count
 
