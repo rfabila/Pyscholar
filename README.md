@@ -6,8 +6,8 @@ A library to create collaboration science networks.
 ### Prerequisites
 -------------
 - Python >= 2.7
-- IPython >=1.2.1
 
+**Pyscholar does not support Python 3.x**
 ### Installation
 -----------
 Before installing Pyscholar you must get your API Key in the following [link][df1].
