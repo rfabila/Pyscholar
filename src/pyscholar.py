@@ -1,6 +1,7 @@
 from scopus_key import MY_API_KEY
 import requests
 
+#New line
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
