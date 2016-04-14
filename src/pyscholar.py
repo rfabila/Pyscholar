@@ -145,8 +145,7 @@ def get_coauthors(id_author=""):
      and the value associated is a set with the ids of the papers between
      the author and co-author.
     """
-    l_temp=[id_author]
-    papers_author=get_papers(l_temp)
+    papers_author=get_papers(id_author)
     list_authors=set()
     papers_with_coauthors=dict()
     for paper in papers_author[id_author]:
@@ -162,10 +161,12 @@ def get_coauthors(id_author=""):
 
     return (id_author,list_authors,papers_with_coauthors)
 
-def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
+def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a list 
     of the ids of the authors who wrote the paper"""
+    if isinstance(list_scopus_id_paper, str):
+        list_scopus_id_paper=[list_scopus_id_paper]
 
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
@@ -184,11 +185,14 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper=[]):
         authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
-def count_citations_by_id_paper(list_scopus_id_paper=[]):
+def count_citations_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is the 
     number citations """
 
+    if isinstance(list_scopus_id_paper, str):
+        list_scopus_id_paper=[list_scopus_id_paper]
+    
     fields = "?field=dc:description,citedby-count"
     cited_by_count=dict()
         
@@ -206,10 +210,12 @@ def count_citations_by_id_paper(list_scopus_id_paper=[]):
     return cited_by_count
 
 
-def get_papers(list_scopus_id_author=[]):
+def get_papers(list_scopus_id_author):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
     is a set of the ids of the papers that belong to the author."""
+    if isinstance(list_scopus_id_author, str):
+        list_scopus_id_author=[list_scopus_id_author]
     
     fields = "&field=identifier"
     papers_by_author=dict()
