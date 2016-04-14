@@ -29,6 +29,7 @@ class Scopus_Exception(Exception):
         return "%s: %s"%(self.statusCode, self.statusText)
 
 
+
 def _add_scopus_id(scopus_id):
     """Adds a scopus id to the merged list. Returns False if the ID
     is already in the merged list and false otherwise"""
@@ -83,6 +84,26 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+
+
+def find_by_id(id_author):
+""" This function returns the name of an author if you know the ID of the author"""
+    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+    searchQuery = "query="
+    if not id_author:
+        return
+    searchQuery+="AU-ID(%s)" %(str(id_author))
+    fields = "&field=identifier"
+    resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+
+    if resp.status_code != 200:
+        print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
+        return None
+
+
+
+
+
 def get_references_by_paper(ids_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a set 
