@@ -82,6 +82,28 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+def get_references_by_paper(ids_paper):
+    """Returns a dictionary where the key is the ID of the 
+    paper and the value associated with the key is a set 
+    of the ids of the papers cited by the main paper"""
+
+    if isinstance(ids_paper, str):
+        ids_paper=[ids_paper]
+    references_by_paper=dict()
+    for id_paper in ids_paper:
+        fields = "?view=REF"
+        searchQuery = id_paper
+        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+        data = resp.json()
+        data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
+        references_ids=set()
+        for id_reference in data:
+            references_ids.add(id_reference['scopus-id'])
+        references_by_paper[id_paper]=references_ids
+    return references_by_paper
+
 
 def get_common_papers(id_author_1="",id_author_2=""):
     """Returns the intercession of papers between two authors"""
