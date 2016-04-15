@@ -28,6 +28,17 @@ class Scopus_Exception(Exception):
         return "%s: %s"%(self.statusCode, self.statusText)
 
 
+def load_authors_from_file(directory=""):
+    """
+    Returns a list of the authors who were in a file.
+    """
+    try:
+        with open(directory, 'r') as f: 
+            return [line.strip() for line in f]
+    except IOError :
+        print "Could not read file:", directory
+
+
 def _add_scopus_id(scopus_id):
     """Adds a scopus id to the merged list. Returns False if the ID
     is already in the merged list and false otherwise"""
@@ -210,11 +221,14 @@ def count_citations_by_id_paper(list_scopus_id_paper):
     return cited_by_count
 
 
-def get_papers(list_scopus_id_author):
+def get_papers(list_scopus_id_author,readFromFile=False):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
     is a set of the ids of the papers that belong to the author."""
-    if isinstance(list_scopus_id_author, str):
+    if readFromFile:
+        list_scopus_id_author=load_authors_from_file(list_scopus_id_author)
+
+    if isinstance(list_scopus_id_author, str) and not readFromFile :
         list_scopus_id_author=[list_scopus_id_author]
     
     fields = "&field=identifier"
