@@ -28,9 +28,20 @@ class Scopus_Exception(Exception):
         return "%s: %s"%(self.statusCode, self.statusText)
 
 
-def load_authorpapers_file(directory=""):
+def load_authors_from_file(directory=""):
     """
     Returns a list of the authors who were in a file.
+    """
+    try:
+        with open(directory, 'r') as f: 
+            return [line.strip() for line in f]
+    except IOError :
+        print "Could not read file:", directory
+
+
+def load_papers_from_file(directory=""):
+    """
+    Returns a list of the papers who were in a file.
     """
     try:
         with open(directory, 'r') as f: 
@@ -93,14 +104,11 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
-def get_references_by_paper(list_scopus_id_paper,readFromFile=False):
+def get_references_by_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a set 
     of the ids of the papers cited by the main paper"""
-    if readFromFile:
-        list_scopus_id_paper=load_authorpapers_file(list_scopus_id_paper)
-
-    if isinstance(list_scopus_id_paper, str) and not readFromFile:
+    if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
         
     references_by_paper=dict()
@@ -175,14 +183,11 @@ def get_coauthors(id_author=""):
 
     return (id_author,list_authors,papers_with_coauthors)
 
-def get_ids_authors_by_id_paper(list_scopus_id_paper,readFromFile=False):
+def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a list 
     of the ids of the authors who wrote the paper"""
-    if readFromFile:
-        list_scopus_id_paper=load_authorpapers_file(list_scopus_id_paper)
-
-    if isinstance(list_scopus_id_paper, str) and not readFromFile:
+    if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
 
     fields = "?field=dc:description,authors"
@@ -202,14 +207,11 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper,readFromFile=False):
         authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
-def count_citations_by_id_paper(list_scopus_id_paper,readFromFile=False):
+def count_citations_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is the 
     number citations """
-    if readFromFile:
-        list_scopus_id_paper=load_authorpapers_file(list_scopus_id_paper)
-
-    if isinstance(list_scopus_id_paper, str) and not readFromFile:
+    if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
     
     fields = "?field=dc:description,citedby-count"
@@ -229,14 +231,12 @@ def count_citations_by_id_paper(list_scopus_id_paper,readFromFile=False):
     return cited_by_count
 
 
-def get_papers(list_scopus_id_author,readFromFile=False):
+def get_papers(list_scopus_id_author):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
     is a set of the ids of the papers that belong to the author."""
-    if readFromFile:
-        list_scopus_id_author=load_authorpapers_file(list_scopus_id_author)
 
-    if isinstance(list_scopus_id_author, str) and not readFromFile :
+    if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
     
     fields = "&field=identifier"
