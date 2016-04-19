@@ -1,5 +1,12 @@
+import matplotlib
 from scopus_key import MY_API_KEY
 import requests
+import networkx as nx
+import os
+
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
@@ -182,6 +189,56 @@ def get_coauthors(id_author=""):
 
 
     return (id_author,list_authors,papers_with_coauthors)
+
+
+
+def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
+    """Returns a graph induced by several authors"""
+    node_colors=["red","blue","green","yellow","brown"]
+    if isinstance(list_scopus_id_author, str):
+        list_scopus_id_author=[list_scopus_id_author]
+    nodes=set()
+    index_color=0
+    edge_list=[]
+    attribute_edge=[]
+    G_coauthors=nx.Graph()
+    while(nivel!=0):
+        new_search=set()
+        print "Nivel: "+str(nivel)
+        print len(list_scopus_id_author)
+        #print list_scopus_id_author
+        for id_author in list_scopus_id_author:
+            if id_author not in nodes:
+                nodes.add(id_author)
+                G_coauthors.add_node(str(id_author),color=node_colors[index_color%5])
+            if(nivel==1):
+                continue
+            else:
+                coauthors=get_coauthors(str(id_author))
+                for coauthor in coauthors[1]:
+                    edge_list.append((id_author,str(coauthor)))
+                    attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
+                    new_search.add(str(coauthor))
+        list_scopus_id_author=new_search.copy()
+        nivel-=1
+        index_color+=1
+    G_coauthors.add_edges_from(edge_list)
+    custom_node_color={}
+    pos = nx.spring_layout(G_coauthors,k=0.15,iterations=200)
+    for id_node in G_coauthors.nodes():
+        custom_node_color[id_node]=G_coauthors.node[id_node]['color']
+    nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
+    if  os.path.exists(directory):
+        plt.savefig(directory+name+".png")
+    for atribute in attribute_edge:
+        if 'papers' in G_coauthors[atribute[0]][atribute[1]]:
+            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+        else:
+            G_coauthors[atribute[0]][atribute[1]]['papers']=[]
+            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+    return G_coauthors
+
+
 
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
