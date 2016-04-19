@@ -1,7 +1,13 @@
+import matplotlib
 from scopus_key import MY_API_KEY
 import requests
+import networkx as nx
+import os
 
-#New line
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
@@ -28,6 +34,27 @@ class Scopus_Exception(Exception):
     def __str__(self):
         return "%s: %s"%(self.statusCode, self.statusText)
 
+
+def load_authors_from_file(directory=""):
+    """
+    Returns a list of the authors who were in a file.
+    """
+    try:
+        with open(directory, 'r') as f: 
+            return [line.strip() for line in f]
+    except IOError :
+        print "Could not read file:", directory
+
+
+def load_papers_from_file(directory=""):
+    """
+    Returns a list of the papers who were in a file.
+    """
+    try:
+        with open(directory, 'r') as f: 
+            return [line.strip() for line in f]
+    except IOError :
+        print "Could not read file:", directory
 
 
 def _add_scopus_id(scopus_id):
@@ -84,35 +111,15 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
-
-
-def find_by_id(id_author):
-""" This function returns the name of an author if you know the ID of the author"""
-    headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
-    searchQuery = "query="
-    if not id_author:
-        return
-    searchQuery+="AU-ID(%s)" %(str(id_author))
-    fields = "&field=identifier"
-    resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
-
-    if resp.status_code != 200:
-        print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
-        return None
-
-
-
-
-
-def get_references_by_paper(ids_paper):
+def get_references_by_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a set 
     of the ids of the papers cited by the main paper"""
-
-    if isinstance(ids_paper, str):
-        ids_paper=[ids_paper]
+    if isinstance(list_scopus_id_paper, str):
+        list_scopus_id_paper=[list_scopus_id_paper]
+        
     references_by_paper=dict()
-    for id_paper in ids_paper:
+    for id_paper in list_scopus_id_paper:
         fields = "?view=REF"
         searchQuery = id_paper
         resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
@@ -183,6 +190,56 @@ def get_coauthors(id_author=""):
 
     return (id_author,list_authors,papers_with_coauthors)
 
+
+
+def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
+    """Returns a graph induced by several authors"""
+    node_colors=["red","blue","green","yellow","brown"]
+    if isinstance(list_scopus_id_author, str):
+        list_scopus_id_author=[list_scopus_id_author]
+    nodes=set()
+    index_color=0
+    edge_list=[]
+    attribute_edge=[]
+    G_coauthors=nx.Graph()
+    while(nivel!=0):
+        new_search=set()
+        print "Nivel: "+str(nivel)
+        print len(list_scopus_id_author)
+        #print list_scopus_id_author
+        for id_author in list_scopus_id_author:
+            if id_author not in nodes:
+                nodes.add(id_author)
+                G_coauthors.add_node(str(id_author),color=node_colors[index_color%5])
+            if(nivel==1):
+                continue
+            else:
+                coauthors=get_coauthors(str(id_author))
+                for coauthor in coauthors[1]:
+                    edge_list.append((id_author,str(coauthor)))
+                    attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
+                    new_search.add(str(coauthor))
+        list_scopus_id_author=new_search.copy()
+        nivel-=1
+        index_color+=1
+    G_coauthors.add_edges_from(edge_list)
+    custom_node_color={}
+    pos = nx.spring_layout(G_coauthors,k=0.15,iterations=200)
+    for id_node in G_coauthors.nodes():
+        custom_node_color[id_node]=G_coauthors.node[id_node]['color']
+    nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
+    if  os.path.exists(directory):
+        plt.savefig(directory+name+".png")
+    for atribute in attribute_edge:
+        if 'papers' in G_coauthors[atribute[0]][atribute[1]]:
+            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+        else:
+            G_coauthors[atribute[0]][atribute[1]]['papers']=[]
+            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+    return G_coauthors
+
+
+
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a list 
@@ -236,6 +293,7 @@ def get_papers(list_scopus_id_author):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
     is a set of the ids of the papers that belong to the author."""
+
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
     
