@@ -193,9 +193,14 @@ def get_coauthors(id_author=""):
 
 
 
-def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
-    """Returns a graph induced by several authors"""
+def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
+    """
+    Returns a tuple where the first element is the graph induced by several authors 
+    and the second element is a list of sets where each set is a set of authors to distance d.
+    """
     node_colors=["red","blue","green","yellow","brown"]
+    node_distance=distance
+    distance+=1
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
     nodes=set()
@@ -203,16 +208,18 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
     edge_list=[]
     attribute_edge=[]
     G_coauthors=nx.Graph()
-    while(nivel!=0):
+    D=[]
+    dist_count=0
+    while(distance!=0):
         new_search=set()
-        #print "Nivel: "+str(nivel)
+        #print "Nivel: "+str(distance)
         #print len(list_scopus_id_author)
         #print list_scopus_id_author
         for id_author in list_scopus_id_author:
             if id_author not in nodes:
                 nodes.add(id_author)
-                G_coauthors.add_node(str(id_author),color=node_colors[index_color%5])
-            if(nivel==1):
+                G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
+            if(distance==1):
                 continue
             else:
                 coauthors=get_coauthors(str(id_author))
@@ -220,7 +227,7 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
-        if (nivel==1):
+        if (distance==1):
             check_edge=it.combinations(list_scopus_id_author,2)
             for edge in check_edge:
                 number_paper=get_common_papers(edge[0],edge[1])
@@ -229,14 +236,21 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
                     edge_list.append((edge[0],edge[1]))
                     attribute_edge.append((edge[0],edge[1],number_paper))
         list_scopus_id_author=new_search.copy()
-        nivel-=1
+        distance-=1
         index_color+=1
+        dist_count+=1
     G_coauthors.add_edges_from(edge_list)
+    for dis in range(node_distance+1):
+        D.append([])
+    for id_node in G_coauthors.nodes():
+        D[G_coauthors.node[id_node]['distance']].append(id_node)
+    """
     custom_node_color={}
     pos = nx.spring_layout(G_coauthors,k=0.15,iterations=200)
     for id_node in G_coauthors.nodes():
         custom_node_color[id_node]=G_coauthors.node[id_node]['color']
     nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
+    """
     if  os.path.exists(directory):
         plt.savefig(directory+name+".png")
     for atribute in attribute_edge:
@@ -245,7 +259,8 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
         else:
             G_coauthors[atribute[0]][atribute[1]]['papers']=[]
             G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
-    return G_coauthors
+    return (G_coauthors,D)
+
 
 
 
