@@ -3,6 +3,7 @@ from scopus_key import MY_API_KEY
 import requests
 import networkx as nx
 import os
+import itertools as it
 
 matplotlib.use('Agg')
 
@@ -204,8 +205,8 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
     G_coauthors=nx.Graph()
     while(nivel!=0):
         new_search=set()
-        print "Nivel: "+str(nivel)
-        print len(list_scopus_id_author)
+        #print "Nivel: "+str(nivel)
+        #print len(list_scopus_id_author)
         #print list_scopus_id_author
         for id_author in list_scopus_id_author:
             if id_author not in nodes:
@@ -219,6 +220,14 @@ def get_graph_coauthors(list_scopus_id_author,nivel,directory="",name=""):
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
+        if (nivel==1):
+            check_edge=it.combinations(list_scopus_id_author,2)
+            for edge in check_edge:
+                number_paper=get_common_papers(edge[0],edge[1])
+                if len(number_paper)>0:
+                    #print number_paper
+                    edge_list.append((edge[0],edge[1]))
+                    attribute_edge.append((edge[0],edge[1],number_paper))
         list_scopus_id_author=new_search.copy()
         nivel-=1
         index_color+=1
