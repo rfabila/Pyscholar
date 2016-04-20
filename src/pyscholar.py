@@ -193,14 +193,14 @@ def get_coauthors(id_author=""):
 
 
 
-def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
+def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
     """
     Returns a tuple where the first element is the graph induced by several authors 
     and the second element is a list of sets where each set is a set of authors to distance d.
     """
     node_colors=["red","blue","green","yellow","brown"]
     node_distance=distance
-    distance+=1
+    iteration=distance+1
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
     nodes=set()
@@ -210,7 +210,7 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
     G_coauthors=nx.Graph()
     D=[]
     dist_count=0
-    while(distance!=0):
+    while(iteration!=0):
         new_search=set()
         #print "Nivel: "+str(distance)
         #print len(list_scopus_id_author)
@@ -219,7 +219,7 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
             if id_author not in nodes:
                 nodes.add(id_author)
                 G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
-            if(distance==1):
+            if(iteration==1):
                 continue
             else:
                 coauthors=get_coauthors(str(id_author))
@@ -227,7 +227,7 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
-        if (distance==1):
+        if (iteration==1):
             check_edge=it.combinations(list_scopus_id_author,2)
             for edge in check_edge:
                 number_paper=get_common_papers(edge[0],edge[1])
@@ -236,7 +236,7 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
                     edge_list.append((edge[0],edge[1]))
                     attribute_edge.append((edge[0],edge[1],number_paper))
         list_scopus_id_author=new_search.copy()
-        distance-=1
+        iteration-=1
         index_color+=1
         dist_count+=1
     G_coauthors.add_edges_from(edge_list)
@@ -251,6 +251,7 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
         custom_node_color[id_node]=G_coauthors.node[id_node]['color']
     nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
     """
+    nx.draw(G_coauthors)
     if  os.path.exists(directory):
         plt.savefig(directory+name+".png")
     for atribute in attribute_edge:
@@ -261,8 +262,59 @@ def get_graph_coauthors(list_scopus_id_author,distance,directory="",name=""):
             G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
     return (G_coauthors,D)
 
-
-
+def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
+    """
+    Returns a tuple where the first element is the graph induced by papers
+    and the second element is a list of sets where each set is a set of papers to distance d.
+    and the last element is a set of papers not found.
+    """
+    node_distance=distance
+    if isinstance(list_scopus_id_paper, str):
+        list_scopus_id_paper=[list_scopus_id_paper]
+    iteration=distance+1
+    G_citation=nx.DiGraph()
+    nodes=set()
+    edge_list=[]
+    paper_not_found=set()
+    dist_count=0
+    D=[]
+    while(iteration!=0):
+        new_search=set()
+        for paper in list_scopus_id_paper:
+            if paper not in nodes:
+                nodes.add(paper)
+                G_citation.add_node(str(paper),distance=dist_count)
+            if(iteration==1):
+                continue
+            else:
+                try:
+                    cites=get_references_by_paper(str(paper))
+                    for cite in cites[str(paper)]:
+                        edge_list.append((str(paper),str(cite)))
+                        new_search.add(str(cite))
+                except:
+                    paper_not_found.add(str(paper))
+        if(iteration==1):
+            check_edge=it.permutations(list_scopus_id_paper,2)
+            for edge in check_edge:
+                try:
+                    check_cite=get_references_by_paper(edge[0])
+                    if edge[1] in check_cite[edge[0]]:
+                        edge_list.append((edge[0],edge[1]))
+                except:
+                    paper_not_found.add(edge[0])
+        list_scopus_id_paper=new_search.copy()
+        iteration-=1
+        dist_count+=1
+    G_citation.add_edges_from(edge_list)
+    nx.draw(G_citation)
+    if  os.path.exists(directory):
+        plt.savefig(directory+name+".png")
+    for dis in range(node_distance+1):
+        D.append([])
+    for id_node in G_citation.nodes():
+        D[G_citation.node[id_node]['distance']].append(id_node)
+    return (G_citation,D,paper_not_found)
 
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
