@@ -3,9 +3,11 @@
 ![pyversion](https://img.shields.io/badge/python-2.7-brightgreen.svg) ![license](https://img.shields.io/badge/license-GNU-blue.svg)
 -----------
 A library to create collaboration science networks.
-### Prerequisites
+### Requirements
 -------------
-- Python >= 2.7
+- [Python][df5] >= 2.7
+- [Networkx][df3]
+- [Matplotlib][df4]
 
 **Pyscholar does not support Python 3.x**
 ### Installation
@@ -52,3 +54,6 @@ This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE
 
 [df1]: <http://dev.elsevier.com/myapikey.html>
 [df2]: <https://github.com/rfabila/Pyscholar/blob/master/LICENSE>
+[df3]: <http://networkx.github.io/documentation/networkx-1.7/install.html>
+[df4]: <http://matplotlib.org/users/installing.html>
+[df5]: <https://www.python.org/download/releases/2.7/>
