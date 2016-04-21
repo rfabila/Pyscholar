@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
+search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
@@ -161,10 +162,27 @@ def get_title_abstract_by_idpaper(id_paper=""):
     return (id_paper,data['dc:title'],data['dc:description'])
 
 
-def search_author():
-    """A wrapper to the Scopus API"""
-    #Pense que seria bueno un wrapper que provea todo lo del api
-    pass
+def search_author(list_scopus_id_author):
+    """Returns a dictionary where the key is the ID of the 
+    author and the value associated with the key is a dictionary
+    with the following keys: name, surname, h-index and coauthor-count.
+    """
+    fields = "?field=dc:identifier,given-name,surname,h-index,coauthor-count"
+    dict_authors=dict()
+    if isinstance(list_scopus_id_author, str):
+        list_scopus_id_author=[list_scopus_id_author]
+    for id_author in list_scopus_id_author:
+        attributes=dict()
+        searchQuery = str(id_author)
+        resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+        data=resp.json()
+        data=data['author-retrieval-response'][0]
+        attributes={'name':data['preferred-name']['given-name'],
+        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count'])}
+        dict_authors[id_author]=attributes
+    return dict_authors
 
 def get_coauthors(id_author=""):
     """
