@@ -4,6 +4,7 @@ import requests
 import networkx as nx
 import os
 import itertools as it
+import math
 
 matplotlib.use('Agg')
 
@@ -167,7 +168,7 @@ def search_author(list_scopus_id_author):
     author and the value associated with the key is a dictionary
     with the following keys: name, surname, h-index and coauthor-count.
     """
-    fields = "?field=dc:identifier,given-name,surname,h-index,coauthor-count"
+    fields = "?field=dc:identifier,given-name,surname,h-index,coauthor-count,document-count"
     dict_authors=dict()
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
@@ -180,11 +181,11 @@ def search_author(list_scopus_id_author):
         data=resp.json()
         data=data['author-retrieval-response'][0]
         attributes={'name':data['preferred-name']['given-name'],
-        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count'])}
+        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
         dict_authors[id_author]=attributes
     return dict_authors
 
-def get_coauthors(id_author=""):
+def get_coauthors(id_author):
     """
     Returns a  tuple with the nex elements,
     1.-Id_author
@@ -225,15 +226,17 @@ def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
     index_color=0
     edge_list=[]
     attribute_edge=[]
+    resource_not_found=[]
     G_coauthors=nx.Graph()
     D=[]
     dist_count=0
     while(iteration!=0):
         new_search=set()
-        #print "Nivel: "+str(distance)
-        #print len(list_scopus_id_author)
-        #print list_scopus_id_author
+        print "Nivel: "+str(distance)
+        print len(list_scopus_id_author)
+        print list_scopus_id_author
         for id_author in list_scopus_id_author:
+            print id_author
             if id_author not in nodes:
                 nodes.add(id_author)
                 G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
@@ -246,13 +249,24 @@ def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
         if (iteration==1):
+            dict_last_authors=dict()
+            for id_author in list_scopus_id_author:
+                try:
+                    print "Aqui"
+                    print id_author
+                    coauthors_of_author=get_coauthors(id_author)
+                    dict_last_authors[id_author]=coauthors_of_author[1]
+                except:
+                    resource_not_found.append(id_author)
+            #print dict_last_authors
             check_edge=it.combinations(list_scopus_id_author,2)
             for edge in check_edge:
-                number_paper=get_common_papers(edge[0],edge[1])
-                if len(number_paper)>0:
+                #print type(edge[0]),edge[1]
+                intersection_papers=dict_last_authors[edge[0]].intersection(dict_last_authors[edge[1]])
+                if len(intersection_papers)>0:
                     #print number_paper
                     edge_list.append((edge[0],edge[1]))
-                    attribute_edge.append((edge[0],edge[1],number_paper))
+                    attribute_edge.append((edge[0],edge[1],intersection_papers))
         list_scopus_id_author=new_search.copy()
         iteration-=1
         index_color+=1
@@ -297,6 +311,8 @@ def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
     dist_count=0
     D=[]
     while(iteration!=0):
+        print list_scopus_id_paper
+        print len(list_scopus_id_paper)
         new_search=set()
         for paper in list_scopus_id_paper:
             if paper not in nodes:
@@ -312,19 +328,28 @@ def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
                         new_search.add(str(cite))
                 except:
                     paper_not_found.add(str(paper))
+                    continue
         if(iteration==1):
-            check_edge=it.permutations(list_scopus_id_paper,2)
-            for edge in check_edge:
+            dict_last_nodes=dict()
+            for id_paper in list_scopus_id_paper:
                 try:
-                    check_cite=get_references_by_paper(edge[0])
-                    if edge[1] in check_cite[edge[0]]:
-                        edge_list.append((edge[0],edge[1]))
+                    #print id_paper
+                    cites=get_references_by_paper(str(id_paper))
+                    dict_last_nodes[id_paper]=cites[str(id_paper)]
                 except:
-                    paper_not_found.add(edge[0])
+                    paper_not_found.add(str(id_paper))
+                    continue
+            check_edge=it.permutations(dict_last_nodes.keys(),2)
+            for edge in check_edge:
+                if edge[1] in dict_last_nodes[edge[0]]:
+                    edge_list.append((str(edge[0]),str(edge[1])))
+                    edge_list.append((str(edge[0]),str(edge[1])))
         list_scopus_id_paper=new_search.copy()
         iteration-=1
         dist_count+=1
     G_citation.add_edges_from(edge_list)
+    for node_to_remove in paper_not_found:
+        G_citation.remove_node(node_to_remove)
     nx.draw(G_citation)
     if  os.path.exists(directory):
         plt.savefig(directory+name+".png")
@@ -354,7 +379,7 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper):
         data=resp.json()
         data=data["abstracts-retrieval-response"]["authors"]["author"]
         for author in data:
-            id_authors.append(author["@auid"])     
+            id_authors.append(str(author["@auid"]))     
         authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
@@ -389,27 +414,38 @@ def get_papers(list_scopus_id_author):
 
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
-    
-    fields = "&field=identifier"
     papers_by_author=dict()
-    
     for id_author in list_scopus_id_author:
-        searchQuery = "query=AU-ID("+str(id_author)+")"
-        resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
-        
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
-            
+        author_attributes=search_author(id_author)
+        document_count=author_attributes[id_author]['document-count']
+        iterations=math.ceil(document_count/200.0)
+        chunks=[]
+        for size_chunk in range(0,int(iterations)+1):
+            if size_chunk==0:
+                chunks.append(0)
+            else:
+                chunks.append((200*size_chunk)+1)
+        index_chunk=0
         id_papers=set()
-        data = resp.json()
-        data = data['search-results']
-        if data["opensearch:totalResults"] == '0':
-            return None
-        else:
-            for entry in data['entry']:
-                paperId = entry['dc:identifier'].split(':')
-                id_papers.add(paperId[1])
-            papers_by_author[id_author]=id_papers
+        while (iterations!=0):
+            print iterations
+            fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
+            searchQuery = "query=AU-ID("+str(id_author)+")"
+            resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+            data = resp.json()
+            if resp.status_code != 200:
+                raise Scopus_Exception(resp)
+            data = resp.json()
+            data = data['search-results']
+            if data["opensearch:totalResults"] == '0':
+                return None
+            else:
+                for entry in data['entry']:
+                    paperId = entry['dc:identifier'].split(':')
+                    id_papers.add(str(paperId[1]))
+            iterations-=1
+            index_chunk+=1
+        papers_by_author[id_author]=id_papers
     return papers_by_author
     
     #Hay que considerar que pudieran tener aliases
