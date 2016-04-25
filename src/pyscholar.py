@@ -185,7 +185,7 @@ def search_author(list_scopus_id_author):
         dict_authors[id_author]=attributes
     return dict_authors
 
-def get_coauthors(id_author):
+def get_coauthors(id_author,dict_knowledge=dict()):
     """
     Returns a  tuple with the nex elements,
     1.-Id_author
@@ -195,20 +195,30 @@ def get_coauthors(id_author):
      the author and co-author.
     """
     papers_author=get_papers(id_author)
+    print papers_author
     list_authors=set()
     papers_with_coauthors=dict()
+    dict_knowledge_new=dict()
+    dict_knowledge_new.update(dict_knowledge)
     for paper in papers_author[id_author]:
-        paper_list=[paper]
-        authors=get_ids_authors_by_id_paper(paper_list)
-        for author in authors[paper]:
-            if author not in list_authors and author!=id_author:
-                list_authors.add(author)
-                papers_with_coauthors[author]=[paper]
-            elif author!=id_author:
-                papers_with_coauthors[author].append(paper)
+        if paper in dict_knowledge_new.keys():
+            for coauthor in dict_knowledge_new[paper]:
+                if coauthor!=id_author:
+                    list_authors.add(coauthor)
+                    papers_with_coauthors[coauthor]=[paper]
+        else:
+            authors=get_ids_authors_by_id_paper(paper)
+            dict_knowledge_new.update(authors)
+            for author in authors[paper]:
+                print author
+                if author not in list_authors and author!=id_author:
+                    list_authors.add(author)
+                    papers_with_coauthors[author]=[paper]
+                elif author!=id_author:
+                    papers_with_coauthors[author].append(paper)
 
 
-    return (id_author,list_authors,papers_with_coauthors)
+    return (id_author,list_authors,papers_with_coauthors,dict_knowledge_new)
 
 
 
@@ -230,38 +240,41 @@ def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
     G_coauthors=nx.Graph()
     D=[]
     dist_count=0
+    dict_knowledge_papers=dict()
     while(iteration!=0):
         new_search=set()
         print "Nivel: "+str(distance)
         print len(list_scopus_id_author)
-        print list_scopus_id_author
+        #print list_scopus_id_author
         for id_author in list_scopus_id_author:
-            print id_author
+            #print id_author
             if id_author not in nodes:
                 nodes.add(id_author)
                 G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
             if(iteration==1):
                 continue
             else:
-                coauthors=get_coauthors(str(id_author))
+                coauthors=get_coauthors(str(id_author),dict_knowledge_papers)
+                dict_knowledge_papers.update(coauthors[3])
                 for coauthor in coauthors[1]:
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
         if (iteration==1):
+            print list_scopus_id_author
             dict_last_authors=dict()
             for id_author in list_scopus_id_author:
                 try:
-                    print "Aqui"
-                    print id_author
-                    coauthors_of_author=get_coauthors(id_author)
+                    coauthors_of_author=get_coauthors(id_author,dict_knowledge_papers)
+                    dict_knowledge_papers.update(coauthors_of_author[3])
                     dict_last_authors[id_author]=coauthors_of_author[1]
                 except:
                     resource_not_found.append(id_author)
-            #print dict_last_authors
+                    continue
             check_edge=it.combinations(list_scopus_id_author,2)
             for edge in check_edge:
                 #print type(edge[0]),edge[1]
+                print edge
                 intersection_papers=dict_last_authors[edge[0]].intersection(dict_last_authors[edge[1]])
                 if len(intersection_papers)>0:
                     #print number_paper
@@ -428,7 +441,7 @@ def get_papers(list_scopus_id_author):
         index_chunk=0
         id_papers=set()
         while (iterations!=0):
-            print iterations
+            #print iterations
             fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
             searchQuery = "query=AU-ID("+str(id_author)+")"
             resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
