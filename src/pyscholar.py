@@ -132,7 +132,7 @@ def get_references_by_paper(list_scopus_id_paper):
         data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
         references_ids=set()
         for id_reference in data:
-            references_ids.add(id_reference['scopus-id'])
+            references_ids.add(str(id_reference['scopus-id']))
         references_by_paper[id_paper]=references_ids
     return references_by_paper
 
@@ -160,7 +160,7 @@ def get_title_abstract_by_idpaper(id_paper=""):
     
     data=resp.json()
     data=data["abstracts-retrieval-response"]["coredata"]
-    return (id_paper,data['dc:title'],data['dc:description'])
+    return (id_paper,str(data['dc:title']),str(data['dc:description']))
 
 
 def search_author(list_scopus_id_author):
@@ -180,8 +180,8 @@ def search_author(list_scopus_id_author):
             raise Scopus_Exception(resp)
         data=resp.json()
         data=data['author-retrieval-response'][0]
-        attributes={'name':data['preferred-name']['given-name'],
-        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
+        attributes={'name':str(data['preferred-name']['given-name']),
+        'surname':str(data['preferred-name']['surname']),'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
         dict_authors[id_author]=attributes
     return dict_authors
 
