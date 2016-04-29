@@ -5,9 +5,7 @@ import networkx as nx
 import os
 import itertools as it
 import math
-
 matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
@@ -16,6 +14,8 @@ search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
 search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
+
+scopus_ids_papers_cache=dict()
 
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
@@ -194,23 +194,21 @@ def get_coauthors(id_author,dict_knowledge=dict()):
      and the value associated is a set with the ids of the papers between
      the author and co-author.
     """
+    scopus_ids_papers_cache.update(dict_knowledge)
     papers_author=get_papers(id_author)
-    print papers_author
-    list_authors=set()
     papers_with_coauthors=dict()
-    dict_knowledge_new=dict()
-    dict_knowledge_new.update(dict_knowledge)
+    list_authors=set()
     for paper in papers_author[id_author]:
-        if paper in dict_knowledge_new.keys():
-            for coauthor in dict_knowledge_new[paper]:
+        if paper in scopus_ids_papers_cache.keys():
+            #print "Here"
+            for coauthor in scopus_ids_papers_cache[paper]:
                 if coauthor!=id_author:
                     list_authors.add(coauthor)
-                    papers_with_coauthors[coauthor]=[paper]
+                    papers_with_coauthors[coauthor]=papers_with_coauthors.setdefault(coauthor,[])+[paper]
         else:
             authors=get_ids_authors_by_id_paper(paper)
-            dict_knowledge_new.update(authors)
+            scopus_ids_papers_cache.update(authors)
             for author in authors[paper]:
-                print author
                 if author not in list_authors and author!=id_author:
                     list_authors.add(author)
                     papers_with_coauthors[author]=[paper]
@@ -218,8 +216,14 @@ def get_coauthors(id_author,dict_knowledge=dict()):
                     papers_with_coauthors[author].append(paper)
 
 
-    return (id_author,list_authors,papers_with_coauthors,dict_knowledge_new)
+    return (id_author,list_authors,papers_with_coauthors)
 
+def get_cache_papers():
+    """
+    Returns the scopus_ids_papers_cache dictionary which 
+    is a cache of papers consulted.
+    """
+    return scopus_ids_papers_cache
 
 
 def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
