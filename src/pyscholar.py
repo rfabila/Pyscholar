@@ -16,6 +16,7 @@ search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
 scopus_ids_papers_cache=dict()
+scopus_papers_by_authorid_cache=dict()
 
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
@@ -142,9 +143,9 @@ def get_common_papers(id_author_1="",id_author_2=""):
     if id_author_1=="" and id_author_2=="":
         print "Give me the two Authors"
     else:
-        papers_author_1=get_papers([id_author_1])
-        papers_author_2=get_papers([id_author_2])
-        papers_in_common=papers_author_1[id_author_1].intersection(papers_author_2[id_author_2])
+        papers_author_1=get_papers([id_author_1])[id_author_1].values()[0]
+        papers_author_2=get_papers([id_author_2])[id_author_2].values()[0]
+        papers_in_common=papers_author_1.intersection(papers_author_2)
     return papers_in_common    
 
 
@@ -185,7 +186,7 @@ def search_author(list_scopus_id_author):
         dict_authors[id_author]=attributes
     return dict_authors
 
-def get_coauthors(id_author,dict_knowledge=dict()):
+def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
     """
     Returns a  tuple with the nex elements,
     1.-Id_author
@@ -195,10 +196,10 @@ def get_coauthors(id_author,dict_knowledge=dict()):
      the author and co-author.
     """
     scopus_ids_papers_cache.update(dict_knowledge)
-    papers_author=get_papers(id_author)
+    papers_author=get_papers([id_author],min_year,max_year)[id_author].values()[0]
     papers_with_coauthors=dict()
     list_authors=set()
-    for paper in papers_author[id_author]:
+    for paper in papers_author:
         if paper in scopus_ids_papers_cache.keys():
             #print "Here"
             for coauthor in scopus_ids_papers_cache[paper]:
@@ -226,7 +227,7 @@ def get_cache_papers():
     return scopus_ids_papers_cache
 
 
-def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
+def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
     """
     Returns a tuple where the first element is the graph induced by several authors 
     and the second element is a list of sets where each set is a set of authors to distance d.
@@ -258,8 +259,8 @@ def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
             if(iteration==1):
                 continue
             else:
-                coauthors=get_coauthors(str(id_author),dict_knowledge_papers)
-                dict_knowledge_papers.update(coauthors[3])
+                coauthors=get_coauthors(str(id_author),min_year,max_year,dict_knowledge_papers)
+                dict_knowledge_papers.update(coauthors[2])
                 for coauthor in coauthors[1]:
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
@@ -267,15 +268,19 @@ def get_coauthors_graph(list_scopus_id_author,distance,directory="",name=""):
         if (iteration==1):
             print list_scopus_id_author
             dict_last_authors=dict()
+            list_scopus_id_author_found=set()
             for id_author in list_scopus_id_author:
                 try:
-                    coauthors_of_author=get_coauthors(id_author,dict_knowledge_papers)
-                    dict_knowledge_papers.update(coauthors_of_author[3])
+                    coauthors_of_author=get_coauthors(id_author,min_year,max_year,dict_knowledge_papers)
+                    dict_knowledge_papers.update(coauthors_of_author[2])
                     dict_last_authors[id_author]=coauthors_of_author[1]
+                    list_scopus_id_author_found.add(id_author)
                 except:
+                    print "Acaaa"
                     resource_not_found.append(id_author)
                     continue
-            check_edge=it.combinations(list_scopus_id_author,2)
+            check_edge=it.combinations(list_scopus_id_author_found,2)
+            print dict_last_authors
             for edge in check_edge:
                 #print type(edge[0]),edge[1]
                 print edge
@@ -423,51 +428,117 @@ def count_citations_by_id_paper(list_scopus_id_paper):
         cited_by_count[id_paper]=number_citations
     return cited_by_count
 
+def check_years(min_year="",max_year=""):
+    """
+    Return the filter if the given interval is correct 
+    otherwise returns None
+    """
+    filtr=""
+    if min_year =="":
+        if max_year=="":
+            filtr=""
+            return filtr
+        else:
+            if max_year.isdigit():
+               filtr+="AND (PUBYEAR < "+ str(int(max_year)+1) +")"
+               return filtr
+            else:
+                print "max_year must be a number"
+                return None
+    else:
+        if min_year.isdigit():
+            if max_year=="":
+                filtr+="AND (PUBYEAR > "+ str(int(min_year)-1) +")"
+                return filtr
+            else:
+                if max_year.isdigit():
+                    if int(max_year)<int(min_year):
+                        print "Max_year must be greater than min_year"
+                        return None
+                    else:
+                        filtr+="AND (PUBYEAR > "+ str(int(min_year)-1) +") AND (PUBYEAR < "+ str(int(max_year)+1)+")"
+                        return filtr
+                else:
+                    print "max_year must be a number"
+                    return None
+        else:
+            if max_year.isdigit():
+                print "min_year must be a number"
+                return None
+            else:
+                print "min_year and max_year must be numbers"
+                return None                
 
-def get_papers(list_scopus_id_author):
+
+
+def get_papers(list_scopus_id_author,min_year="",max_year=""):
     """Returns a dictionary where the key is the ID of the 
     author and the value associated with the key 
-    is a set of the ids of the papers that belong to the author."""
+    is a set of the ids of the papers that belong to 
+    the author in certain time interval."""
 
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
+    
     papers_by_author=dict()
+    filter_year=""
+    filter_year=check_years(min_year,max_year)
+    if filter_year==None:
+        return None
+    
     for id_author in list_scopus_id_author:
-        author_attributes=search_author(id_author)
-        document_count=author_attributes[id_author]['document-count']
-        iterations=math.ceil(document_count/200.0)
-        chunks=[]
-        for size_chunk in range(0,int(iterations)+1):
-            if size_chunk==0:
-                chunks.append(0)
+        if (id_author in scopus_papers_by_authorid_cache.keys()) and (min_year+"-"+max_year in scopus_papers_by_authorid_cache[id_author].keys()):
+            papers_by_author[id_author]=set()
+            papers_by_author[id_author]=papers_by_author[id_author].union(scopus_papers_by_authorid_cache[id_author][min_year+"-"+max_year])
+        else:
+            author_attributes=search_author(id_author)
+            document_count=author_attributes[id_author]['document-count']
+            iterations=math.ceil(document_count/200.0)
+            chunks=[]
+            for size_chunk in range(0,int(iterations)+1):
+                if size_chunk==0:
+                    chunks.append(0)
+                else:
+                    chunks.append((200*size_chunk)+1)
+            index_chunk=0
+            id_papers=set()
+            while (iterations!=0):
+                #print iterations
+                fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
+                searchQuery = "query=AU-ID("+str(id_author)+") "+filter_year
+                #print searchQuery
+                resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+                data = resp.json()
+                if resp.status_code != 200:
+                    raise Scopus_Exception(resp)
+                data = resp.json()
+                data = data['search-results']
+                if data["opensearch:totalResults"] == '0':
+                    papers_by_author[id_author]=dict()
+                    papers_by_author[id_author].update({min_year+"-"+max_year:id_papers})
+                else:
+                    for entry in data['entry']:
+                        paperId = entry['dc:identifier'].split(':')
+                        id_papers.add(str(paperId[1]))
+                iterations-=1
+                index_chunk+=1
+            papers_by_author[id_author]=set()
+            papers_by_author[id_author]=papers_by_author[id_author].union(id_papers)
+            if id_author not in scopus_papers_by_authorid_cache.keys():
+                scopus_papers_by_authorid_cache[id_author]=dict()
+                scopus_papers_by_authorid_cache[id_author].update({min_year+"-"+max_year:id_papers})
             else:
-                chunks.append((200*size_chunk)+1)
-        index_chunk=0
-        id_papers=set()
-        while (iterations!=0):
-            #print iterations
-            fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
-            searchQuery = "query=AU-ID("+str(id_author)+")"
-            resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
-            data = resp.json()
-            if resp.status_code != 200:
-                raise Scopus_Exception(resp)
-            data = resp.json()
-            data = data['search-results']
-            if data["opensearch:totalResults"] == '0':
-                return None
-            else:
-                for entry in data['entry']:
-                    paperId = entry['dc:identifier'].split(':')
-                    id_papers.add(str(paperId[1]))
-            iterations-=1
-            index_chunk+=1
-        papers_by_author[id_author]=id_papers
+                scopus_papers_by_authorid_cache[id_author].update({min_year+"-"+max_year:id_papers})
     return papers_by_author
     
-    #Hay que considerar que pudieran tener aliases
-
-#FIN DE TODO LIST
+def get_cache_papers_by_authorid():
+    """
+    Returns the global variable scopus_papers_by_authorid_cache which is 
+    a dictionary of dictionaries where the first dictionary key is 
+    the id of the author and the key to the second dictionary is 
+    the time interval whose associated value is a set of papers.
+    """
+    return scopus_papers_by_authorid_cache
 
 def find_author_scopus_id_by_name(firstName="", lastName=""):
     """Searches for an author scopus id given its name."""
