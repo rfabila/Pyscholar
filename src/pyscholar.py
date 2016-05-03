@@ -15,7 +15,7 @@ search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
-scopus_ids_papers_cache=dict()
+scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
 
 #Un diccionario con las listas 
@@ -143,8 +143,8 @@ def get_common_papers(id_author_1="",id_author_2=""):
     if id_author_1=="" and id_author_2=="":
         print "Give me the two Authors"
     else:
-        papers_author_1=get_papers([id_author_1])[id_author_1].values()[0]
-        papers_author_2=get_papers([id_author_2])[id_author_2].values()[0]
+        papers_author_1=get_papers([id_author_1])[id_author_1]
+        papers_author_2=get_papers([id_author_2])[id_author_2]
         papers_in_common=papers_author_1.intersection(papers_author_2)
     return papers_in_common    
 
@@ -195,20 +195,20 @@ def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
      and the value associated is a set with the ids of the papers between
      the author and co-author.
     """
-    scopus_ids_papers_cache.update(dict_knowledge)
-    papers_author=get_papers([id_author],min_year,max_year)[id_author].values()[0]
+    scopus_authors_by_idpapers_cache.update(dict_knowledge)
+    papers_author=get_papers([id_author],min_year,max_year)[id_author]
     papers_with_coauthors=dict()
     list_authors=set()
     for paper in papers_author:
-        if paper in scopus_ids_papers_cache.keys():
+        if paper in scopus_authors_by_idpapers_cache.keys():
             #print "Here"
-            for coauthor in scopus_ids_papers_cache[paper]:
+            for coauthor in scopus_authors_by_idpapers_cache[paper]:
                 if coauthor!=id_author:
                     list_authors.add(coauthor)
                     papers_with_coauthors[coauthor]=papers_with_coauthors.setdefault(coauthor,[])+[paper]
         else:
             authors=get_ids_authors_by_id_paper(paper)
-            scopus_ids_papers_cache.update(authors)
+            scopus_authors_by_idpapers_cache.update(authors)
             for author in authors[paper]:
                 if author not in list_authors and author!=id_author:
                     list_authors.add(author)
@@ -221,10 +221,11 @@ def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
 
 def get_cache_papers():
     """
-    Returns the scopus_ids_papers_cache dictionary which 
-    is a cache of papers consulted.
+    Returns the scopus_authors_by_idpapers_cache dictionary which 
+    is a cache of papers consulted where the key is the id of the paper 
+    and the associated value is a set of authors who wrote the article.
     """
-    return scopus_ids_papers_cache
+    return scopus_authors_by_idpapers_cache
 
 
 def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
@@ -248,8 +249,8 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
     dict_knowledge_papers=dict()
     while(iteration!=0):
         new_search=set()
-        print "Nivel: "+str(distance)
-        print len(list_scopus_id_author)
+        #print "Nivel: "+str(distance)
+        #print len(list_scopus_id_author)
         #print list_scopus_id_author
         for id_author in list_scopus_id_author:
             #print id_author
@@ -266,7 +267,7 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
         if (iteration==1):
-            print list_scopus_id_author
+            #print list_scopus_id_author
             dict_last_authors=dict()
             list_scopus_id_author_found=set()
             for id_author in list_scopus_id_author:
@@ -276,14 +277,12 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                     dict_last_authors[id_author]=coauthors_of_author[1]
                     list_scopus_id_author_found.add(id_author)
                 except:
-                    print "Acaaa"
                     resource_not_found.append(id_author)
                     continue
             check_edge=it.combinations(list_scopus_id_author_found,2)
-            print dict_last_authors
+            #print dict_last_authors
             for edge in check_edge:
                 #print type(edge[0]),edge[1]
-                print edge
                 intersection_papers=dict_last_authors[edge[0]].intersection(dict_last_authors[edge[1]])
                 if len(intersection_papers)>0:
                     #print number_paper
