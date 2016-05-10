@@ -23,6 +23,7 @@ headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
 scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
+scopus_references_by_idpaper_cache=dict()
 
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
@@ -268,19 +269,37 @@ def get_references_by_paper(list_scopus_id_paper):
         
     references_by_paper=dict()
     for id_paper in list_scopus_id_paper:
-        fields = "?view=REF"
-        searchQuery = id_paper
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
-        data = resp.json()
-        data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
-        references_ids=set()
-        for id_reference in data:
-            references_ids.add(str(id_reference['scopus-id']))
-        references_by_paper[id_paper]=references_ids
+        if id_paper in scopus_references_by_idpaper_cache.keys():
+            if len(scopus_references_by_idpaper_cache[id_paper])==0:
+                print "I didn't find references for this paper."
+            references_by_paper[id_paper]=scopus_references_by_idpaper_cache[id_paper]
+        else:
+            fields = "?view=REF"
+            searchQuery = id_paper
+            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+            if resp.status_code != 200:
+                raise Scopus_Exception(resp)
+            data = resp.json()
+            if data[u'abstracts-retrieval-response'] is not None:
+                data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
+                references_ids=set()
+                for id_reference in data:
+                    references_ids.add(str(id_reference['scopus-id']))
+                references_by_paper[id_paper]=references_ids
+                scopus_references_by_idpaper_cache.update({id_paper:references_ids})
+            else:
+                print "I didn't find references for this paper."
+                scopus_references_by_idpaper_cache.update({id_paper:set()})
+
     return references_by_paper
 
+def get_cache_references_by_idpaper():
+    """
+    Returns the global variable scopus_references_by_idpaper_cache which is 
+    a dictionary where the key is the id of the paper and the value associated 
+    with the key is a set of the ids of the papers cited by the main paper
+    """
+    return scopus_references_by_idpaper_cache
 
 
 def get_common_papers(id_author_1="",id_author_2=""):
