@@ -1,4 +1,3 @@
-import matplotlib
 from scopus_key import MY_API_KEY
 import requests
 import networkx as nx
@@ -6,9 +5,9 @@ import os
 import itertools as it
 import math
 import pandas as pd 
-
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
@@ -122,6 +121,20 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+def disable_graphical_interface():
+    """
+    Function that disables the graphical environment
+    """
+    #import matplotlib.pyplot as plt
+    plt.switch_backend('Agg') 
+
+def enable_graphical_interface():
+    #import matplotlib.pyplot as plt
+    """
+    ['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
+    """
+    plt.switch_backend('GTK')
+
 def load_graph_pickle(path=""):
     """Read graph object in Python pickle format.
     """
