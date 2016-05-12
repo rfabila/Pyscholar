@@ -1,5 +1,7 @@
 pyscholar module
 ================
 
+This is the main module of PyScholar.
+
 .. automodule:: pyscholar
    :members:
