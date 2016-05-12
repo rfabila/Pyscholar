@@ -188,12 +188,12 @@ def search_author(list_scopus_id_author):
 
 def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
     """
-    Returns a  tuple with the nex elements,
-    1.-Id_author
-    2.-Set of co-authors associated with an id of an author.
-    3.-A dictionary where the key is the ID of the co-authors 
-     and the value associated is a set with the ids of the papers between
-     the author and co-author.
+        Returns a  tuple with the nex elements,
+        1.-Id_author
+        2.-Set of co-authors associated with an id of an author.
+        3.-A dictionary where the key is the ID of the co-authors 
+        and the value associated is a set with the ids of the papers between
+        the author and co-author.
     """
     scopus_authors_by_idpapers_cache.update(dict_knowledge)
     papers_author=get_papers([id_author],min_year,max_year)[id_author]
