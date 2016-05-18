@@ -1,22 +1,28 @@
-import matplotlib
 from scopus_key import MY_API_KEY
 import requests
 import networkx as nx
 import os
 import itertools as it
 import math
-matplotlib.use('Agg')
+import pandas as pd 
 import matplotlib.pyplot as plt
+
+
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
 search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
+search_api_affiliation_url = "http://api.elsevier.com/content/search/affiliation?"
+retrieve_api_affiliation_url="http://api.elsevier.com/content/affiliation/affiliation_id/"
+
+
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
 scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
+scopus_references_by_idpaper_cache=dict()
 
 #Un diccionario con las listas 
 Scopus_ids_merged_rep={}
@@ -45,7 +51,7 @@ def load_authors_from_file(directory=""):
     """
     try:
         with open(directory, 'r') as f: 
-            return [line.strip() for line in f]
+            return [str(line.strip()) for line in f]
     except IOError :
         print "Could not read file:", directory
 
@@ -115,6 +121,158 @@ def _get_alias_id(scopus_id):
 
 
 ###FIN DE FUNCIONES de IDs
+def disable_graphical_interface():
+    """
+    Function that disables the graphical environment
+    """
+    #import matplotlib.pyplot as plt
+    plt.switch_backend('Agg') 
+
+def enable_graphical_interface():
+    #import matplotlib.pyplot as plt
+    """
+    ['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
+    """
+    plt.switch_backend('GTK')
+
+def load_graph_pickle(path=""):
+    """Read graph object in Python pickle format.
+    """
+    return nx.read_gpickle(path)
+
+def save_graph_pickle(G,path="",name_graph=""):
+    """
+    Save graph in Python pickle format.
+    """
+    nx.write_gpickle(G,path+name_graph+".gpickle")
+
+def find_affiliation_scopus_id_by_name(organization=""):
+    """
+    Returns a table which contains all matches found by the search affiliation name.
+    """
+    searchQuery = "query=affil("+organization+")"
+    fields = ""
+    resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
+    if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+    id_affil=[]
+    data = resp.json()
+    data = data['search-results']
+    if data["opensearch:totalResults"] == '0':
+        print "None"
+        return None
+    affiliation_scopus_id_by_name=dict()
+    for entry in data['entry']:
+        affiliation_name=entry['affiliation-name']
+        identifier=entry['dc:identifier']
+        ident=entry['dc:identifier'].split(":")[1]
+        #affil_id = entry['dc:identifier'].split(':')
+        eid= entry["eid"]
+        document_count=entry['document-count']
+        if 'country' in entry.keys():
+            country =entry['country']
+        else:
+            country=""
+        if 'city' in entry.keys():
+            city =entry['city']
+        else:
+            city=""
+        list_names_variants=[]
+        if 'name-variant' in entry.keys():
+            for name_variant in entry['name-variant']:
+                list_names_variants.append(name_variant['$'])
+
+        affiliation_scopus_id_by_name[str(ident)]={'affiliation_name':affiliation_name,'identifier':str(identifier),'eid':str(eid),'document_count':int(document_count),'country':str(country),'city':str(city),'name_variant':list_names_variants}
+    table=[]
+    for id_affiliation,attributes_affil in affiliation_scopus_id_by_name.items():
+        register=[]
+        register.append(id_affiliation)
+        for key_val,val_affil in attributes_affil.items():
+            register.append(val_affil)
+        table.append(register)
+    headers_table=['id', 'city', 'country', 'name_variant', 'eid', 'affiliation_name', 'identifier', 'document_count']
+    affiliation_table=pd.DataFrame(table)
+    for i in range(len(headers_table)):
+        affiliation_table.rename(index=str, columns={i:headers_table[i]},inplace=True)
+    affiliation_table.sort_values(['document_count'],ascending=[False],inplace=True)
+    affiliation_table = affiliation_table.reset_index(drop=True)
+    
+    return affiliation_table
+
+def search_affiliation_by_id(list_scopus_id_affiliation):
+    """Returns a dictionary where the key is the ID of the 
+    affiliation and the value associated with the key is a dictionary
+    with the following keys: date_created, preferred_name, author_count 
+    and document_count
+    """
+    if isinstance(list_scopus_id_affiliation, str):
+        list_scopus_id_affiliation=[list_scopus_id_affiliation]
+    fields=""
+    dict_affiliation_by_id=dict()
+    for id_affiliation in list_scopus_id_affiliation:
+        searchQuery = str(id_affiliation)
+        resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
+        if resp.status_code != 200:
+            raise Scopus_Exception(resp)
+        data=resp.json()
+        data=data["affiliation-retrieval-response"]
+        date_created=str(data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year'])
+        preferred_name=str(data["institution-profile"]['preferred-name'])
+        author_count=int(data['coredata']['author-count'])
+        document_count=int(data['coredata']['document-count'])
+        attributes={'date_created':date_created,'preferred_name':preferred_name,'author_count':author_count,'document_count':document_count}
+        dict_affiliation_by_id[id_affiliation]=attributes
+    return dict_affiliation_by_id
+
+def get_authors_by_id_affiliatio(list_scopus_id_affiliation):
+    """Returns a dictionary where the key is the ID of the 
+    paper and the value associated with the key is a set 
+    of the ids of the papers cited by the main paper"""
+    if isinstance(list_scopus_id_affiliation, str):
+        list_scopus_id_affiliation=[list_scopus_id_affiliation]
+    authors_by_id_affiliation=dict()
+    for id_affiliation in list_scopus_id_affiliation:
+        affiliation_attributes=search_affiliation_by_id(id_affiliation)
+        author_count=affiliation_attributes[id_affiliation]["author_count"]
+        iterations=math.ceil(author_count/200.0)
+        chunks=[]
+        for size_chunk in range(0,int(iterations)+1):
+            if size_chunk==0:
+                chunks.append(0)
+            else:
+                if ((200*size_chunk)+1+200)<=5000:
+                    chunks.append((200*size_chunk)+1)
+                else:
+                    if 4801 not in chunks:
+                        chunks.append(4801)
+        iterations=len(chunks)
+        index_chunk=0
+        ids_author=set()
+        while(iterations!=0):
+            if chunks[index_chunk]!=4801:
+                fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
+            else:
+                fields = "&field=dc:identifier&count=199"+"&start="+str(chunks[index_chunk])
+            searchQuery = "query=AF-ID("+str(id_affiliation)+")"
+            #print search_api_author_url+searchQuery+fields
+            resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+            if resp.status_code != 200:
+                raise Scopus_Exception(resp)
+            data=resp.json()
+            data = data['search-results']
+            if data["opensearch:totalResults"] == '0':
+                #Check after.
+                print "None"
+                return None
+            for entry in data['entry']:
+                authorId = entry['dc:identifier'].split(':')
+                ids_author.add(str(authorId[1]))
+            iterations-=1
+            index_chunk+=1
+        authors_by_id_affiliation[id_affiliation]=ids_author
+
+    return authors_by_id_affiliation
+
 def get_references_by_paper(list_scopus_id_paper):
     """Returns a dictionary where the key is the ID of the 
     paper and the value associated with the key is a set 
@@ -124,18 +282,37 @@ def get_references_by_paper(list_scopus_id_paper):
         
     references_by_paper=dict()
     for id_paper in list_scopus_id_paper:
-        fields = "?view=REF"
-        searchQuery = id_paper
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
-        data = resp.json()
-        data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
-        references_ids=set()
-        for id_reference in data:
-            references_ids.add(str(id_reference['scopus-id']))
-        references_by_paper[id_paper]=references_ids
+        if id_paper in scopus_references_by_idpaper_cache.keys():
+            if len(scopus_references_by_idpaper_cache[id_paper])==0:
+                print "I didn't find references for this paper."
+            references_by_paper[id_paper]=scopus_references_by_idpaper_cache[id_paper]
+        else:
+            fields = "?view=REF"
+            searchQuery = id_paper
+            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+            if resp.status_code != 200:
+                raise Scopus_Exception(resp)
+            data = resp.json()
+            if data[u'abstracts-retrieval-response'] is not None:
+                data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
+                references_ids=set()
+                for id_reference in data:
+                    references_ids.add(str(id_reference['scopus-id']))
+                references_by_paper[id_paper]=references_ids
+                scopus_references_by_idpaper_cache.update({id_paper:references_ids})
+            else:
+                print "I didn't find references for this paper."
+                scopus_references_by_idpaper_cache.update({id_paper:set()})
+
     return references_by_paper
+
+def get_cache_references_by_idpaper():
+    """
+    Returns the global variable scopus_references_by_idpaper_cache which is 
+    a dictionary where the key is the id of the paper and the value associated 
+    with the key is a set of the ids of the papers cited by the main paper
+    """
+    return scopus_references_by_idpaper_cache
 
 
 def get_common_papers(id_author_1="",id_author_2=""):
@@ -261,13 +438,14 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                 continue
             else:
                 coauthors=get_coauthors(str(id_author),min_year,max_year,dict_knowledge_papers)
+                print coauthors
                 dict_knowledge_papers.update(coauthors[2])
                 for coauthor in coauthors[1]:
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
         if (iteration==1):
-            #print list_scopus_id_author
+            print list_scopus_id_author
             dict_last_authors=dict()
             list_scopus_id_author_found=set()
             for id_author in list_scopus_id_author:
@@ -280,12 +458,10 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                     resource_not_found.append(id_author)
                     continue
             check_edge=it.combinations(list_scopus_id_author_found,2)
-            #print dict_last_authors
             for edge in check_edge:
-                #print type(edge[0]),edge[1]
-                intersection_papers=dict_last_authors[edge[0]].intersection(dict_last_authors[edge[1]])
+                #print edge[0],edge[1]
+                intersection_papers=get_common_papers(edge[0],edge[1])
                 if len(intersection_papers)>0:
-                    #print number_paper
                     edge_list.append((edge[0],edge[1]))
                     attribute_edge.append((edge[0],edge[1],intersection_papers))
         list_scopus_id_author=new_search.copy()
@@ -332,8 +508,8 @@ def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
     dist_count=0
     D=[]
     while(iteration!=0):
-        print list_scopus_id_paper
-        print len(list_scopus_id_paper)
+        #print list_scopus_id_paper
+        #print len(list_scopus_id_paper)
         new_search=set()
         for paper in list_scopus_id_paper:
             if paper not in nodes:
@@ -578,3 +754,4 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
         ids.append(authorId[1])
                                                                                                                        
     return ids
+
