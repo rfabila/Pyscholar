@@ -51,7 +51,7 @@ def load_authors_from_file(directory=""):
     """
     try:
         with open(directory, 'r') as f: 
-            return [line.strip() for line in f]
+            return [str(line.strip()) for line in f]
     except IOError :
         print "Could not read file:", directory
 
@@ -754,3 +754,4 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
         ids.append(authorId[1])
                                                                                                                        
     return ids
+
