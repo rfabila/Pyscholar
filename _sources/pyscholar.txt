@@ -1,7 +1,5 @@
 pyscholar module
 ================
-
-This is the main module of PyScholar.
-
 .. automodule:: pyscholar
    :members:
+   :exclude-members: load_graph_pickle
