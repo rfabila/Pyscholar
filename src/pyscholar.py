@@ -135,40 +135,48 @@ def enable_graphical_interface():
     """
     plt.switch_backend('GTK')
 
-def load_graph_pickle(path=""):
-    """Load a graph object in Python pickle format.
 
+
+
+def load_graph_pickle(path=""):
+    """
+    Loads a graph object in :mod:`pickle` format.
+    
     This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.
 
-    :param path: It is the directory where the object pickle is located.
+    :param path: The directory where the object pickle is located.
     :type path: String.
     :returns: Return a graph G.
-    :rtype: Return a NetworkX graph.
+    :rtype: Return a NetworkX graph object.
+    
     :Example:
+    
     >>> import pyscholar
     >>> my_graph = psycholar.load_graph_pickle("~/dir/graph.pickle")
     >>> my_graph
+    
     """
     return nx.read_gpickle(path)
 
 def save_graph_pickle(G,path="",name_graph=""):
-    """Save graph in Python pickle format.
+    """
+    Saves graph in :mod:`pickle` format.
 
-    This function saves saves a graphic object in pickle format in a directory.
+    This function saves a graphic object in pickle format in a directory.
     
-
-    :param path: It is the directory where the object pickle is located.
+    :param G: The graph that will be saved.
+    :param path: The directory where the graph will be saved.
+    :param name_graph: The name of the graph.
+    :type G: NetworkX graph object.
     :type path: String.
-    :returns: Return a graph G.
-    :rtype: Return a NetworkX graph.
+    :type name_graph: String.
+    :returns: The function doesn't return any value.
+    
     :Example:
     >>> import pyscholar
-    >>> my_graph = psycholar.load_graph_pickle("~/dir/graph.pickle")
-    >>> my_graph
-    """
-
-    """
-    Save graph in Python pickle format.
+    >>> psycholar.save_graph_pickle(G,"~/dir/","my_graph")
+    >>> 
+    
     """
     nx.write_gpickle(G,path+name_graph+".gpickle")
 
