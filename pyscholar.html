@@ -8,7 +8,7 @@
     
     <title>pyscholar module &mdash; Pyscholar 1.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -23,84 +23,54 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="Pyscholar 1.0.0 documentation" href="index.html" />
-    <link rel="prev" title="Welcome to Pyscholar’s documentation!" href="index.html" /> 
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Pyscholar’s documentation!"
+          <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="pyscholar-module">
 <h1>pyscholar module<a class="headerlink" href="#pyscholar-module" title="Permalink to this headline">¶</a></h1>
-<p>This is the main module of PyScholar.</p>
-<span class="target" id="module-pyscholar"></span><dl class="function">
-<dt id="pyscholar.check_years">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">check_years</tt><big>(</big><em>min_year=''</em>, <em>max_year=''</em><big>)</big><a class="headerlink" href="#pyscholar.check_years" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the filter if the given interval is correct 
-otherwise returns None</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyscholar.count_citations_by_id_paper">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">count_citations_by_id_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#pyscholar.count_citations_by_id_paper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary where the key is the ID of the 
-paper and the value associated with the key is the 
-number citations</p>
-</dd></dl>
-
+<div class="section" id="scopus-author-co-authors">
+<h2>Scopus Author/Co-Authors<a class="headerlink" href="#scopus-author-co-authors" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyscholar.find_author_scopus_id_by_name">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">find_author_scopus_id_by_name</tt><big>(</big><em>firstName=''</em>, <em>lastName=''</em><big>)</big><a class="headerlink" href="#pyscholar.find_author_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">find_author_scopus_id_by_name</code><span class="sig-paren">(</span><em>firstName=''</em>, <em>lastName=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.find_author_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for an author scopus id given its name.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_cache_papers">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_cache_papers</tt><big>(</big><big>)</big><a class="headerlink" href="#pyscholar.get_cache_papers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the scopus_authors_by_idpapers_cache dictionary which 
-is a cache of papers consulted where the key is the id of the paper 
-and the associated value is a set of authors who wrote the article.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyscholar.get_cache_papers_by_authorid">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_cache_papers_by_authorid</tt><big>(</big><big>)</big><a class="headerlink" href="#pyscholar.get_cache_papers_by_authorid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the global variable scopus_papers_by_authorid_cache which is 
-a dictionary of dictionaries where the first dictionary key is 
-the id of the author and the key to the second dictionary is 
-the time interval whose associated value is a set of papers.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyscholar.get_citation_graph">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_citation_graph</tt><big>(</big><em>list_scopus_id_paper</em>, <em>distance</em>, <em>directory=''</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#pyscholar.get_citation_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a tuple where the first element is the graph induced by papers
-and the second element is a list of sets where each set is a set of papers to distance d.
-and the last element is a set of papers not found.</p>
+<dt id="pyscholar.get_authors_by_id_affiliatio">
+<code class="descclassname">pyscholar.</code><code class="descname">get_authors_by_id_affiliatio</code><span class="sig-paren">(</span><em>list_scopus_id_affiliation</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_authors_by_id_affiliatio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary where the key is the ID of the 
+paper and the value associated with the key is a set 
+of the ids of the papers cited by the main paper</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyscholar.get_coauthors">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_coauthors</tt><big>(</big><em>id_author</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>dict_knowledge={}</em><big>)</big><a class="headerlink" href="#pyscholar.get_coauthors" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors</code><span class="sig-paren">(</span><em>id_author</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>dict_knowledge={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a  tuple with the nex elements,
 1.-Id_author
 2.-Set of co-authors associated with an id of an author.
@@ -110,29 +80,47 @@ the author and co-author.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_coauthors_graph">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_coauthors_graph</tt><big>(</big><em>list_scopus_id_author</em>, <em>distance</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>directory=''</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#pyscholar.get_coauthors_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a tuple where the first element is the graph induced by several authors 
-and the second element is a list of sets where each set is a set of authors to distance d.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyscholar.get_common_papers">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_common_papers</tt><big>(</big><em>id_author_1=''</em>, <em>id_author_2=''</em><big>)</big><a class="headerlink" href="#pyscholar.get_common_papers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the intercession of papers between two authors</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="pyscholar.get_ids_authors_by_id_paper">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_ids_authors_by_id_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#pyscholar.get_ids_authors_by_id_paper" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_ids_authors_by_id_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_ids_authors_by_id_paper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary where the key is the ID of the 
 paper and the value associated with the key is a list 
 of the ids of the authors who wrote the paper</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="pyscholar.load_authors_from_file">
+<code class="descclassname">pyscholar.</code><code class="descname">load_authors_from_file</code><span class="sig-paren">(</span><em>directory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the authors who were in a file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyscholar.search_author">
+<code class="descclassname">pyscholar.</code><code class="descname">search_author</code><span class="sig-paren">(</span><em>list_scopus_id_author</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.search_author" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary where the key is the ID of the 
+author and the value associated with the key is a dictionary
+with the following keys: name, surname, h-index and coauthor-count.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="scopus-paper">
+<h2>Scopus Paper<a class="headerlink" href="#scopus-paper" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyscholar.count_citations_by_id_paper">
+<code class="descclassname">pyscholar.</code><code class="descname">count_citations_by_id_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.count_citations_by_id_paper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary where the key is the ID of the 
+paper and the value associated with the key is the 
+number citations</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyscholar.get_common_papers">
+<code class="descclassname">pyscholar.</code><code class="descname">get_common_papers</code><span class="sig-paren">(</span><em>id_author_1=''</em>, <em>id_author_2=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_common_papers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the intercession of papers between two authors</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pyscholar.get_papers">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_papers</tt><big>(</big><em>list_scopus_id_author</em>, <em>min_year=''</em>, <em>max_year=''</em><big>)</big><a class="headerlink" href="#pyscholar.get_papers" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_papers</code><span class="sig-paren">(</span><em>list_scopus_id_author</em>, <em>min_year=''</em>, <em>max_year=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_papers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary where the key is the ID of the 
 author and the value associated with the key 
 is a set of the ids of the papers that belong to 
@@ -141,7 +129,7 @@ the author in certain time interval.</p>
 
 <dl class="function">
 <dt id="pyscholar.get_references_by_paper">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_references_by_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#pyscholar.get_references_by_paper" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_references_by_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_references_by_paper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary where the key is the ID of the 
 paper and the value associated with the key is a set 
 of the ids of the papers cited by the main paper</p>
@@ -149,48 +137,168 @@ of the ids of the papers cited by the main paper</p>
 
 <dl class="function">
 <dt id="pyscholar.get_title_abstract_by_idpaper">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">get_title_abstract_by_idpaper</tt><big>(</big><em>id_paper=''</em><big>)</big><a class="headerlink" href="#pyscholar.get_title_abstract_by_idpaper" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_title_abstract_by_idpaper</code><span class="sig-paren">(</span><em>id_paper=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_title_abstract_by_idpaper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tuple with the id_paper,title and abstract of each paper</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.load_authors_from_file">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">load_authors_from_file</tt><big>(</big><em>directory=''</em><big>)</big><a class="headerlink" href="#pyscholar.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of the authors who were in a file.
-Each line must have a valid scopus id.</p>
+<dt>
+<code class="descclassname">pyscholar.</code><code class="descname">get_title_abstract_by_idpaper</code><span class="sig-paren">(</span><em>id_paper=''</em><span class="sig-paren">)</span></dt>
+<dd><p>Returns a tuple with the id_paper,title and abstract of each paper</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyscholar.load_papers_from_file">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">load_papers_from_file</tt><big>(</big><em>directory=''</em><big>)</big><a class="headerlink" href="#pyscholar.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyscholar.</code><code class="descname">load_papers_from_file</code><span class="sig-paren">(</span><em>directory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the papers who were in a file.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="scopus-affiliation">
+<h2>Scopus Affiliation<a class="headerlink" href="#scopus-affiliation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.search_author">
-<tt class="descclassname">pyscholar.</tt><tt class="descname">search_author</tt><big>(</big><em>list_scopus_id_author</em><big>)</big><a class="headerlink" href="#pyscholar.search_author" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary where the key is the ID of the 
-author and the value associated with the key is a dictionary
-with the following keys: name, surname, h-index and coauthor-count.</p>
+<dt id="pyscholar.find_affiliation_scopus_id_by_name">
+<code class="descclassname">pyscholar.</code><code class="descname">find_affiliation_scopus_id_by_name</code><span class="sig-paren">(</span><em>organization=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.find_affiliation_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a table which contains all matches found by the search affiliation name.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="pyscholar.search_affiliation_by_id">
+<code class="descclassname">pyscholar.</code><code class="descname">search_affiliation_by_id</code><span class="sig-paren">(</span><em>list_scopus_id_affiliation</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.search_affiliation_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary where the key is the ID of the 
+affiliation and the value associated with the key is a dictionary
+with the following keys: date_created, preferred_name, author_count 
+and document_count</p>
+</dd></dl>
+
+</div>
+<div class="section" id="graph-generators">
+<h2>Graph Generators<a class="headerlink" href="#graph-generators" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyscholar.get_citation_graph">
+<code class="descclassname">pyscholar.</code><code class="descname">get_citation_graph</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em>, <em>distance</em>, <em>directory=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_citation_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple where the first element is the graph induced by papers
+and the second element is a list of sets where each set is a set of papers to distance d.
+and the last element is a set of papers not found.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyscholar.get_coauthors_graph">
+<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors_graph</code><span class="sig-paren">(</span><em>list_scopus_id_author</em>, <em>distance</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>directory=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple where the first element is the graph induced by several authors 
+and the second element is a list of sets where each set is a set of authors to distance d.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="reading-and-writing-graphs">
+<h2>Reading and Writing Graphs<a class="headerlink" href="#reading-and-writing-graphs" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyscholar.save_graph_pickle">
+<code class="descclassname">pyscholar.</code><code class="descname">save_graph_pickle</code><span class="sig-paren">(</span><em>G</em>, <em>path=''</em>, <em>name_graph=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.save_graph_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves graph in <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">pickle</span></code></a> format.</p>
+<p>This function saves a graphic object in pickle format in a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>G</strong> (<em>NetworkX graph object.</em>) &#8211; The graph that will be saved.</li>
+<li><strong>path</strong> (<em>String.</em>) &#8211; The directory where the graph will be saved.</li>
+<li><strong>name_graph</strong> (<em>String.</em>) &#8211; The name of the graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The function doesn&#8217;t return any value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">psycholar</span><span class="o">.</span><span class="n">save_graph_pickle</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s2">&quot;~/dir/&quot;</span><span class="p">,</span><span class="s2">&quot;my_graph&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyscholar.load_graph_pickle">
+<code class="descclassname">pyscholar.</code><code class="descname">load_graph_pickle</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_graph_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a graph object in <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">pickle</span></code></a> format.</p>
+<p>This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>String.</em>) &#8211; The directory where the object pickle is located.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Return a graph G.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Return a NetworkX graph object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span> <span class="o">=</span> <span class="n">psycholar</span><span class="o">.</span><span class="n">load_graph_pickle</span><span class="p">(</span><span class="s2">&quot;~/dir/graph.pickle&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="other-functions">
+<h2>Other Functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyscholar.disable_graphical_interface">
+<code class="descclassname">pyscholar.</code><code class="descname">disable_graphical_interface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.disable_graphical_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that disables the graphical environment</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyscholar.enable_graphical_interface">
+<code class="descclassname">pyscholar.</code><code class="descname">enable_graphical_interface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.enable_graphical_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>[&#8216;pdf&#8217;, &#8216;pgf&#8217;, &#8216;Qt4Agg&#8217;, &#8216;GTK&#8217;, &#8216;GTKAgg&#8217;, &#8216;ps&#8217;, &#8216;agg&#8217;, &#8216;cairo&#8217;, &#8216;MacOSX&#8217;, &#8216;GTKCairo&#8217;, &#8216;WXAgg&#8217;, &#8216;template&#8217;, &#8216;TkAgg&#8217;, &#8216;GTK3Cairo&#8217;, &#8216;GTK3Agg&#8217;, &#8216;svg&#8217;, &#8216;WebAgg&#8217;, &#8216;CocoaAgg&#8217;, &#8216;emf&#8217;, &#8216;gdk&#8217;, &#8216;WX&#8217;]</p>
+</dd></dl>
+
+</div>
 </div>
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyscholar module</a><ul>
+<li><a class="reference internal" href="#scopus-author-co-authors">Scopus Author/Co-Authors</a></li>
+<li><a class="reference internal" href="#scopus-paper">Scopus Paper</a></li>
+<li><a class="reference internal" href="#scopus-affiliation">Scopus Affiliation</a></li>
+<li><a class="reference internal" href="#graph-generators">Graph Generators</a></li>
+<li><a class="reference internal" href="#reading-and-writing-graphs">Reading and Writing Graphs</a></li>
+<li><a class="reference internal" href="#other-functions">Other Functions</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to Pyscholar&#8217;s documentation!</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/pyscholar.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pyscholar.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -207,24 +315,24 @@ with the following keys: name, surname, h-index and coauthor-count.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Pyscholar’s documentation!"
+          <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2016, DesarrolloDeSoftwareCientífico.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>
