@@ -135,14 +135,48 @@ def enable_graphical_interface():
     """
     plt.switch_backend('GTK')
 
+
+
+
 def load_graph_pickle(path=""):
-    """Read graph object in Python pickle format.
+    """
+    Loads a graph object in :mod:`pickle` format.
+    
+    This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.
+
+    :param path: The directory where the object pickle is located.
+    :type path: String.
+    :returns: Return a graph G.
+    :rtype: Return a NetworkX graph object.
+    
+    :Example:
+    
+    >>> import pyscholar
+    >>> my_graph = psycholar.load_graph_pickle("~/dir/graph.pickle")
+    >>> my_graph
+    
     """
     return nx.read_gpickle(path)
 
 def save_graph_pickle(G,path="",name_graph=""):
     """
-    Save graph in Python pickle format.
+    Saves graph in :mod:`pickle` format.
+
+    This function saves a graphic object in pickle format in a directory.
+    
+    :param G: The graph that will be saved.
+    :param path: The directory where the graph will be saved.
+    :param name_graph: The name of the graph.
+    :type G: NetworkX graph object.
+    :type path: String.
+    :type name_graph: String.
+    :returns: The function doesn't return any value.
+    
+    :Example:
+    >>> import pyscholar
+    >>> psycholar.save_graph_pickle(G,"~/dir/","my_graph")
+    >>> 
+    
     """
     nx.write_gpickle(G,path+name_graph+".gpickle")
 
@@ -438,14 +472,15 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                 continue
             else:
                 coauthors=get_coauthors(str(id_author),min_year,max_year,dict_knowledge_papers)
-                print coauthors
+                #print coauthors
                 dict_knowledge_papers.update(coauthors[2])
                 for coauthor in coauthors[1]:
                     edge_list.append((id_author,str(coauthor)))
                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
                     new_search.add(str(coauthor))
         if (iteration==1):
-            print list_scopus_id_author
+            print "Here"
+            #print list_scopus_id_author
             dict_last_authors=dict()
             list_scopus_id_author_found=set()
             for id_author in list_scopus_id_author:
@@ -459,7 +494,8 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
                     continue
             check_edge=it.combinations(list_scopus_id_author_found,2)
             for edge in check_edge:
-                #print edge[0],edge[1]
+                print "Check edge"
+                print edge[0],edge[1]
                 intersection_papers=get_common_papers(edge[0],edge[1])
                 if len(intersection_papers)>0:
                     edge_list.append((edge[0],edge[1]))
