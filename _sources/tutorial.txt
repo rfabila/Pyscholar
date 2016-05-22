@@ -1,4 +1,4 @@
-.. _my-reference-label:
+.. _tutorial:
 
 Tutorial
 ================
