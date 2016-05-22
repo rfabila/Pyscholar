@@ -4,7 +4,7 @@ import networkx as nx
 import os
 import itertools as it
 import math
-import pandas as pd 
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -24,11 +24,11 @@ scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
 scopus_references_by_idpaper_cache=dict()
 
-#Un diccionario con las listas 
+#Un diccionario con las listas
 Scopus_ids_merged_rep={}
 Scopus_ids_merged_lists={}
 
-#Voy a poner aqui lo que falta por hacer (TODO list) 
+#Voy a poner aqui lo que falta por hacer (TODO list)
 
 #Funciones para manejar las ids, hago implementaciones ingenuas que
 #despues mejoraremos
@@ -50,7 +50,7 @@ def load_authors_from_file(directory=""):
     Returns a list of the authors who were in a file.
     """
     try:
-        with open(directory, 'r') as f: 
+        with open(directory, 'r') as f:
             return [str(line.strip()) for line in f]
     except IOError :
         print "Could not read file:", directory
@@ -61,7 +61,7 @@ def load_papers_from_file(directory=""):
     Returns a list of the papers who were in a file.
     """
     try:
-        with open(directory, 'r') as f: 
+        with open(directory, 'r') as f:
             return [line.strip() for line in f]
     except IOError :
         print "Could not read file:", directory
@@ -70,67 +70,68 @@ def load_papers_from_file(directory=""):
 def _add_scopus_id(scopus_id):
     """Adds a scopus id to the merged list. Returns False if the ID
     is already in the merged list and false otherwise"""
-    
+
     #Buscamos a ver si ya estaba en algunas lista, de ser
     #asi no hacemos nada
     for x in Scopus_ids_merged_lists:
         if scopus_id in D[x]:
             return False
-    
-    
+
+
     #No tiene "padre" y por tanto es la raiz
     Scopus_ids_merged_rep[scopus_id]=None
-    
+
     #De momento el es el unico de la lista
     Scopus_ids_merged_lists[scopus_id]=[scopus_id]
-    
+
     return list
 
 
 def _get_root_id(scopus_id):
     """Follows the path of parents until it finds the root"""
-    
+
     #Si no esta en la lista de representantes pues no hay nada que hacer
     if scopus_id not in Scopus_ids_merged_rep:
         return scopus_id
-    
-    
+
+
     root_scopus_id=scopus_id
     parent_scopus_id=t_scopus_id
-    
+
     #seguimos los apuntadores hasta llegar a la raiz
     while Scopus_ids_merged_rep[root_scopus_id]!=None:
         root_scopus_id=Scopus_ids_merged_rep[root_scopus_id]
-    
+
     return root_scopus_id
 
 def _get_alias_list_id(scopus_id):
     """returns the list of alias id"""
     #En Scopus_ids_merged_lists[root_id] se van a guardar la lista
     #de alias
-    
+
 def _union_alias_id(scopus_id_1,scopus_id_2):
     #Junta a la lista de scopus_id_1 y scopus_id_2
     pass
-        
-    
+
+
 def _get_alias_id(scopus_id):
     pass
-    
+
 
 
 
 ###FIN DE FUNCIONES de IDs
 def disable_graphical_interface():
     """
-    Function that disables the graphical environment
+    This function disables the graphical environment.
     """
     #import matplotlib.pyplot as plt
-    plt.switch_backend('Agg') 
+    plt.switch_backend('Agg')
 
 def enable_graphical_interface():
-    #import matplotlib.pyplot as plt
     """
+     This function enables the graphical environment.
+     
     ['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
     """
     plt.switch_backend('GTK')
@@ -141,20 +142,19 @@ def enable_graphical_interface():
 def load_graph_pickle(path=""):
     """
     Loads a graph object in :mod:`pickle` format.
-    
+
     This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.
 
     :param path: The directory where the object pickle is located.
     :type path: String.
     :returns: Return a graph G.
     :rtype: Return a NetworkX graph object.
-    
+
     :Example:
-    
+
     >>> import pyscholar
     >>> my_graph = psycholar.load_graph_pickle("~/dir/graph.pickle")
     >>> my_graph
-    
     """
     return nx.read_gpickle(path)
 
@@ -163,7 +163,7 @@ def save_graph_pickle(G,path="",name_graph=""):
     Saves graph in :mod:`pickle` format.
 
     This function saves a graphic object in pickle format in a directory.
-    
+
     :param G: The graph that will be saved.
     :param path: The directory where the graph will be saved.
     :param name_graph: The name of the graph.
@@ -171,19 +171,39 @@ def save_graph_pickle(G,path="",name_graph=""):
     :type path: String.
     :type name_graph: String.
     :returns: The function doesn't return any value.
-    
+
     :Example:
+
     >>> import pyscholar
     >>> psycholar.save_graph_pickle(G,"~/dir/","my_graph")
-    >>> 
-    
+    >>>
     """
     nx.write_gpickle(G,path+name_graph+".gpickle")
 
 def find_affiliation_scopus_id_by_name(organization=""):
     """
-    Returns a table which contains all matches found by the search affiliation name.
-    """
+    This function returns a data frame which contains all matches found by the search affiliation name.
+
+    :param organization: The name of the affiliation that you want to search.
+    :type organization: String 
+    :returns: A data frame that has different attributes (id,city,country,name_variant,eid,affiliation_name,identifier,document_count).
+    :rtype: DataFrame
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.find_affiliation_scopus_id_by_name("CINVESTAV")
+               id                 city      country                 name_variant                        eid                   affiliation_name                              identifier          document_count
+        0    60017323          Mexico City  Mexico        [CINVESTAV-IPN, CINVESTAV]             10-s2.0-60017323  Centro de Investigacion y de Estudios Avanzados    AFFILIATION_ID:60017323       19254  
+        1    60010531        M&eacute;rida  Mexico              [CINVESTAV-IPN]                  10-s2.0-60010531           CINVESTAV Unidad Merida                   AFFILIATION_ID:60010531        1811
+        2    60018216          Guadalajara  Mexico  [CINVESTAV, CINVESTAV Unidad Guadalajara]    10-s2.0-60018216           CINVESTAV Unidad Guadalajara              AFFILIATION_ID:60018216        1010  
+        .
+        .
+        .
+        .
+	>>>   
+
+    """    
     searchQuery = "query=affil("+organization+")"
     fields = ""
     resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
@@ -230,14 +250,30 @@ def find_affiliation_scopus_id_by_name(organization=""):
         affiliation_table.rename(index=str, columns={i:headers_table[i]},inplace=True)
     affiliation_table.sort_values(['document_count'],ascending=[False],inplace=True)
     affiliation_table = affiliation_table.reset_index(drop=True)
-    
+
     return affiliation_table
 
 def search_affiliation_by_id(list_scopus_id_affiliation):
-    """Returns a dictionary where the key is the ID of the 
+    """
+    This function returns a dictionary where the key is the ID of the
     affiliation and the value associated with the key is a dictionary
-    with the following keys: date_created, preferred_name, author_count 
-    and document_count
+    with the following keys: date_created, preferred_name, author_count
+    and document_count.
+
+    :param list_scopus_id_affiliation: If you are looking for an affiliation, you can send the id as a string but if you want to multiple affiliations you can send a list of their ids.
+    :type list_scopus_id_affiliation: String or List
+    :returns: Dictionary where the key is the ID of theaffiliation and the value associated with the key is a dictionary with the following keys: date_created, preferred_name, author_count and document_count.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.search_affiliation_by_id("60017323")
+    {'60017323': {'date_created': '03/02/2008', 'author_count': 5522, 'document_count': 19266, 'preferred_name': 'Centro de Investigacion y de Estudios Avanzados'}}
+    >>> pyscholar.search_affiliation_by_id(["60017323","60018216"])
+    {'60017323': {'date_created': '03/02/2008', 'author_count': 5522, 'document_count': 19266, 'preferred_name': 'Centro de Investigacion y de Estudios Avanzados'}, '60018216': {'date_created': '03/02/2008', 'author_count': 285, 'document_count': 1011, 'preferred_name': 'CINVESTAV Unidad Guadalajara'}}
+    >>>
+    
     """
     if isinstance(list_scopus_id_affiliation, str):
         list_scopus_id_affiliation=[list_scopus_id_affiliation]
@@ -258,9 +294,9 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
         dict_affiliation_by_id[id_affiliation]=attributes
     return dict_affiliation_by_id
 
-def get_authors_by_id_affiliatio(list_scopus_id_affiliation):
-    """Returns a dictionary where the key is the ID of the 
-    paper and the value associated with the key is a set 
+def get_authors_by_id_affiliation(list_scopus_id_affiliation):
+    """Returns a dictionary where the key is the ID of the
+    paper and the value associated with the key is a set
     of the ids of the papers cited by the main paper"""
     if isinstance(list_scopus_id_affiliation, str):
         list_scopus_id_affiliation=[list_scopus_id_affiliation]
@@ -308,12 +344,28 @@ def get_authors_by_id_affiliatio(list_scopus_id_affiliation):
     return authors_by_id_affiliation
 
 def get_references_by_paper(list_scopus_id_paper):
-    """Returns a dictionary where the key is the ID of the 
-    paper and the value associated with the key is a set 
-    of the ids of the papers cited by the main paper"""
+    """
+    This function returns a dictionary where the key is the ID of the paper and 
+    the value associated with the key is a set of the ids of the papers cited by each paper searched.
+
+    :param list_scopus_id_paper: If you are looking for the ids of the papers cited by an paper, you can send the id as a string but if you want to get the ids of the papers cited from several papers you can send a list of their ids.
+    :type list_scopus_id_author: String or List
+    :returns: Dictionary where the key is the ID of the paper and the value associated with the key is a set of the ids of the papers cited by each paper.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.get_references_by_paper("84924004559")
+    {'84924004559': set(['84897620666', '84923945772', '0039555230', '84870039666', '84923947094', '3042511364', '84870033200', '0038961022', '0038961019', '0040696207', '84922016024', '0039331818', '84892691931'])}
+    >>> pyscholar.get_references_by_paper(["84924004559","77950850685"])
+    {'84924004559': set(['84897620666', '84923945772', '0039555230', '84870039666', '84923947094', '3042511364', '84870033200', '0038961022', '0038961019', '0040696207', '84922016024', '0039331818', '84892691931']), '77950850685': set(['0039555230', '84893392206', '0038961022', '3042511364', '33644645839', '0001387789', '0038961019', '84867934819', '0001434692', '0039331818', '77950815647', '0002436460'])}
+    >>>
+    
+    """
     if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
-        
+
     references_by_paper=dict()
     for id_paper in list_scopus_id_paper:
         if id_paper in scopus_references_by_idpaper_cache.keys():
@@ -342,41 +394,72 @@ def get_references_by_paper(list_scopus_id_paper):
 
 def get_cache_references_by_idpaper():
     """
-    Returns the global variable scopus_references_by_idpaper_cache which is 
-    a dictionary where the key is the id of the paper and the value associated 
+    Returns the global variable scopus_references_by_idpaper_cache which is
+    a dictionary where the key is the id of the paper and the value associated
     with the key is a set of the ids of the papers cited by the main paper
     """
     return scopus_references_by_idpaper_cache
 
 
 def get_common_papers(id_author_1="",id_author_2=""):
-    """Returns the intercession of papers between two authors"""
+    """
+    This function returns the intercession of papers between two authors.
+    
+    :param id_author_1: Id of the first author.
+    :param id_author_2: Id of the second author.
+    :type id_author_1: String 
+    :type id_author_2: String 
+    :returns: The intercession of papers between the two authors which is a set.
+    :rtype: Set
+    
+    :Example:
+    
+    >>> import pyscholar
+    >>> pyscholar.get_common_papers("56013555800","8931919100")
+    {'84924004559', '84925067887'}
+    >>>
+    """    
+    
+    """Returns """
     if id_author_1=="" and id_author_2=="":
         print "Give me the two Authors"
     else:
         papers_author_1=get_papers([id_author_1])[id_author_1]
         papers_author_2=get_papers([id_author_2])[id_author_2]
         papers_in_common=papers_author_1.intersection(papers_author_2)
-    return papers_in_common    
+    return papers_in_common
 
 
 def get_title_abstract_by_idpaper(id_paper=""):
-    """Returns a tuple with the id_paper,title and abstract of each paper """
+    """
+    This function returns a tuple with the identification, title and summary of the paper that you searched.
     
+    :param id_paper: Id of the paper that you want to search. 
+    :type id_paper: String 
+    :returns: Tuple with the identification, title and summary of the paper that you searched
+    :rtype: Tuple
+    
+    :Example:
+    
+    >>> import pyscholar
+    >>> pyscholar.get_ids_authors_by_id_paper("77950850685")
+    ('77950850685',u'Empty monochromatic triangles',u'We consider a variation of a problem stated by Erd\xf6s and Guy in 1973 about the number of convex k-gons determined by any set S of n points in the plane. In our setting the points of S are colored and we say that a spanned polygon is monochromatic if all its points are colored with the same color. As a main result we show that any bi-colored set of n points in R2 in general position determines a super-linear number of empty monochromatic triangles, namely \u03a9(n5/4).')
+    >>>
+    """    
     fields = "?field=dc:description,title"
-    
+
     searchQuery = (id_paper)
     resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
     if resp.status_code != 200:
         raise Scopus_Exception(resp)
-    
+
     data=resp.json()
     data=data["abstracts-retrieval-response"]["coredata"]
-    return (id_paper,str(data['dc:title']),str(data['dc:description']))
+    return (id_paper,(data['dc:title']),(data['dc:description']))
 
 
 def search_author(list_scopus_id_author):
-    """Returns a dictionary where the key is the ID of the 
+    """Returns a dictionary where the key is the ID of the
     author and the value associated with the key is a dictionary
     with the following keys: name, surname, h-index and coauthor-count.
     """
@@ -392,8 +475,8 @@ def search_author(list_scopus_id_author):
             raise Scopus_Exception(resp)
         data=resp.json()
         data=data['author-retrieval-response'][0]
-        attributes={'name':str(data['preferred-name']['given-name']),
-        'surname':str(data['preferred-name']['surname']),'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
+        attributes={'name':data['preferred-name']['given-name'],
+        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
         dict_authors[id_author]=attributes
     return dict_authors
 
@@ -402,7 +485,7 @@ def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
         Returns a  tuple with the nex elements,
         1.-Id_author
         2.-Set of co-authors associated with an id of an author.
-        3.-A dictionary where the key is the ID of the co-authors 
+        3.-A dictionary where the key is the ID of the co-authors
         and the value associated is a set with the ids of the papers between
         the author and co-author.
     """
@@ -432,8 +515,8 @@ def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
 
 def get_cache_papers():
     """
-    Returns the scopus_authors_by_idpapers_cache dictionary which 
-    is a cache of papers consulted where the key is the id of the paper 
+    Returns the scopus_authors_by_idpapers_cache dictionary which
+    is a cache of papers consulted where the key is the id of the paper
     and the associated value is a set of authors who wrote the article.
     """
     return scopus_authors_by_idpapers_cache
@@ -441,7 +524,7 @@ def get_cache_papers():
 
 def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
     """
-    Returns a tuple where the first element is the graph induced by several authors 
+    Returns a tuple where the first element is the graph induced by several authors
     and the second element is a list of sets where each set is a set of authors to distance d.
     """
     node_colors=["red","blue","green","yellow","brown"]
@@ -593,45 +676,77 @@ def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
     return (G_citation,D,paper_not_found)
 
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
-    """Returns a dictionary where the key is the ID of the 
-    paper and the value associated with the key is a list 
-    of the ids of the authors who wrote the paper"""
+    """
+    This function returns a dictionary where the key is the ID of the
+    paper and the value associated with the key is a list
+    of the ids of the authors who wrote the paper.
+
+    :param list_scopus_id_paper: If you are looking for the ids of the authors who wrote an paper, you can send the id as a string but if you want to get the ids of the authors from several papers you can send a list of their ids.
+    :type list_scopus_id_author: String or List
+    :returns: Dictionary where the key is the ID of the paper and the value associated with the key is a list of the ids of the authors who wrote the paper.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.get_ids_authors_by_id_paper("84945466401")
+    {'84945466401': ['7003988000', '56286038700', '8847635500', '56013555800', '56815189300']}
+    >>> pyscholar.get_ids_authors_by_id_paper(['84924256130', '84924228967', '84876052381','84864280014','84867281605','77950850685'])
+    {'84876052381': ['55647751400'], '84864280014': ['6506110957', '7006657985', '23388216300', '7005508480', '6603865823', '36117782600', '56013555800', '36117667600', '7006733509', '6701488992', '36118513000', '6603259241', '6504765315'], '84924256130': ['55647751400'], '77950850685': ['7004102317', '56013555800', '56013629200', '12645615700', '56240672400', '35566511400'], '84867281605': ['8847635500', '56013555800', '56013629200', '37107692000', '35566511400'], '84924228967': ['55647751400']}
+    >>>
+    """
     if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
 
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
-    
+
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
         resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
         if resp.status_code != 200:
             raise Scopus_Exception(resp)
-            
+
         id_authors=[]
         data=resp.json()
         data=data["abstracts-retrieval-response"]["authors"]["author"]
         for author in data:
-            id_authors.append(str(author["@auid"]))     
+            id_authors.append(str(author["@auid"]))
         authors_by_id_paper[id_paper]=id_authors
     return authors_by_id_paper
 
 def count_citations_by_id_paper(list_scopus_id_paper):
-    """Returns a dictionary where the key is the ID of the 
-    paper and the value associated with the key is the 
-    number citations """
+    """
+    This function returns a dictionary where the key is the ID of the
+    paper and the value associated with the key is the
+    number citations.
+
+    :param list_scopus_id_paper: If you are looking for the number of citations of an paper you can send the id as a string but if you want to get the number of citations from several papers you can send a list of their ids.
+    :type list_scopus_id_author: String or List
+    :returns: Dictionary where the key is the ID of the paper and the value associated with the key is the number citations.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.count_citations_by_id_paper("84864280014")
+    {'84864280014': 5}
+    >>> pyscholar.count_citations_by_id_paper(['84924256130', '84924228967', '84876052381','84864280014','84867281605','77950850685'])
+    {'84876052381': 0, '84864280014': 5, '84924256130': 0, '77950850685': 1, '84867281605': 3, '84924228967': 0}
+    >>>
+    """
     if isinstance(list_scopus_id_paper, str):
         list_scopus_id_paper=[list_scopus_id_paper]
-    
+
     fields = "?field=dc:description,citedby-count"
     cited_by_count=dict()
-        
+
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
         resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
         if resp.status_code != 200:
-            raise Scopus_Exception(resp) 
-        
+            raise Scopus_Exception(resp)
+
         number_citations=0
         data=resp.json()
         data=data["abstracts-retrieval-response"]["coredata"]
@@ -641,7 +756,7 @@ def count_citations_by_id_paper(list_scopus_id_paper):
 
 def check_years(min_year="",max_year=""):
     """
-    Return the filter if the given interval is correct 
+    Return the filter if the given interval is correct
     otherwise returns None
     """
     filtr=""
@@ -678,25 +793,51 @@ def check_years(min_year="",max_year=""):
                 return None
             else:
                 print "min_year and max_year must be numbers"
-                return None                
+                return None
 
 
 
 def get_papers(list_scopus_id_author,min_year="",max_year=""):
-    """Returns a dictionary where the key is the ID of the 
-    author and the value associated with the key 
-    is a set of the ids of the papers that belong to 
-    the author in certain time interval."""
+    """
+    This function returns a dictionary where the key is the ID of the
+    author and the value associated with the key
+    is a set of the ids of the papers that belong to
+    the author in a certain time interval.The values of min_year and max_year are optional,
+    if you omit min_year and max_year returns the dictionary in all time.
+
+    :param list_scopus_id_author: If you are looking for the paper of an author you can send the id as a string but if you want to get the papers from several authors you can send a list of their ids.
+    :param min_year: The initial year in the time interval you want to look for papers.
+    :param max_year: The final year in the time interval you want to look for papers.
+    :type list_scopus_id_author: String or List.
+    :type min_year: String
+    :type max_year: String
+    :returns: Dictionary where the key is the identifier of the author and the associated value is the set of papers that belong to each author.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.get_papers("56578611900")
+    {'56578611900': set(['84959332636'])}
+    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'])
+    {'7006176684': set(['5444229075', '17144467193', '0001031138', '79959322537', '84911059592', '84955069066', '0037233714', '38249018110', '52149122079', '0009416953', '84892551677', '51249164413', '0000772349', '0007057901', '13544277720', '33847670994', '0031146399', '84921029337', '84886394293', '0034363462', '67651172822', '0035869886', '0038931174', '38249040825', '33947675881', '0010211186', '84905729730', '0031285726', '23044528188', '0033072608', '0009247597', '84947051661', '84951039519', '0033531899', '77958482876', '0000385874', '33646915730', '84886435449', '0032221906', '58149129161', '21844489552', '52549094277', '0034656467', '0037953609', '84907056975', '38249018633', '84903995394', '84867339764', '33845367161', '0040629757', '0039530566', '0000740606', '22444453689', '84892368124', '76449084340', '84856747354', '27744453855', '34250143856', '84902675107', '27844526213', '0030078477', '0001503960', '0038980939', '0035636479', '79955933749', '0030602470', '17344380224', '0002130779', '80054044270', '79954497708', '47249108096', '34250110161', '0040631446', '0041195239', '67349106698', '0034347051', '33845783250', '84886738410', '0038625364', '34247172128', '21844507175', '84902371560', '0039529250']),
+    '55647751400': set(['84924256130', '84924228967', '84876052381']), '56072631800': set(['84896417515', '84947558059'])}
+    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'],"2014","2016")
+    {'7006176684': set(['84902675107', '84905729730', '84892368124', '84951039519', '84907056975', '84947051661', '84911059592', '84903995394', '84921029337', '84886738410', '84955069066', '84902371560', '84886435449']),
+    '55647751400': set([]), '56072631800': set([])}
+    >>>
+
+    """
 
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
-    
+
     papers_by_author=dict()
     filter_year=""
     filter_year=check_years(min_year,max_year)
     if filter_year==None:
         return None
-    
+
     for id_author in list_scopus_id_author:
         if (id_author in scopus_papers_by_authorid_cache.keys()) and (min_year+"-"+max_year in scopus_papers_by_authorid_cache[id_author].keys()):
             papers_by_author[id_author]=set()
@@ -741,12 +882,12 @@ def get_papers(list_scopus_id_author,min_year="",max_year=""):
             else:
                 scopus_papers_by_authorid_cache[id_author].update({min_year+"-"+max_year:id_papers})
     return papers_by_author
-    
+
 def get_cache_papers_by_authorid():
     """
-    Returns the global variable scopus_papers_by_authorid_cache which is 
-    a dictionary of dictionaries where the first dictionary key is 
-    the id of the author and the key to the second dictionary is 
+    Returns the global variable scopus_papers_by_authorid_cache which is
+    a dictionary of dictionaries where the first dictionary key is
+    the id of the author and the key to the second dictionary is
     the time interval whose associated value is a set of papers.
     """
     return scopus_papers_by_authorid_cache
@@ -762,32 +903,31 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
         if firstName:
             searchQuery += " AND "
         searchQuery += "AUTHLASTNAME(%s)" % (lastName)
-    
-    #print searchQuery 
-    
+
+    #print searchQuery
+
     fields = "&field=identifier"
     resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
-    
+
     if resp.status_code != 200:
        raise Scopus_Exception(resp)
-    
+
     data = resp.json()
     #print "-----------JSON----------"
     #print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
-    
+
     #print "----------DATA----------"
     data = data['search-results']
     #print data
-    
+
     if data["opensearch:totalResults"] == '0':
         print "None"
         return None
-                                                                                           
+
     ids = []
-                                                                                           
+
     for entry in data['entry']:
         authorId = entry['dc:identifier'].split(':')
         ids.append(authorId[1])
-                                                                                                                       
-    return ids
 
+    return ids
