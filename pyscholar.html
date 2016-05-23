@@ -63,20 +63,65 @@
 <dl class="function">
 <dt id="pyscholar.get_authors_by_id_affiliation">
 <code class="descclassname">pyscholar.</code><code class="descname">get_authors_by_id_affiliation</code><span class="sig-paren">(</span><em>list_scopus_id_affiliation</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_authors_by_id_affiliation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary where the key is the ID of the
+<dd><p>This function returns a dictionary where the key is the ID of the
 paper and the value associated with the key is a set
-of the ids of the papers cited by the main paper</p>
+of the ids of the papers cited by the main paper.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_scopus_id_affiliation</strong> (<em>String or List</em>) &#8211; If you are looking for an affiliation, you can send the id as a string but if you want to multiple affiliations you can send a list of their ids.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary where the key is the ID of theaffiliation and the value associated with the key is a dictionary with the following keys: date_created, preferred_name, author_count and document_count.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_authors_by_id_affiliation</span><span class="p">(</span><span class="s2">&quot;60017323&quot;</span><span class="p">)</span>
+<span class="go">{&#39;60017323&#39;: {&#39;10039155200&#39;,&#39;10041045600&#39;,&#39;10041193100&#39;,&#39;10041905300&#39;,&#39;10043843600&#39;,&#39;10044307900&#39;,&#39;10138970000&#39;,&#39;10140877800&#39;,...,&#39;10739229200&#39;}</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyscholar.get_coauthors">
-<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors</code><span class="sig-paren">(</span><em>id_author</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>dict_knowledge={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a  tuple with the nex elements,
-1.-Id_author
-2.-Set of co-authors associated with an id of an author.
-3.-A dictionary where the key is the ID of the co-authors
-and the value associated is a set with the ids of the papers between
-the author and co-author.</p>
+<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors</code><span class="sig-paren">(</span><em>id_author</em>, <em>min_year=&quot;&quot;</em>, <em>max_year=&quot;&quot;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a tuple in certain time interval with the next elemets id_author,set of co-authors associated with an id of an author 
+and a dictionary where the key is the ID of the co-authors 
+and the value associated is a set with the ids of the papers between the author and co-author.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id_author</strong> (<em>String</em>) &#8211; Id of the author that you want to search.</li>
+<li><strong>min_year</strong> (<em>String</em>) &#8211; The initial year in the time interval.</li>
+<li><strong>max_year</strong> (<em>String</em>) &#8211; The final year in the time interval.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tuple with the next elements: id_author,set of co-authors associated with an id of an author,dictionary where the key is the ID of the co-authors.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Tuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
+<span class="go">(&#39;56013555800&#39;, set([&#39;36117782600&#39;, &#39;6603259241&#39;, &#39;7005223038&#39;, &#39;12645109800&#39;,...,&#39;56606293700&#39;, &#39;6701488992&#39;, &#39;8931919100&#39;]), </span>
+<span class="go">{&#39;36117782600&#39;: [&#39;84864280014&#39;], &#39;6603259241&#39;: [&#39;84864280014&#39;], &#39;7005223038&#39;: [&#39;84928742486&#39;], &#39;12645109800&#39;: [&#39;84897620666&#39;, &#39;84883004734&#39;],...,&#39;56606293700&#39;: [&#39;84928490197&#39;], &#39;6701488992&#39;: [&#39;84864280014&#39;], &#39;8931919100&#39;: [&#39;84924004559&#39;, &#39;84925067887&#39;]})</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -99,7 +144,7 @@ of the ids of the authors who wrote the paper.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;84945466401&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84945466401&#39;: [&#39;7003988000&#39;, &#39;56286038700&#39;, &#39;8847635500&#39;, &#39;56013555800&#39;, &#39;56815189300&#39;]}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">([</span><span class="s1">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s1">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s1">&#39;84876052381&#39;</span><span class="p">,</span><span class="s1">&#39;84864280014&#39;</span><span class="p">,</span><span class="s1">&#39;84867281605&#39;</span><span class="p">,</span><span class="s1">&#39;77950850685&#39;</span><span class="p">])</span>
@@ -118,9 +163,32 @@ of the ids of the authors who wrote the paper.</p>
 <dl class="function">
 <dt id="pyscholar.search_author">
 <code class="descclassname">pyscholar.</code><code class="descname">search_author</code><span class="sig-paren">(</span><em>list_scopus_id_author</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.search_author" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary where the key is the ID of the
+<dd><p>This function returns a dictionary where the key is the ID of the
 author and the value associated with the key is a dictionary
 with the following keys: name, surname, h-index and coauthor-count.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_scopus_id_affiliation</strong> (<em>String or List</em>) &#8211; If you are looking for an author, you can send the id as a string but if you want to multiple authors you can send a list of their ids.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary where the key is the ID of the author and the value associated with the key is a dictionary with the following keys: name, surname, h-index and coauthor-count.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dictionary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">(</span><span class="s2">&quot;56013555800&quot;</span><span class="p">)</span>
+<span class="go">{&#39;56013555800&#39;: {&#39;coauthor-count&#39;: 60,&#39;document-count&#39;: 32,&#39;h-index&#39;: 3,&#39;name&#39;: u&#39;Ruy&#39;,&#39;surname&#39;: u&#39;Fabila-Monroy&#39;}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">([</span><span class="s2">&quot;56013555800&quot;</span><span class="p">,</span><span class="s2">&quot;56578611900&quot;</span><span class="p">])</span>
+<span class="go">{&#39;56013555800&#39;: {&#39;coauthor-count&#39;: 60,&#39;document-count&#39;: 32,&#39;h-index&#39;: 3,&#39;name&#39;: u&#39;Ruy&#39;,&#39;surname&#39;: u&#39;Fabila-Monroy&#39;},</span>
+<span class="go">&#39;56578611900&#39;: {&#39;coauthor-count&#39;: 1,&#39;document-count&#39;: 1,&#39;h-index&#39;: 0,&#39;name&#39;: u&#39;Carlos&#39;,  &#39;surname&#39;: u&#39;Hidalgo-Toscano&#39;}}</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -146,7 +214,7 @@ number citations.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">(</span><span class="s2">&quot;84864280014&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84864280014&#39;: 5}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">([</span><span class="s1">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s1">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s1">&#39;84876052381&#39;</span><span class="p">,</span><span class="s1">&#39;84864280014&#39;</span><span class="p">,</span><span class="s1">&#39;84867281605&#39;</span><span class="p">,</span><span class="s1">&#39;77950850685&#39;</span><span class="p">])</span>
@@ -180,7 +248,7 @@ number citations.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_common_papers</span><span class="p">(</span><span class="s2">&quot;56013555800&quot;</span><span class="p">,</span><span class="s2">&quot;8931919100&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84924004559&#39;, &#39;84925067887&#39;}</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -217,7 +285,7 @@ if you omit min_year and max_year returns the dictionary in all time.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s2">&quot;56578611900&quot;</span><span class="p">)</span>
 <span class="go">{&#39;56578611900&#39;: set([&#39;84959332636&#39;])}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">])</span>
@@ -250,7 +318,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">(</span><span class="s2">&quot;84924004559&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84924004559&#39;: set([&#39;84897620666&#39;, &#39;84923945772&#39;, &#39;0039555230&#39;, &#39;84870039666&#39;, &#39;84923947094&#39;, &#39;3042511364&#39;, &#39;84870033200&#39;, &#39;0038961022&#39;, &#39;0038961019&#39;, &#39;0040696207&#39;, &#39;84922016024&#39;, &#39;0039331818&#39;, &#39;84892691931&#39;])}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">([</span><span class="s2">&quot;84924004559&quot;</span><span class="p">,</span><span class="s2">&quot;77950850685&quot;</span><span class="p">])</span>
@@ -278,7 +346,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
 <span class="go">(&#39;77950850685&#39;,u&#39;Empty monochromatic triangles&#39;,u&#39;We consider a variation of a problem stated by Erdös and Guy in 1973 about the number of convex k-gons determined by any set S of n points in the plane. In our setting the points of S are colored and we say that a spanned polygon is monochromatic if all its points are colored with the same color. As a main result we show that any bi-colored set of n points in R2 in general position determines a super-linear number of empty monochromatic triangles, namely \u03a9(n5/4).&#39;)</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -304,7 +372,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
 <span class="go">(&#39;77950850685&#39;,u&#39;Empty monochromatic triangles&#39;,u&#39;We consider a variation of a problem stated by Erdös and Guy in 1973 about the number of convex k-gons determined by any set S of n points in the plane. In our setting the points of S are colored and we say that a spanned polygon is monochromatic if all its points are colored with the same color. As a main result we show that any bi-colored set of n points in R2 in general position determines a super-linear number of empty monochromatic triangles, namely \u03a9(n5/4).&#39;)</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -339,7 +407,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">find_affiliation_scopus_id_by_name</span><span class="p">(</span><span class="s2">&quot;CINVESTAV&quot;</span><span class="p">)</span>
 <span class="go">           id                 city      country                 name_variant                        eid                   affiliation_name                              identifier          document_count</span>
 <span class="go">    0    60017323          Mexico City  Mexico        [CINVESTAV-IPN, CINVESTAV]             10-s2.0-60017323  Centro de Investigacion y de Estudios Avanzados    AFFILIATION_ID:60017323       19254  </span>
@@ -375,7 +443,7 @@ and document_count.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">(</span><span class="s2">&quot;60017323&quot;</span><span class="p">)</span>
 <span class="go">{&#39;60017323&#39;: {&#39;date_created&#39;: &#39;03/02/2008&#39;, &#39;author_count&#39;: 5522, &#39;document_count&#39;: 19266, &#39;preferred_name&#39;: &#39;Centro de Investigacion y de Estudios Avanzados&#39;}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">([</span><span class="s2">&quot;60017323&quot;</span><span class="p">,</span><span class="s2">&quot;60018216&quot;</span><span class="p">])</span>
@@ -429,7 +497,7 @@ and the second element is a list of sets where each set is a set of authors to d
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">psycholar</span><span class="o">.</span><span class="n">save_graph_pickle</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s2">&quot;~/dir/&quot;</span><span class="p">,</span><span class="s2">&quot;my_graph&quot;</span><span class="p">)</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -455,7 +523,7 @@ and the second element is a list of sets where each set is a set of authors to d
 </tr>
 </tbody>
 </table>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span> <span class="o">=</span> <span class="n">psycholar</span><span class="o">.</span><span class="n">load_graph_pickle</span><span class="p">(</span><span class="s2">&quot;~/dir/graph.pickle&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span>
 </pre></div>
@@ -548,7 +616,7 @@ and the second element is a list of sets where each set is a set of authors to d
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2016, DesarrolloDeSoftwareCientífico.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
     </div>
   </body>
 </html>
