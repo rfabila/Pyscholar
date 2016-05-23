@@ -1,3 +1,5 @@
+.. _pyscholar:
+
 ================
 pyscholar module
 ================
@@ -7,8 +9,10 @@ pyscholar module
 Scopus Author/Co-Authors
 ==========================
 .. autofunction:: find_author_scopus_id_by_name
-.. autofunction:: get_authors_by_id_affiliatio
-.. autofunction:: get_coauthors
+.. autofunction:: get_authors_by_id_affiliation
+
+.. autofunction:: get_coauthors (id_author,min_year="",max_year="")
+
 .. autofunction:: get_ids_authors_by_id_paper
 .. autofunction:: load_authors_from_file
 .. autofunction:: search_author
@@ -41,7 +45,6 @@ Graph Generators
 Reading and Writing Graphs
 =============================
 .. autofunction:: save_graph_pickle
-
 .. autofunction:: load_graph_pickle
 
 

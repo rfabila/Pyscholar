@@ -1,4 +1,4 @@
-.. _example:
+.. _index:
 .. Pyscholar documentation master file, created by
    sphinx-quickstart on Tue May  3 14:42:25 2016.
    You can adapt this file completely to your liking, but it should at least
