@@ -295,9 +295,24 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
     return dict_affiliation_by_id
 
 def get_authors_by_id_affiliation(list_scopus_id_affiliation):
-    """Returns a dictionary where the key is the ID of the
+    """
+    This function returns a dictionary where the key is the ID of the
     paper and the value associated with the key is a set
-    of the ids of the papers cited by the main paper"""
+    of the ids of the papers cited by the main paper.
+
+    :param list_scopus_id_affiliation: If you are looking for an affiliation, you can send the id as a string but if you want to multiple affiliations you can send a list of their ids.
+    :type list_scopus_id_affiliation: String or List
+    :returns: Dictionary where the key is the ID of theaffiliation and the value associated with the key is a dictionary with the following keys: date_created, preferred_name, author_count and document_count.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.get_authors_by_id_affiliation("60017323")
+    {'60017323': {'10039155200','10041045600','10041193100','10041905300','10043843600','10044307900','10138970000','10140877800',...,'10739229200'}
+    >>>
+
+    """    
     if isinstance(list_scopus_id_affiliation, str):
         list_scopus_id_affiliation=[list_scopus_id_affiliation]
     authors_by_id_affiliation=dict()
@@ -418,9 +433,7 @@ def get_common_papers(id_author_1="",id_author_2=""):
     >>> pyscholar.get_common_papers("56013555800","8931919100")
     {'84924004559', '84925067887'}
     >>>
-    """    
-    
-    """Returns """
+    """
     if id_author_1=="" and id_author_2=="":
         print "Give me the two Authors"
     else:
@@ -459,9 +472,26 @@ def get_title_abstract_by_idpaper(id_paper=""):
 
 
 def search_author(list_scopus_id_author):
-    """Returns a dictionary where the key is the ID of the
+    """
+    This function returns a dictionary where the key is the ID of the
     author and the value associated with the key is a dictionary
     with the following keys: name, surname, h-index and coauthor-count.
+
+    :param list_scopus_id_affiliation: If you are looking for an author, you can send the id as a string but if you want to multiple authors you can send a list of their ids.
+    :type list_scopus_id_affiliation: String or List
+    :returns: Dictionary where the key is the ID of the author and the value associated with the key is a dictionary with the following keys: name, surname, h-index and coauthor-count.
+    :rtype: Dictionary
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.search_author("56013555800")
+    {'56013555800': {'coauthor-count': 60,'document-count': 32,'h-index': 3,'name': u'Ruy','surname': u'Fabila-Monroy'}}
+    >>> pyscholar.search_author(["56013555800","56578611900"])
+    {'56013555800': {'coauthor-count': 60,'document-count': 32,'h-index': 3,'name': u'Ruy','surname': u'Fabila-Monroy'},
+    '56578611900': {'coauthor-count': 1,'document-count': 1,'h-index': 0,'name': u'Carlos',  'surname': u'Hidalgo-Toscano'}}
+    >>>
+
     """
     fields = "?field=dc:identifier,given-name,surname,h-index,coauthor-count,document-count"
     dict_authors=dict()
@@ -482,12 +512,26 @@ def search_author(list_scopus_id_author):
 
 def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
     """
-        Returns a  tuple with the nex elements,
-        1.-Id_author
-        2.-Set of co-authors associated with an id of an author.
-        3.-A dictionary where the key is the ID of the co-authors
-        and the value associated is a set with the ids of the papers between
-        the author and co-author.
+    This function returns a tuple in certain time interval with the next elemets id_author,set of co-authors associated with an id of an author 
+    and a dictionary where the key is the ID of the co-authors 
+    and the value associated is a set with the ids of the papers between the author and co-author.
+    
+    :param id_author: Id of the author that you want to search. 
+    :param min_year: The initial year in the time interval.
+    :param max_year: The final year in the time interval.
+    :type id_author: String 
+    :type min_year: String
+    :type max_year: String
+    :returns: Tuple with the next elements: id_author,set of co-authors associated with an id of an author,dictionary where the key is the ID of the co-authors.
+    :rtype: Tuple
+    
+    :Example:
+    
+    >>> import pyscholar
+    >>> pyscholar.get_ids_authors_by_id_paper("77950850685")
+    ('56013555800', set(['36117782600', '6603259241', '7005223038', '12645109800',...,'56606293700', '6701488992', '8931919100']), 
+    {'36117782600': ['84864280014'], '6603259241': ['84864280014'], '7005223038': ['84928742486'], '12645109800': ['84897620666', '84883004734'],...,'56606293700': ['84928490197'], '6701488992': ['84864280014'], '8931919100': ['84924004559', '84925067887']})
+    >>>
     """
     scopus_authors_by_idpapers_cache.update(dict_knowledge)
     papers_author=get_papers([id_author],min_year,max_year)[id_author]
@@ -828,7 +872,6 @@ def get_papers(list_scopus_id_author,min_year="",max_year=""):
     >>>
 
     """
-
     if isinstance(list_scopus_id_author, str):
         list_scopus_id_author=[list_scopus_id_author]
 
@@ -893,8 +936,9 @@ def get_cache_papers_by_authorid():
     return scopus_papers_by_authorid_cache
 
 def find_author_scopus_id_by_name(firstName="", lastName=""):
-    """Searches for an author scopus id given its name."""
-
+    """
+    Searches for an author scopus id given its name.
+    """
     searchQuery = "query="
 
     if firstName:
