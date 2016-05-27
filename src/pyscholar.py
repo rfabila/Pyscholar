@@ -45,9 +45,23 @@ class Scopus_Exception(Exception):
         return "%s: %s"%(self.statusCode, self.statusText)
 
 
-def load_authors_from_file(directory=""):
+def load_authors_from_file(path=""):
     """
-    Returns a list of the authors who were in a file.
+    This function reads a file where each line of the file is 
+    an author id.
+
+    param path: The directory where the file is located.
+    :type path: String
+    :returns: List with the authors ids.
+    :rtype: List
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.load_authors_from_file("/home/dir/authors.txt")
+    >>> ['56013555800', '12645109800', '12645615700', '12646275800', '15740951000', '23388216300', '23398643600', '24171073600', '24512697200', '26032291700', '34870304900', '35566511400', '36117667600', '36117782600', '36118513000', '36141027800', '37107692000', '37111010900', '54792735300', '55439178900', '55468916100', '55669785100', '55918277800', '55943170800', '55993686500', '56002701400', '56013629200', '56013731100', '56013734400', '56240672400', '56263920000', '56279187000']
+    >>>
+
     """
     try:
         with open(directory, 'r') as f:
@@ -56,9 +70,24 @@ def load_authors_from_file(directory=""):
         print "Could not read file:", directory
 
 
-def load_papers_from_file(directory=""):
+def load_papers_from_file(path=""):
     """
-    Returns a list of the papers who were in a file.
+    This function reads a file where each line of the file is 
+    an paper id.
+
+    param path: The directory where the file is located.
+    :type path: String
+    :returns: List with the papers ids.
+    :rtype: List
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.load_papers_from_file("/home/dir/papers.txt")
+    >>> ['78149425675', '79959254005', '84883029526', '84887837079', '84892691931', '84893836569', '84897620666', '84904102369', '84908190310', '84919922003', '84924004559', '84925067887', '84928486421', '84928490197', '84928742486', '84939945186', '84939973084', '84945466401', '84961373040']
+
+    >>>
+    
     """
     try:
         with open(directory, 'r') as f:
@@ -131,9 +160,8 @@ def disable_graphical_interface():
 def enable_graphical_interface():
     """
      This function enables the graphical environment.
-     
-    ['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
     """
+    #['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
     plt.switch_backend('GTK')
 
 
@@ -568,8 +596,31 @@ def get_cache_papers():
 
 def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
     """
-    Returns a tuple where the first element is the graph induced by several authors
+    This function returns a tuple where the first element is the graph induced by several authors
     and the second element is a list of sets where each set is a set of authors to distance d.
+
+    :param list_scopus_id_author: If you are looking for the paper of an author you can send the id as a string but if you want to get the papers from several authors you can send a list of their ids.
+    :param min_year: The initial year in the time interval you want to look for papers.
+    :param max_year: The final year in the time interval you want to look for papers.
+    :type list_scopus_id_author: String or List.
+    :type min_year: String
+    :type max_year: String
+    :returns: Tuple where the first element is the graph induced by several authors and the second element is a list of sets where each set is a set of authors to distance d.
+    :rtype: Tuple
+
+    :Example:
+
+    >>> import pyscholar
+    >>> pyscholar.get_papers("56578611900")
+    {'56578611900': set(['84959332636'])}
+    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'])
+    {'7006176684': set(['5444229075', '17144467193', '0001031138', '79959322537', '84911059592', '84955069066', '0037233714', '38249018110', '52149122079', '0009416953', '84892551677', '51249164413', '0000772349', '0007057901', '13544277720', '33847670994', '0031146399', '84921029337', '84886394293', '0034363462', '67651172822', '0035869886', '0038931174', '38249040825', '33947675881', '0010211186', '84905729730', '0031285726', '23044528188', '0033072608', '0009247597', '84947051661', '84951039519', '0033531899', '77958482876', '0000385874', '33646915730', '84886435449', '0032221906', '58149129161', '21844489552', '52549094277', '0034656467', '0037953609', '84907056975', '38249018633', '84903995394', '84867339764', '33845367161', '0040629757', '0039530566', '0000740606', '22444453689', '84892368124', '76449084340', '84856747354', '27744453855', '34250143856', '84902675107', '27844526213', '0030078477', '0001503960', '0038980939', '0035636479', '79955933749', '0030602470', '17344380224', '0002130779', '80054044270', '79954497708', '47249108096', '34250110161', '0040631446', '0041195239', '67349106698', '0034347051', '33845783250', '84886738410', '0038625364', '34247172128', '21844507175', '84902371560', '0039529250']),
+    '55647751400': set(['84924256130', '84924228967', '84876052381']), '56072631800': set(['84896417515', '84947558059'])}
+    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'],"2014","2016")
+    {'7006176684': set(['84902675107', '84905729730', '84892368124', '84951039519', '84907056975', '84947051661', '84911059592', '84903995394', '84921029337', '84886738410', '84955069066', '84902371560', '84886435449']),
+    '55647751400': set([]), '56072631800': set([])}
+    >>>
+
     """
     node_colors=["red","blue","green","yellow","brown"]
     node_distance=distance
