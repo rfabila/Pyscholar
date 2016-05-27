@@ -156,8 +156,27 @@ of the ids of the authors who wrote the paper.</p>
 
 <dl class="function">
 <dt id="pyscholar.load_authors_from_file">
-<code class="descclassname">pyscholar.</code><code class="descname">load_authors_from_file</code><span class="sig-paren">(</span><em>directory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of the authors who were in a file.</p>
+<code class="descclassname">pyscholar.</code><code class="descname">load_authors_from_file</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads a file where each line of the file is 
+an author id.</p>
+<p>param path: The directory where the file is located.
+:type path: String
+:returns: List with the authors ids.
+:rtype: List</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_authors_from_file</span><span class="p">(</span><span class="s2">&quot;/home/dir/authors.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s1">&#39;56013555800&#39;</span><span class="p">,</span> <span class="s1">&#39;12645109800&#39;</span><span class="p">,</span> <span class="s1">&#39;12645615700&#39;</span><span class="p">,</span> <span class="s1">&#39;12646275800&#39;</span><span class="p">,</span> <span class="s1">&#39;15740951000&#39;</span><span class="p">,</span> <span class="s1">&#39;23388216300&#39;</span><span class="p">,</span> <span class="s1">&#39;23398643600&#39;</span><span class="p">,</span> <span class="s1">&#39;24171073600&#39;</span><span class="p">,</span> <span class="s1">&#39;24512697200&#39;</span><span class="p">,</span> <span class="s1">&#39;26032291700&#39;</span><span class="p">,</span> <span class="s1">&#39;34870304900&#39;</span><span class="p">,</span> <span class="s1">&#39;35566511400&#39;</span><span class="p">,</span> <span class="s1">&#39;36117667600&#39;</span><span class="p">,</span> <span class="s1">&#39;36117782600&#39;</span><span class="p">,</span> <span class="s1">&#39;36118513000&#39;</span><span class="p">,</span> <span class="s1">&#39;36141027800&#39;</span><span class="p">,</span> <span class="s1">&#39;37107692000&#39;</span><span class="p">,</span> <span class="s1">&#39;37111010900&#39;</span><span class="p">,</span> <span class="s1">&#39;54792735300&#39;</span><span class="p">,</span> <span class="s1">&#39;55439178900&#39;</span><span class="p">,</span> <span class="s1">&#39;55468916100&#39;</span><span class="p">,</span> <span class="s1">&#39;55669785100&#39;</span><span class="p">,</span> <span class="s1">&#39;55918277800&#39;</span><span class="p">,</span> <span class="s1">&#39;55943170800&#39;</span><span class="p">,</span> <span class="s1">&#39;55993686500&#39;</span><span class="p">,</span> <span class="s1">&#39;56002701400&#39;</span><span class="p">,</span> <span class="s1">&#39;56013629200&#39;</span><span class="p">,</span> <span class="s1">&#39;56013731100&#39;</span><span class="p">,</span> <span class="s1">&#39;56013734400&#39;</span><span class="p">,</span> <span class="s1">&#39;56240672400&#39;</span><span class="p">,</span> <span class="s1">&#39;56263920000&#39;</span><span class="p">,</span> <span class="s1">&#39;56279187000&#39;</span><span class="p">]</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -382,8 +401,29 @@ the value associated with the key is a set of the ids of the papers cited by eac
 
 <dl class="function">
 <dt id="pyscholar.load_papers_from_file">
-<code class="descclassname">pyscholar.</code><code class="descname">load_papers_from_file</code><span class="sig-paren">(</span><em>directory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of the papers who were in a file.</p>
+<code class="descclassname">pyscholar.</code><code class="descname">load_papers_from_file</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads a file where each line of the file is 
+an paper id.</p>
+<p>param path: The directory where the file is located.
+:type path: String
+:returns: List with the papers ids.
+:rtype: List</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_papers_from_file</span><span class="p">(</span><span class="s2">&quot;/home/dir/papers.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s1">&#39;78149425675&#39;</span><span class="p">,</span> <span class="s1">&#39;79959254005&#39;</span><span class="p">,</span> <span class="s1">&#39;84883029526&#39;</span><span class="p">,</span> <span class="s1">&#39;84887837079&#39;</span><span class="p">,</span> <span class="s1">&#39;84892691931&#39;</span><span class="p">,</span> <span class="s1">&#39;84893836569&#39;</span><span class="p">,</span> <span class="s1">&#39;84897620666&#39;</span><span class="p">,</span> <span class="s1">&#39;84904102369&#39;</span><span class="p">,</span> <span class="s1">&#39;84908190310&#39;</span><span class="p">,</span> <span class="s1">&#39;84919922003&#39;</span><span class="p">,</span> <span class="s1">&#39;84924004559&#39;</span><span class="p">,</span> <span class="s1">&#39;84925067887&#39;</span><span class="p">,</span> <span class="s1">&#39;84928486421&#39;</span><span class="p">,</span> <span class="s1">&#39;84928490197&#39;</span><span class="p">,</span> <span class="s1">&#39;84928742486&#39;</span><span class="p">,</span> <span class="s1">&#39;84939945186&#39;</span><span class="p">,</span> <span class="s1">&#39;84939973084&#39;</span><span class="p">,</span> <span class="s1">&#39;84945466401&#39;</span><span class="p">,</span> <span class="s1">&#39;84961373040&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -467,8 +507,41 @@ and the last element is a set of papers not found.</p>
 <dl class="function">
 <dt id="pyscholar.get_coauthors_graph">
 <code class="descclassname">pyscholar.</code><code class="descname">get_coauthors_graph</code><span class="sig-paren">(</span><em>list_scopus_id_author</em>, <em>distance</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>directory=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a tuple where the first element is the graph induced by several authors
+<dd><p>This function returns a tuple where the first element is the graph induced by several authors
 and the second element is a list of sets where each set is a set of authors to distance d.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list_scopus_id_author</strong> (<em>String or List.</em>) &#8211; If you are looking for the paper of an author you can send the id as a string but if you want to get the papers from several authors you can send a list of their ids.</li>
+<li><strong>min_year</strong> (<em>String</em>) &#8211; The initial year in the time interval you want to look for papers.</li>
+<li><strong>max_year</strong> (<em>String</em>) &#8211; The final year in the time interval you want to look for papers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tuple where the first element is the graph induced by several authors and the second element is a list of sets where each set is a set of authors to distance d.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Tuple</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s2">&quot;56578611900&quot;</span><span class="p">)</span>
+<span class="go">{&#39;56578611900&#39;: set([&#39;84959332636&#39;])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">])</span>
+<span class="go">{&#39;7006176684&#39;: set([&#39;5444229075&#39;, &#39;17144467193&#39;, &#39;0001031138&#39;, &#39;79959322537&#39;, &#39;84911059592&#39;, &#39;84955069066&#39;, &#39;0037233714&#39;, &#39;38249018110&#39;, &#39;52149122079&#39;, &#39;0009416953&#39;, &#39;84892551677&#39;, &#39;51249164413&#39;, &#39;0000772349&#39;, &#39;0007057901&#39;, &#39;13544277720&#39;, &#39;33847670994&#39;, &#39;0031146399&#39;, &#39;84921029337&#39;, &#39;84886394293&#39;, &#39;0034363462&#39;, &#39;67651172822&#39;, &#39;0035869886&#39;, &#39;0038931174&#39;, &#39;38249040825&#39;, &#39;33947675881&#39;, &#39;0010211186&#39;, &#39;84905729730&#39;, &#39;0031285726&#39;, &#39;23044528188&#39;, &#39;0033072608&#39;, &#39;0009247597&#39;, &#39;84947051661&#39;, &#39;84951039519&#39;, &#39;0033531899&#39;, &#39;77958482876&#39;, &#39;0000385874&#39;, &#39;33646915730&#39;, &#39;84886435449&#39;, &#39;0032221906&#39;, &#39;58149129161&#39;, &#39;21844489552&#39;, &#39;52549094277&#39;, &#39;0034656467&#39;, &#39;0037953609&#39;, &#39;84907056975&#39;, &#39;38249018633&#39;, &#39;84903995394&#39;, &#39;84867339764&#39;, &#39;33845367161&#39;, &#39;0040629757&#39;, &#39;0039530566&#39;, &#39;0000740606&#39;, &#39;22444453689&#39;, &#39;84892368124&#39;, &#39;76449084340&#39;, &#39;84856747354&#39;, &#39;27744453855&#39;, &#39;34250143856&#39;, &#39;84902675107&#39;, &#39;27844526213&#39;, &#39;0030078477&#39;, &#39;0001503960&#39;, &#39;0038980939&#39;, &#39;0035636479&#39;, &#39;79955933749&#39;, &#39;0030602470&#39;, &#39;17344380224&#39;, &#39;0002130779&#39;, &#39;80054044270&#39;, &#39;79954497708&#39;, &#39;47249108096&#39;, &#39;34250110161&#39;, &#39;0040631446&#39;, &#39;0041195239&#39;, &#39;67349106698&#39;, &#39;0034347051&#39;, &#39;33845783250&#39;, &#39;84886738410&#39;, &#39;0038625364&#39;, &#39;34247172128&#39;, &#39;21844507175&#39;, &#39;84902371560&#39;, &#39;0039529250&#39;]),</span>
+<span class="go">&#39;55647751400&#39;: set([&#39;84924256130&#39;, &#39;84924228967&#39;, &#39;84876052381&#39;]), &#39;56072631800&#39;: set([&#39;84896417515&#39;, &#39;84947558059&#39;])}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">],</span><span class="s2">&quot;2014&quot;</span><span class="p">,</span><span class="s2">&quot;2016&quot;</span><span class="p">)</span>
+<span class="go">{&#39;7006176684&#39;: set([&#39;84902675107&#39;, &#39;84905729730&#39;, &#39;84892368124&#39;, &#39;84951039519&#39;, &#39;84907056975&#39;, &#39;84947051661&#39;, &#39;84911059592&#39;, &#39;84903995394&#39;, &#39;84921029337&#39;, &#39;84886738410&#39;, &#39;84955069066&#39;, &#39;84902371560&#39;, &#39;84886435449&#39;]),</span>
+<span class="go">&#39;55647751400&#39;: set([]), &#39;56072631800&#39;: set([])}</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -542,9 +615,7 @@ and the second element is a list of sets where each set is a set of authors to d
 <dl class="function">
 <dt id="pyscholar.enable_graphical_interface">
 <code class="descclassname">pyscholar.</code><code class="descname">enable_graphical_interface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.enable_graphical_interface" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>This function enables the graphical environment.</div></blockquote>
-<p>[&#8216;pdf&#8217;, &#8216;pgf&#8217;, &#8216;Qt4Agg&#8217;, &#8216;GTK&#8217;, &#8216;GTKAgg&#8217;, &#8216;ps&#8217;, &#8216;agg&#8217;, &#8216;cairo&#8217;, &#8216;MacOSX&#8217;, &#8216;GTKCairo&#8217;, &#8216;WXAgg&#8217;, &#8216;template&#8217;, &#8216;TkAgg&#8217;, &#8216;GTK3Cairo&#8217;, &#8216;GTK3Agg&#8217;, &#8216;svg&#8217;, &#8216;WebAgg&#8217;, &#8216;CocoaAgg&#8217;, &#8216;emf&#8217;, &#8216;gdk&#8217;, &#8216;WX&#8217;]</p>
+<dd><p>This function enables the graphical environment.</p>
 </dd></dl>
 
 </div>
