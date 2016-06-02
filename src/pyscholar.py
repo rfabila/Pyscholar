@@ -1026,3 +1026,44 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
         ids.append(authorId[1])
 
     return ids
+
+def get_author_affiliations(firstName="", lastName=""):
+    """Searches for an author scopus id given its name."""
+
+    searchQuery = "query="
+
+    if firstName:
+        searchQuery += "AUTHFIRST(%s)" % (firstName)
+    if lastName:
+        if firstName:
+            searchQuery += " AND "
+        searchQuery += "AUTHLASTNAME(%s)" % (lastName)
+   
+    #print searchQuery
+   
+    #fields = "&field=identifier"
+    fields = ""
+    resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+   
+    if resp.status_code != 200:
+       raise Scopus_Exception(resp)
+   
+    data = resp.json()
+    #print "-----------JSON----------"
+    #print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))
+   
+    #print "----------DATA----------"
+    data = data['search-results']
+    #print data
+   
+    if data["opensearch:totalResults"] == '0':
+        print "None"
+        return None
+                                                                                          
+    affiliations = []
+                                                                                          
+    for entry in data['entry']:
+	if 'affiliation-current' in entry:
+            affiliations.append(entry['affiliation-current'])
+                                                                                                                      
+    return affiliations
