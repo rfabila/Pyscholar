@@ -1,4 +1,27 @@
-from scopus_key import MY_API_KEY
+# from scopus_key import MY_API_KEY
+# print "got", MY_API_KEY
+
+import ConfigParser
+
+class Key_Exception(Exception):
+    def __str__(self):
+        return "Scopus key not set."
+
+keys = ConfigParser.ConfigParser()
+keys.read("keys.cfg")
+MY_API_KEY = keys.get('Keys', 'Scopus')
+
+if MY_API_KEY == "":
+    ans = raw_input("Scopus key not set. Do you want to set it now? (Y/N) ")
+    if ans.lower() == 'y':
+        key = raw_input("Your scopus api key: ")
+        keys.set('Keys', 'Scopus', key)
+        cfgfile = open("keys.cfg", 'w')
+        keys.write(cfgfile)
+        MY_API_KEY = key
+    else:
+        raise Key_Exception
+
 import requests
 import networkx as nx
 import os
