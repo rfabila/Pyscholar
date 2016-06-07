@@ -44,7 +44,7 @@ First navigate to the instalation directory:
 
     $ cd ~/Pyscholar/src
 
-Then execute python::
+Then execute python
 
 .. code:: sh
 
