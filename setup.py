@@ -1,17 +1,27 @@
 from setuptools import setup
 import ConfigParser
+import sys
+import os
 
-keys = ConfigParser.ConfigParser()
-keys.read("keys.cfg")
+if "install" in sys.argv:
+    #We create keys.cfg before installing
+    keysParser = ConfigParser.ConfigParser()
+    keysParser.add_section("Keys")
+    keysParser.set('Keys', 'Scopus', "")
+    originalMask = os.umask(0)
+    dirPath = os.path.dirname(os.path.abspath(__file__))
+    print "path is", dirPath
+    keysDescriptor = os.open(os.path.join(dirPath, 'pyscholar/keys.cfg'), os.O_WRONLY | os.O_CREAT, 0666)
+    keysFile = os.fdopen(keysDescriptor, 'w')
+    os.umask(originalMask)
+    keysParser.write(keysFile)
+    keysFile.close()
 
-ans = raw_input("Do you want to set your Scopus key now? (Y/N) ")
-if ans.lower() == 'y':
-    key = raw_input("Your scopus api key: ")
-    keys.set('Keys', 'Scopus', key)
-    cfgfile = open("keys.cfg", 'w')
-    keys.write(cfgfile)
+def readme():
+    with open('README.rst') as f:
+        return f.read()
 
-setup(name='Pyscholar',
+setup(name='pyscholar',
       version='0.1',
       description='A python library to access Scopus',
       url='http://rfabila.github.io/Pyscholar/',
@@ -24,4 +34,5 @@ setup(name='Pyscholar',
           'matplotlib',
           'pandas'
       ],
+      include_package_data=True,
       zip_safe=False)

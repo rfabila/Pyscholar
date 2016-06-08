@@ -7,18 +7,18 @@ class Key_Exception(Exception):
     def __str__(self):
         return "Scopus key not set."
 
-keys = ConfigParser.ConfigParser()
-keys.read("keys.cfg")
-MY_API_KEY = keys.get('Keys', 'Scopus')
+keysParser = ConfigParser.ConfigParser()
+keysParser.read("keys.cfg")
+MY_API_KEY = keysParser.get('Keys', 'Scopus')
 
 if MY_API_KEY == "":
     ans = raw_input("Scopus key not set. Do you want to set it now? (Y/N) ")
     if ans.lower() == 'y':
-        key = raw_input("Your scopus api key: ")
-        keys.set('Keys', 'Scopus', key)
-        cfgfile = open("keys.cfg", 'w')
-        keys.write(cfgfile)
-        MY_API_KEY = key
+        MY_API_KEY = raw_input("Your scopus api key: ")
+        keysParser.set('Keys', 'Scopus', MY_API_KEY)
+        keysFile = open("keys.cfg", 'w')
+        keysParser.write(keysFile)
+        keysFile.close()
     else:
         raise Key_Exception
 
@@ -29,8 +29,6 @@ import itertools as it
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-
-
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
