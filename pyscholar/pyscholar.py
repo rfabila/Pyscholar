@@ -1,4 +1,29 @@
-from scopus_key import MY_API_KEY
+# from scopus_key import MY_API_KEY
+# print "got", MY_API_KEY
+
+import ConfigParser, os
+
+class Key_Exception(Exception):
+    def __str__(self):
+        return "Scopus key not set."
+
+keys = ConfigParser.ConfigParser()
+dirPath = os.path.dirname(os.path.abspath(__file__))
+keys.read(os.path.join(dirPath, 'keys.cfg'))
+MY_API_KEY = keys.get('Keys', 'Scopus')
+
+if MY_API_KEY == "":
+    ans = raw_input("Scopus key not set. Do you want to set it now? (y/n) ")
+    if ans.lower() == 'y':
+        key = raw_input("Your scopus api key: ")
+        keys.set('Keys', 'Scopus', key)
+        cfgfile = open(os.path.join(dirPath, 'keys.cfg'), 'w')
+        keys.write(cfgfile)
+        cfgfile.close()
+        MY_API_KEY = key
+    else:
+        raise Key_Exception
+
 import requests
 import networkx as nx
 import os
@@ -6,8 +31,6 @@ import itertools as it
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-
-
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
