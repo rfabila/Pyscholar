@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import ConfigParser
 import sys
 import os
@@ -8,9 +8,8 @@ if "install" in sys.argv:
     keysParser = ConfigParser.ConfigParser()
     keysParser.add_section("Keys")
     keysParser.set('Keys', 'Scopus', "")
-    originalMask = os.umask(0)
     dirPath = os.path.dirname(os.path.abspath(__file__))
-    print "path is", dirPath
+    originalMask = os.umask(0)
     keysDescriptor = os.open(os.path.join(dirPath, 'pyscholar/keys.cfg'), os.O_WRONLY | os.O_CREAT, 0666)
     keysFile = os.fdopen(keysDescriptor, 'w')
     os.umask(originalMask)
@@ -22,13 +21,13 @@ def readme():
         return f.read()
 
 setup(name='pyscholar',
-      version='0.1',
+      version='1.0.0.dev1',
       description='A python library to access Scopus',
       url='http://rfabila.github.io/Pyscholar/',
       author='DesarrolloDeSoftware',
-      author_email='rfabila@math.cinvestav.mx',
+      author_email='rfabila@math.cinvestav.edu.mx',
       license='GNU',
-      packages=['pyscholar'],
+      packages=find_packages(),
       install_requires=[
           'networkx',
           'matplotlib',
