@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pyscholar module &mdash; Pyscholar 1.0.0 documentation</title>
+    <title>scopus module &mdash; Pyscholar 1.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -23,13 +23,13 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="Pyscholar 1.0.0 documentation" href="index.html" />
     <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -41,28 +41,28 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  <div class="section" id="pyscholar-module">
-<span id="pyscholar"></span><h1>pyscholar module<a class="headerlink" href="#pyscholar-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="scopus-module">
+<span id="scopus"></span><h1>scopus module<a class="headerlink" href="#scopus-module" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="scopus-author-co-authors">
 <h2>Scopus Author/Co-Authors<a class="headerlink" href="#scopus-author-co-authors" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.find_author_scopus_id_by_name">
-<code class="descclassname">pyscholar.</code><code class="descname">find_author_scopus_id_by_name</code><span class="sig-paren">(</span><em>firstName=''</em>, <em>lastName=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.find_author_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.find_author_scopus_id_by_name">
+<tt class="descclassname">scopus.</tt><tt class="descname">find_author_scopus_id_by_name</tt><big>(</big><em>firstName=''</em>, <em>lastName=''</em><big>)</big><a class="headerlink" href="#scopus.find_author_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for an author scopus id given its name.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_authors_by_id_affiliation">
-<code class="descclassname">pyscholar.</code><code class="descname">get_authors_by_id_affiliation</code><span class="sig-paren">(</span><em>list_scopus_id_affiliation</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_authors_by_id_affiliation" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_authors_by_id_affiliation">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_authors_by_id_affiliation</tt><big>(</big><em>list_scopus_id_affiliation</em><big>)</big><a class="headerlink" href="#scopus.get_authors_by_id_affiliation" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 paper and the value associated with the key is a set
 of the ids of the papers cited by the main paper.</p>
@@ -81,7 +81,7 @@ of the ids of the papers cited by the main paper.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_authors_by_id_affiliation</span><span class="p">(</span><span class="s2">&quot;60017323&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_authors_by_id_affiliation</span><span class="p">(</span><span class="s">&quot;60017323&quot;</span><span class="p">)</span>
 <span class="go">{&#39;60017323&#39;: {&#39;10039155200&#39;,&#39;10041045600&#39;,&#39;10041193100&#39;,&#39;10041905300&#39;,&#39;10043843600&#39;,&#39;10044307900&#39;,&#39;10138970000&#39;,&#39;10140877800&#39;,...,&#39;10739229200&#39;}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -89,8 +89,8 @@ of the ids of the papers cited by the main paper.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_coauthors">
-<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors</code><span class="sig-paren">(</span><em>id_author</em>, <em>min_year=&quot;&quot;</em>, <em>max_year=&quot;&quot;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_coauthors">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_coauthors</tt><big>(</big><em>id_author</em>, <em>min_year=&quot;&quot;</em>, <em>max_year=&quot;&quot;</em><big>)</big><a class="headerlink" href="#scopus.get_coauthors" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a tuple in certain time interval with the next elemets id_author,set of co-authors associated with an id of an author 
 and a dictionary where the key is the ID of the co-authors 
 and the value associated is a set with the ids of the papers between the author and co-author.</p>
@@ -116,7 +116,7 @@ and the value associated is a set with the ids of the papers between the author 
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s">&quot;77950850685&quot;</span><span class="p">)</span>
 <span class="go">(&#39;56013555800&#39;, set([&#39;36117782600&#39;, &#39;6603259241&#39;, &#39;7005223038&#39;, &#39;12645109800&#39;,...,&#39;56606293700&#39;, &#39;6701488992&#39;, &#39;8931919100&#39;]), </span>
 <span class="go">{&#39;36117782600&#39;: [&#39;84864280014&#39;], &#39;6603259241&#39;: [&#39;84864280014&#39;], &#39;7005223038&#39;: [&#39;84928742486&#39;], &#39;12645109800&#39;: [&#39;84897620666&#39;, &#39;84883004734&#39;],...,&#39;56606293700&#39;: [&#39;84928490197&#39;], &#39;6701488992&#39;: [&#39;84864280014&#39;], &#39;8931919100&#39;: [&#39;84924004559&#39;, &#39;84925067887&#39;]})</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -125,8 +125,8 @@ and the value associated is a set with the ids of the papers between the author 
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_ids_authors_by_id_paper">
-<code class="descclassname">pyscholar.</code><code class="descname">get_ids_authors_by_id_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_ids_authors_by_id_paper" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_ids_authors_by_id_paper">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_ids_authors_by_id_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#scopus.get_ids_authors_by_id_paper" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 paper and the value associated with the key is a list
 of the ids of the authors who wrote the paper.</p>
@@ -145,9 +145,9 @@ of the ids of the authors who wrote the paper.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;84945466401&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s">&quot;84945466401&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84945466401&#39;: [&#39;7003988000&#39;, &#39;56286038700&#39;, &#39;8847635500&#39;, &#39;56013555800&#39;, &#39;56815189300&#39;]}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">([</span><span class="s1">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s1">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s1">&#39;84876052381&#39;</span><span class="p">,</span><span class="s1">&#39;84864280014&#39;</span><span class="p">,</span><span class="s1">&#39;84867281605&#39;</span><span class="p">,</span><span class="s1">&#39;77950850685&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">([</span><span class="s">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s">&#39;84876052381&#39;</span><span class="p">,</span><span class="s">&#39;84864280014&#39;</span><span class="p">,</span><span class="s">&#39;84867281605&#39;</span><span class="p">,</span><span class="s">&#39;77950850685&#39;</span><span class="p">])</span>
 <span class="go">{&#39;84876052381&#39;: [&#39;55647751400&#39;], &#39;84864280014&#39;: [&#39;6506110957&#39;, &#39;7006657985&#39;, &#39;23388216300&#39;, &#39;7005508480&#39;, &#39;6603865823&#39;, &#39;36117782600&#39;, &#39;56013555800&#39;, &#39;36117667600&#39;, &#39;7006733509&#39;, &#39;6701488992&#39;, &#39;36118513000&#39;, &#39;6603259241&#39;, &#39;6504765315&#39;], &#39;84924256130&#39;: [&#39;55647751400&#39;], &#39;77950850685&#39;: [&#39;7004102317&#39;, &#39;56013555800&#39;, &#39;56013629200&#39;, &#39;12645615700&#39;, &#39;56240672400&#39;, &#39;35566511400&#39;], &#39;84867281605&#39;: [&#39;8847635500&#39;, &#39;56013555800&#39;, &#39;56013629200&#39;, &#39;37107692000&#39;, &#39;35566511400&#39;], &#39;84924228967&#39;: [&#39;55647751400&#39;]}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -155,33 +155,34 @@ of the ids of the authors who wrote the paper.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.load_authors_from_file">
-<code class="descclassname">pyscholar.</code><code class="descname">load_authors_from_file</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function reads a file where each line of the file is 
-an author id.</p>
-<p>param path: The directory where the file is located.
-:type path: String
-:returns: List with the authors ids.
-:rtype: List</p>
+<dt id="scopus.load_authors_from_file">
+<tt class="descclassname">scopus.</tt><tt class="descname">load_authors_from_file</tt><big>(</big><em>path=''</em><big>)</big><a class="headerlink" href="#scopus.load_authors_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a file where each line of the file is an author id.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The directory where the file is located.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list with the authors ids.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_authors_from_file</span><span class="p">(</span><span class="s2">&quot;/home/dir/authors.txt&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s1">&#39;56013555800&#39;</span><span class="p">,</span> <span class="s1">&#39;12645109800&#39;</span><span class="p">,</span> <span class="s1">&#39;12645615700&#39;</span><span class="p">,</span> <span class="s1">&#39;12646275800&#39;</span><span class="p">,</span> <span class="s1">&#39;15740951000&#39;</span><span class="p">,</span> <span class="s1">&#39;23388216300&#39;</span><span class="p">,</span> <span class="s1">&#39;23398643600&#39;</span><span class="p">,</span> <span class="s1">&#39;24171073600&#39;</span><span class="p">,</span> <span class="s1">&#39;24512697200&#39;</span><span class="p">,</span> <span class="s1">&#39;26032291700&#39;</span><span class="p">,</span> <span class="s1">&#39;34870304900&#39;</span><span class="p">,</span> <span class="s1">&#39;35566511400&#39;</span><span class="p">,</span> <span class="s1">&#39;36117667600&#39;</span><span class="p">,</span> <span class="s1">&#39;36117782600&#39;</span><span class="p">,</span> <span class="s1">&#39;36118513000&#39;</span><span class="p">,</span> <span class="s1">&#39;36141027800&#39;</span><span class="p">,</span> <span class="s1">&#39;37107692000&#39;</span><span class="p">,</span> <span class="s1">&#39;37111010900&#39;</span><span class="p">,</span> <span class="s1">&#39;54792735300&#39;</span><span class="p">,</span> <span class="s1">&#39;55439178900&#39;</span><span class="p">,</span> <span class="s1">&#39;55468916100&#39;</span><span class="p">,</span> <span class="s1">&#39;55669785100&#39;</span><span class="p">,</span> <span class="s1">&#39;55918277800&#39;</span><span class="p">,</span> <span class="s1">&#39;55943170800&#39;</span><span class="p">,</span> <span class="s1">&#39;55993686500&#39;</span><span class="p">,</span> <span class="s1">&#39;56002701400&#39;</span><span class="p">,</span> <span class="s1">&#39;56013629200&#39;</span><span class="p">,</span> <span class="s1">&#39;56013731100&#39;</span><span class="p">,</span> <span class="s1">&#39;56013734400&#39;</span><span class="p">,</span> <span class="s1">&#39;56240672400&#39;</span><span class="p">,</span> <span class="s1">&#39;56263920000&#39;</span><span class="p">,</span> <span class="s1">&#39;56279187000&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_authors_from_file</span><span class="p">(</span><span class="s">&quot;/home/dir/authors.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s">&#39;56013555800&#39;</span><span class="p">,</span> <span class="s">&#39;12645109800&#39;</span><span class="p">,</span> <span class="s">&#39;12645615700&#39;</span><span class="p">,</span> <span class="s">&#39;12646275800&#39;</span><span class="p">,</span> <span class="s">&#39;15740951000&#39;</span><span class="p">,</span> <span class="s">&#39;23388216300&#39;</span><span class="p">,</span> <span class="s">&#39;23398643600&#39;</span><span class="p">,</span> <span class="s">&#39;24171073600&#39;</span><span class="p">,</span> <span class="s">&#39;24512697200&#39;</span><span class="p">,</span> <span class="s">&#39;26032291700&#39;</span><span class="p">,</span> <span class="s">&#39;34870304900&#39;</span><span class="p">,</span> <span class="s">&#39;35566511400&#39;</span><span class="p">,</span> <span class="s">&#39;36117667600&#39;</span><span class="p">,</span> <span class="s">&#39;36117782600&#39;</span><span class="p">,</span> <span class="s">&#39;36118513000&#39;</span><span class="p">,</span> <span class="s">&#39;36141027800&#39;</span><span class="p">,</span> <span class="s">&#39;37107692000&#39;</span><span class="p">,</span> <span class="s">&#39;37111010900&#39;</span><span class="p">,</span> <span class="s">&#39;54792735300&#39;</span><span class="p">,</span> <span class="s">&#39;55439178900&#39;</span><span class="p">,</span> <span class="s">&#39;55468916100&#39;</span><span class="p">,</span> <span class="s">&#39;55669785100&#39;</span><span class="p">,</span> <span class="s">&#39;55918277800&#39;</span><span class="p">,</span> <span class="s">&#39;55943170800&#39;</span><span class="p">,</span> <span class="s">&#39;55993686500&#39;</span><span class="p">,</span> <span class="s">&#39;56002701400&#39;</span><span class="p">,</span> <span class="s">&#39;56013629200&#39;</span><span class="p">,</span> <span class="s">&#39;56013731100&#39;</span><span class="p">,</span> <span class="s">&#39;56013734400&#39;</span><span class="p">,</span> <span class="s">&#39;56240672400&#39;</span><span class="p">,</span> <span class="s">&#39;56263920000&#39;</span><span class="p">,</span> <span class="s">&#39;56279187000&#39;</span><span class="p">]</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.search_author">
-<code class="descclassname">pyscholar.</code><code class="descname">search_author</code><span class="sig-paren">(</span><em>list_scopus_id_author</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.search_author" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.search_author">
+<tt class="descclassname">scopus.</tt><tt class="descname">search_author</tt><big>(</big><em>list_scopus_id_author</em><big>)</big><a class="headerlink" href="#scopus.search_author" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 author and the value associated with the key is a dictionary
 with the following keys: name, surname, h-index and coauthor-count.</p>
@@ -200,9 +201,9 @@ with the following keys: name, surname, h-index and coauthor-count.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">(</span><span class="s2">&quot;56013555800&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">(</span><span class="s">&quot;56013555800&quot;</span><span class="p">)</span>
 <span class="go">{&#39;56013555800&#39;: {&#39;coauthor-count&#39;: 60,&#39;document-count&#39;: 32,&#39;h-index&#39;: 3,&#39;name&#39;: u&#39;Ruy&#39;,&#39;surname&#39;: u&#39;Fabila-Monroy&#39;}}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">([</span><span class="s2">&quot;56013555800&quot;</span><span class="p">,</span><span class="s2">&quot;56578611900&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_author</span><span class="p">([</span><span class="s">&quot;56013555800&quot;</span><span class="p">,</span><span class="s">&quot;56578611900&quot;</span><span class="p">])</span>
 <span class="go">{&#39;56013555800&#39;: {&#39;coauthor-count&#39;: 60,&#39;document-count&#39;: 32,&#39;h-index&#39;: 3,&#39;name&#39;: u&#39;Ruy&#39;,&#39;surname&#39;: u&#39;Fabila-Monroy&#39;},</span>
 <span class="go">&#39;56578611900&#39;: {&#39;coauthor-count&#39;: 1,&#39;document-count&#39;: 1,&#39;h-index&#39;: 0,&#39;name&#39;: u&#39;Carlos&#39;,  &#39;surname&#39;: u&#39;Hidalgo-Toscano&#39;}}</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -214,8 +215,8 @@ with the following keys: name, surname, h-index and coauthor-count.</p>
 <div class="section" id="scopus-paper">
 <h2>Scopus Paper<a class="headerlink" href="#scopus-paper" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.count_citations_by_id_paper">
-<code class="descclassname">pyscholar.</code><code class="descname">count_citations_by_id_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.count_citations_by_id_paper" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.count_citations_by_id_paper">
+<tt class="descclassname">scopus.</tt><tt class="descname">count_citations_by_id_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#scopus.count_citations_by_id_paper" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 paper and the value associated with the key is the
 number citations.</p>
@@ -234,9 +235,9 @@ number citations.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">(</span><span class="s2">&quot;84864280014&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">(</span><span class="s">&quot;84864280014&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84864280014&#39;: 5}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">([</span><span class="s1">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s1">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s1">&#39;84876052381&#39;</span><span class="p">,</span><span class="s1">&#39;84864280014&#39;</span><span class="p">,</span><span class="s1">&#39;84867281605&#39;</span><span class="p">,</span><span class="s1">&#39;77950850685&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">count_citations_by_id_paper</span><span class="p">([</span><span class="s">&#39;84924256130&#39;</span><span class="p">,</span> <span class="s">&#39;84924228967&#39;</span><span class="p">,</span> <span class="s">&#39;84876052381&#39;</span><span class="p">,</span><span class="s">&#39;84864280014&#39;</span><span class="p">,</span><span class="s">&#39;84867281605&#39;</span><span class="p">,</span><span class="s">&#39;77950850685&#39;</span><span class="p">])</span>
 <span class="go">{&#39;84876052381&#39;: 0, &#39;84864280014&#39;: 5, &#39;84924256130&#39;: 0, &#39;77950850685&#39;: 1, &#39;84867281605&#39;: 3, &#39;84924228967&#39;: 0}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -244,8 +245,8 @@ number citations.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_common_papers">
-<code class="descclassname">pyscholar.</code><code class="descname">get_common_papers</code><span class="sig-paren">(</span><em>id_author_1=''</em>, <em>id_author_2=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_common_papers" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_common_papers">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_common_papers</tt><big>(</big><em>id_author_1=''</em>, <em>id_author_2=''</em><big>)</big><a class="headerlink" href="#scopus.get_common_papers" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns the intercession of papers between two authors.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -268,7 +269,7 @@ number citations.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_common_papers</span><span class="p">(</span><span class="s2">&quot;56013555800&quot;</span><span class="p">,</span><span class="s2">&quot;8931919100&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_common_papers</span><span class="p">(</span><span class="s">&quot;56013555800&quot;</span><span class="p">,</span><span class="s">&quot;8931919100&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84924004559&#39;, &#39;84925067887&#39;}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -276,8 +277,8 @@ number citations.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_papers">
-<code class="descclassname">pyscholar.</code><code class="descname">get_papers</code><span class="sig-paren">(</span><em>list_scopus_id_author</em>, <em>min_year=''</em>, <em>max_year=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_papers" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_papers">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_papers</tt><big>(</big><em>list_scopus_id_author</em>, <em>min_year=''</em>, <em>max_year=''</em><big>)</big><a class="headerlink" href="#scopus.get_papers" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 author and the value associated with the key
 is a set of the ids of the papers that belong to
@@ -305,12 +306,12 @@ if you omit min_year and max_year returns the dictionary in all time.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s2">&quot;56578611900&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s">&quot;56578611900&quot;</span><span class="p">)</span>
 <span class="go">{&#39;56578611900&#39;: set([&#39;84959332636&#39;])}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s">&#39;7006176684&#39;</span><span class="p">,</span><span class="s">&#39;55647751400&#39;</span><span class="p">,</span><span class="s">&#39;56072631800&#39;</span><span class="p">])</span>
 <span class="go">{&#39;7006176684&#39;: set([&#39;5444229075&#39;, &#39;17144467193&#39;, &#39;0001031138&#39;, &#39;79959322537&#39;, &#39;84911059592&#39;, &#39;84955069066&#39;, &#39;0037233714&#39;, &#39;38249018110&#39;, &#39;52149122079&#39;, &#39;0009416953&#39;, &#39;84892551677&#39;, &#39;51249164413&#39;, &#39;0000772349&#39;, &#39;0007057901&#39;, &#39;13544277720&#39;, &#39;33847670994&#39;, &#39;0031146399&#39;, &#39;84921029337&#39;, &#39;84886394293&#39;, &#39;0034363462&#39;, &#39;67651172822&#39;, &#39;0035869886&#39;, &#39;0038931174&#39;, &#39;38249040825&#39;, &#39;33947675881&#39;, &#39;0010211186&#39;, &#39;84905729730&#39;, &#39;0031285726&#39;, &#39;23044528188&#39;, &#39;0033072608&#39;, &#39;0009247597&#39;, &#39;84947051661&#39;, &#39;84951039519&#39;, &#39;0033531899&#39;, &#39;77958482876&#39;, &#39;0000385874&#39;, &#39;33646915730&#39;, &#39;84886435449&#39;, &#39;0032221906&#39;, &#39;58149129161&#39;, &#39;21844489552&#39;, &#39;52549094277&#39;, &#39;0034656467&#39;, &#39;0037953609&#39;, &#39;84907056975&#39;, &#39;38249018633&#39;, &#39;84903995394&#39;, &#39;84867339764&#39;, &#39;33845367161&#39;, &#39;0040629757&#39;, &#39;0039530566&#39;, &#39;0000740606&#39;, &#39;22444453689&#39;, &#39;84892368124&#39;, &#39;76449084340&#39;, &#39;84856747354&#39;, &#39;27744453855&#39;, &#39;34250143856&#39;, &#39;84902675107&#39;, &#39;27844526213&#39;, &#39;0030078477&#39;, &#39;0001503960&#39;, &#39;0038980939&#39;, &#39;0035636479&#39;, &#39;79955933749&#39;, &#39;0030602470&#39;, &#39;17344380224&#39;, &#39;0002130779&#39;, &#39;80054044270&#39;, &#39;79954497708&#39;, &#39;47249108096&#39;, &#39;34250110161&#39;, &#39;0040631446&#39;, &#39;0041195239&#39;, &#39;67349106698&#39;, &#39;0034347051&#39;, &#39;33845783250&#39;, &#39;84886738410&#39;, &#39;0038625364&#39;, &#39;34247172128&#39;, &#39;21844507175&#39;, &#39;84902371560&#39;, &#39;0039529250&#39;]),</span>
 <span class="go">&#39;55647751400&#39;: set([&#39;84924256130&#39;, &#39;84924228967&#39;, &#39;84876052381&#39;]), &#39;56072631800&#39;: set([&#39;84896417515&#39;, &#39;84947558059&#39;])}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">],</span><span class="s2">&quot;2014&quot;</span><span class="p">,</span><span class="s2">&quot;2016&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s">&#39;7006176684&#39;</span><span class="p">,</span><span class="s">&#39;55647751400&#39;</span><span class="p">,</span><span class="s">&#39;56072631800&#39;</span><span class="p">],</span><span class="s">&quot;2014&quot;</span><span class="p">,</span><span class="s">&quot;2016&quot;</span><span class="p">)</span>
 <span class="go">{&#39;7006176684&#39;: set([&#39;84902675107&#39;, &#39;84905729730&#39;, &#39;84892368124&#39;, &#39;84951039519&#39;, &#39;84907056975&#39;, &#39;84947051661&#39;, &#39;84911059592&#39;, &#39;84903995394&#39;, &#39;84921029337&#39;, &#39;84886738410&#39;, &#39;84955069066&#39;, &#39;84902371560&#39;, &#39;84886435449&#39;]),</span>
 <span class="go">&#39;55647751400&#39;: set([]), &#39;56072631800&#39;: set([])}</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -319,8 +320,8 @@ if you omit min_year and max_year returns the dictionary in all time.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_references_by_paper">
-<code class="descclassname">pyscholar.</code><code class="descname">get_references_by_paper</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_references_by_paper" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_references_by_paper">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_references_by_paper</tt><big>(</big><em>list_scopus_id_paper</em><big>)</big><a class="headerlink" href="#scopus.get_references_by_paper" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the paper and 
 the value associated with the key is a set of the ids of the papers cited by each paper searched.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -338,9 +339,9 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">(</span><span class="s2">&quot;84924004559&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">(</span><span class="s">&quot;84924004559&quot;</span><span class="p">)</span>
 <span class="go">{&#39;84924004559&#39;: set([&#39;84897620666&#39;, &#39;84923945772&#39;, &#39;0039555230&#39;, &#39;84870039666&#39;, &#39;84923947094&#39;, &#39;3042511364&#39;, &#39;84870033200&#39;, &#39;0038961022&#39;, &#39;0038961019&#39;, &#39;0040696207&#39;, &#39;84922016024&#39;, &#39;0039331818&#39;, &#39;84892691931&#39;])}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">([</span><span class="s2">&quot;84924004559&quot;</span><span class="p">,</span><span class="s2">&quot;77950850685&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_references_by_paper</span><span class="p">([</span><span class="s">&quot;84924004559&quot;</span><span class="p">,</span><span class="s">&quot;77950850685&quot;</span><span class="p">])</span>
 <span class="go">{&#39;84924004559&#39;: set([&#39;84897620666&#39;, &#39;84923945772&#39;, &#39;0039555230&#39;, &#39;84870039666&#39;, &#39;84923947094&#39;, &#39;3042511364&#39;, &#39;84870033200&#39;, &#39;0038961022&#39;, &#39;0038961019&#39;, &#39;0040696207&#39;, &#39;84922016024&#39;, &#39;0039331818&#39;, &#39;84892691931&#39;]), &#39;77950850685&#39;: set([&#39;0039555230&#39;, &#39;84893392206&#39;, &#39;0038961022&#39;, &#39;3042511364&#39;, &#39;33644645839&#39;, &#39;0001387789&#39;, &#39;0038961019&#39;, &#39;84867934819&#39;, &#39;0001434692&#39;, &#39;0039331818&#39;, &#39;77950815647&#39;, &#39;0002436460&#39;])}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -348,8 +349,8 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_title_abstract_by_idpaper">
-<code class="descclassname">pyscholar.</code><code class="descname">get_title_abstract_by_idpaper</code><span class="sig-paren">(</span><em>id_paper=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_title_abstract_by_idpaper" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_title_abstract_by_idpaper">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_title_abstract_by_idpaper</tt><big>(</big><em>id_paper=''</em><big>)</big><a class="headerlink" href="#scopus.get_title_abstract_by_idpaper" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a tuple with the identification, title and summary of the paper that you searched.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -366,7 +367,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s">&quot;77950850685&quot;</span><span class="p">)</span>
 <span class="go">(&#39;77950850685&#39;,u&#39;Empty monochromatic triangles&#39;,u&#39;We consider a variation of a problem stated by Erdös and Guy in 1973 about the number of convex k-gons determined by any set S of n points in the plane. In our setting the points of S are colored and we say that a spanned polygon is monochromatic if all its points are colored with the same color. As a main result we show that any bi-colored set of n points in R2 in general position determines a super-linear number of empty monochromatic triangles, namely \u03a9(n5/4).&#39;)</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -375,7 +376,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 
 <dl class="function">
 <dt>
-<code class="descclassname">pyscholar.</code><code class="descname">get_title_abstract_by_idpaper</code><span class="sig-paren">(</span><em>id_paper=''</em><span class="sig-paren">)</span></dt>
+<tt class="descclassname">scopus.</tt><tt class="descname">get_title_abstract_by_idpaper</tt><big>(</big><em>id_paper=''</em><big>)</big></dt>
 <dd><p>This function returns a tuple with the identification, title and summary of the paper that you searched.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -392,7 +393,7 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s2">&quot;77950850685&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_ids_authors_by_id_paper</span><span class="p">(</span><span class="s">&quot;77950850685&quot;</span><span class="p">)</span>
 <span class="go">(&#39;77950850685&#39;,u&#39;Empty monochromatic triangles&#39;,u&#39;We consider a variation of a problem stated by Erdös and Guy in 1973 about the number of convex k-gons determined by any set S of n points in the plane. In our setting the points of S are colored and we say that a spanned polygon is monochromatic if all its points are colored with the same color. As a main result we show that any bi-colored set of n points in R2 in general position determines a super-linear number of empty monochromatic triangles, namely \u03a9(n5/4).&#39;)</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -400,28 +401,26 @@ the value associated with the key is a set of the ids of the papers cited by eac
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.load_papers_from_file">
-<code class="descclassname">pyscholar.</code><code class="descname">load_papers_from_file</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function reads a file where each line of the file is 
-an paper id.</p>
-<p>param path: The directory where the file is located.
-:type path: String
-:returns: List with the papers ids.
-:rtype: List</p>
+<dt id="scopus.load_papers_from_file">
+<tt class="descclassname">scopus.</tt><tt class="descname">load_papers_from_file</tt><big>(</big><em>path=''</em><big>)</big><a class="headerlink" href="#scopus.load_papers_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a file where each line of the file is an paper id.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The directory where the file is located.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list with the papers ids.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_papers_from_file</span><span class="p">(</span><span class="s2">&quot;/home/dir/papers.txt&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s1">&#39;78149425675&#39;</span><span class="p">,</span> <span class="s1">&#39;79959254005&#39;</span><span class="p">,</span> <span class="s1">&#39;84883029526&#39;</span><span class="p">,</span> <span class="s1">&#39;84887837079&#39;</span><span class="p">,</span> <span class="s1">&#39;84892691931&#39;</span><span class="p">,</span> <span class="s1">&#39;84893836569&#39;</span><span class="p">,</span> <span class="s1">&#39;84897620666&#39;</span><span class="p">,</span> <span class="s1">&#39;84904102369&#39;</span><span class="p">,</span> <span class="s1">&#39;84908190310&#39;</span><span class="p">,</span> <span class="s1">&#39;84919922003&#39;</span><span class="p">,</span> <span class="s1">&#39;84924004559&#39;</span><span class="p">,</span> <span class="s1">&#39;84925067887&#39;</span><span class="p">,</span> <span class="s1">&#39;84928486421&#39;</span><span class="p">,</span> <span class="s1">&#39;84928490197&#39;</span><span class="p">,</span> <span class="s1">&#39;84928742486&#39;</span><span class="p">,</span> <span class="s1">&#39;84939945186&#39;</span><span class="p">,</span> <span class="s1">&#39;84939973084&#39;</span><span class="p">,</span> <span class="s1">&#39;84945466401&#39;</span><span class="p">,</span> <span class="s1">&#39;84961373040&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">load_papers_from_file</span><span class="p">(</span><span class="s">&quot;/home/dir/papers.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s">&#39;78149425675&#39;</span><span class="p">,</span> <span class="s">&#39;79959254005&#39;</span><span class="p">,</span> <span class="s">&#39;84883029526&#39;</span><span class="p">,</span> <span class="s">&#39;84887837079&#39;</span><span class="p">,</span> <span class="s">&#39;84892691931&#39;</span><span class="p">,</span> <span class="s">&#39;84893836569&#39;</span><span class="p">,</span> <span class="s">&#39;84897620666&#39;</span><span class="p">,</span> <span class="s">&#39;84904102369&#39;</span><span class="p">,</span> <span class="s">&#39;84908190310&#39;</span><span class="p">,</span> <span class="s">&#39;84919922003&#39;</span><span class="p">,</span> <span class="s">&#39;84924004559&#39;</span><span class="p">,</span> <span class="s">&#39;84925067887&#39;</span><span class="p">,</span> <span class="s">&#39;84928486421&#39;</span><span class="p">,</span> <span class="s">&#39;84928490197&#39;</span><span class="p">,</span> <span class="s">&#39;84928742486&#39;</span><span class="p">,</span> <span class="s">&#39;84939945186&#39;</span><span class="p">,</span> <span class="s">&#39;84939973084&#39;</span><span class="p">,</span> <span class="s">&#39;84945466401&#39;</span><span class="p">,</span> <span class="s">&#39;84961373040&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -430,41 +429,40 @@ an paper id.</p>
 <div class="section" id="scopus-affiliation">
 <h2>Scopus Affiliation<a class="headerlink" href="#scopus-affiliation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.find_affiliation_scopus_id_by_name">
-<code class="descclassname">pyscholar.</code><code class="descname">find_affiliation_scopus_id_by_name</code><span class="sig-paren">(</span><em>organization=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.find_affiliation_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function returns a data frame which contains all matches found by the search affiliation name.</p>
+<dt id="scopus.find_affiliation_scopus_id_by_name">
+<tt class="descclassname">scopus.</tt><tt class="descname">find_affiliation_scopus_id_by_name</tt><big>(</big><em>organization=''</em><big>)</big><a class="headerlink" href="#scopus.find_affiliation_scopus_id_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a data frame which contains all matches found by the search of an affiliation name.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>organization</strong> (<em>String</em>) &#8211; The name of the affiliation that you want to search.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>organization</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The name of the affiliation to search.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A data frame that has different attributes (id,city,country,name_variant,eid,affiliation_name,identifier,document_count).</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A data frame with the following attributes: id,city,country,name_variant,eid,affiliation_name,identifier,document_count.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">DataFrame</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.1)"><tt class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></tt></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">find_affiliation_scopus_id_by_name</span><span class="p">(</span><span class="s2">&quot;CINVESTAV&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">find_affiliation_scopus_id_by_name</span><span class="p">(</span><span class="s">&quot;CINVESTAV&quot;</span><span class="p">)</span>
 <span class="go">           id                 city      country                 name_variant                        eid                   affiliation_name                              identifier          document_count</span>
-<span class="go">    0    60017323          Mexico City  Mexico        [CINVESTAV-IPN, CINVESTAV]             10-s2.0-60017323  Centro de Investigacion y de Estudios Avanzados    AFFILIATION_ID:60017323       19254  </span>
+<span class="go">    0    60017323          Mexico City  Mexico        [CINVESTAV-IPN, CINVESTAV]             10-s2.0-60017323  Centro de Investigacion y de Estudios Avanzados    AFFILIATION_ID:60017323       19254</span>
 <span class="go">    1    60010531        M&amp;eacute;rida  Mexico              [CINVESTAV-IPN]                  10-s2.0-60010531           CINVESTAV Unidad Merida                   AFFILIATION_ID:60010531        1811</span>
-<span class="go">    2    60018216          Guadalajara  Mexico  [CINVESTAV, CINVESTAV Unidad Guadalajara]    10-s2.0-60018216           CINVESTAV Unidad Guadalajara              AFFILIATION_ID:60018216        1010  </span>
+<span class="go">    2    60018216          Guadalajara  Mexico  [CINVESTAV, CINVESTAV Unidad Guadalajara]    10-s2.0-60018216           CINVESTAV Unidad Guadalajara              AFFILIATION_ID:60018216        1010</span>
 <span class="go">    .</span>
 <span class="go">    .</span>
 <span class="go">    .</span>
 <span class="go">    .</span>
-<span class="go">    &gt;&gt;&gt;   </span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.search_affiliation_by_id">
-<code class="descclassname">pyscholar.</code><code class="descname">search_affiliation_by_id</code><span class="sig-paren">(</span><em>list_scopus_id_affiliation</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.search_affiliation_by_id" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.search_affiliation_by_id">
+<tt class="descclassname">scopus.</tt><tt class="descname">search_affiliation_by_id</tt><big>(</big><em>list_scopus_id_affiliation</em><big>)</big><a class="headerlink" href="#scopus.search_affiliation_by_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a dictionary where the key is the ID of the
 affiliation and the value associated with the key is a dictionary
 with the following keys: date_created, preferred_name, author_count
@@ -484,9 +482,9 @@ and document_count.</p>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">(</span><span class="s2">&quot;60017323&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">(</span><span class="s">&quot;60017323&quot;</span><span class="p">)</span>
 <span class="go">{&#39;60017323&#39;: {&#39;date_created&#39;: &#39;03/02/2008&#39;, &#39;author_count&#39;: 5522, &#39;document_count&#39;: 19266, &#39;preferred_name&#39;: &#39;Centro de Investigacion y de Estudios Avanzados&#39;}}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">([</span><span class="s2">&quot;60017323&quot;</span><span class="p">,</span><span class="s2">&quot;60018216&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">search_affiliation_by_id</span><span class="p">([</span><span class="s">&quot;60017323&quot;</span><span class="p">,</span><span class="s">&quot;60018216&quot;</span><span class="p">])</span>
 <span class="go">{&#39;60017323&#39;: {&#39;date_created&#39;: &#39;03/02/2008&#39;, &#39;author_count&#39;: 5522, &#39;document_count&#39;: 19266, &#39;preferred_name&#39;: &#39;Centro de Investigacion y de Estudios Avanzados&#39;}, &#39;60018216&#39;: {&#39;date_created&#39;: &#39;03/02/2008&#39;, &#39;author_count&#39;: 285, &#39;document_count&#39;: 1011, &#39;preferred_name&#39;: &#39;CINVESTAV Unidad Guadalajara&#39;}}</span>
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
@@ -497,16 +495,16 @@ and document_count.</p>
 <div class="section" id="graph-generators">
 <h2>Graph Generators<a class="headerlink" href="#graph-generators" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.get_citation_graph">
-<code class="descclassname">pyscholar.</code><code class="descname">get_citation_graph</code><span class="sig-paren">(</span><em>list_scopus_id_paper</em>, <em>distance</em>, <em>directory=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_citation_graph" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_citation_graph">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_citation_graph</tt><big>(</big><em>list_scopus_id_paper</em>, <em>distance</em>, <em>directory=''</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#scopus.get_citation_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a tuple where the first element is the graph induced by papers
 and the second element is a list of sets where each set is a set of papers to distance d.
 and the last element is a set of papers not found.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.get_coauthors_graph">
-<code class="descclassname">pyscholar.</code><code class="descname">get_coauthors_graph</code><span class="sig-paren">(</span><em>list_scopus_id_author</em>, <em>distance</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>directory=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.get_coauthors_graph" title="Permalink to this definition">¶</a></dt>
+<dt id="scopus.get_coauthors_graph">
+<tt class="descclassname">scopus.</tt><tt class="descname">get_coauthors_graph</tt><big>(</big><em>list_scopus_id_author</em>, <em>distance</em>, <em>min_year=''</em>, <em>max_year=''</em>, <em>directory=''</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#scopus.get_coauthors_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a tuple where the first element is the graph induced by several authors
 and the second element is a list of sets where each set is a set of authors to distance d.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -531,12 +529,12 @@ and the second element is a list of sets where each set is a set of authors to d
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s2">&quot;56578611900&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">(</span><span class="s">&quot;56578611900&quot;</span><span class="p">)</span>
 <span class="go">{&#39;56578611900&#39;: set([&#39;84959332636&#39;])}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s">&#39;7006176684&#39;</span><span class="p">,</span><span class="s">&#39;55647751400&#39;</span><span class="p">,</span><span class="s">&#39;56072631800&#39;</span><span class="p">])</span>
 <span class="go">{&#39;7006176684&#39;: set([&#39;5444229075&#39;, &#39;17144467193&#39;, &#39;0001031138&#39;, &#39;79959322537&#39;, &#39;84911059592&#39;, &#39;84955069066&#39;, &#39;0037233714&#39;, &#39;38249018110&#39;, &#39;52149122079&#39;, &#39;0009416953&#39;, &#39;84892551677&#39;, &#39;51249164413&#39;, &#39;0000772349&#39;, &#39;0007057901&#39;, &#39;13544277720&#39;, &#39;33847670994&#39;, &#39;0031146399&#39;, &#39;84921029337&#39;, &#39;84886394293&#39;, &#39;0034363462&#39;, &#39;67651172822&#39;, &#39;0035869886&#39;, &#39;0038931174&#39;, &#39;38249040825&#39;, &#39;33947675881&#39;, &#39;0010211186&#39;, &#39;84905729730&#39;, &#39;0031285726&#39;, &#39;23044528188&#39;, &#39;0033072608&#39;, &#39;0009247597&#39;, &#39;84947051661&#39;, &#39;84951039519&#39;, &#39;0033531899&#39;, &#39;77958482876&#39;, &#39;0000385874&#39;, &#39;33646915730&#39;, &#39;84886435449&#39;, &#39;0032221906&#39;, &#39;58149129161&#39;, &#39;21844489552&#39;, &#39;52549094277&#39;, &#39;0034656467&#39;, &#39;0037953609&#39;, &#39;84907056975&#39;, &#39;38249018633&#39;, &#39;84903995394&#39;, &#39;84867339764&#39;, &#39;33845367161&#39;, &#39;0040629757&#39;, &#39;0039530566&#39;, &#39;0000740606&#39;, &#39;22444453689&#39;, &#39;84892368124&#39;, &#39;76449084340&#39;, &#39;84856747354&#39;, &#39;27744453855&#39;, &#39;34250143856&#39;, &#39;84902675107&#39;, &#39;27844526213&#39;, &#39;0030078477&#39;, &#39;0001503960&#39;, &#39;0038980939&#39;, &#39;0035636479&#39;, &#39;79955933749&#39;, &#39;0030602470&#39;, &#39;17344380224&#39;, &#39;0002130779&#39;, &#39;80054044270&#39;, &#39;79954497708&#39;, &#39;47249108096&#39;, &#39;34250110161&#39;, &#39;0040631446&#39;, &#39;0041195239&#39;, &#39;67349106698&#39;, &#39;0034347051&#39;, &#39;33845783250&#39;, &#39;84886738410&#39;, &#39;0038625364&#39;, &#39;34247172128&#39;, &#39;21844507175&#39;, &#39;84902371560&#39;, &#39;0039529250&#39;]),</span>
 <span class="go">&#39;55647751400&#39;: set([&#39;84924256130&#39;, &#39;84924228967&#39;, &#39;84876052381&#39;]), &#39;56072631800&#39;: set([&#39;84896417515&#39;, &#39;84947558059&#39;])}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s1">&#39;7006176684&#39;</span><span class="p">,</span><span class="s1">&#39;55647751400&#39;</span><span class="p">,</span><span class="s1">&#39;56072631800&#39;</span><span class="p">],</span><span class="s2">&quot;2014&quot;</span><span class="p">,</span><span class="s2">&quot;2016&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyscholar</span><span class="o">.</span><span class="n">get_papers</span><span class="p">([</span><span class="s">&#39;7006176684&#39;</span><span class="p">,</span><span class="s">&#39;55647751400&#39;</span><span class="p">,</span><span class="s">&#39;56072631800&#39;</span><span class="p">],</span><span class="s">&quot;2014&quot;</span><span class="p">,</span><span class="s">&quot;2016&quot;</span><span class="p">)</span>
 <span class="go">{&#39;7006176684&#39;: set([&#39;84902675107&#39;, &#39;84905729730&#39;, &#39;84892368124&#39;, &#39;84951039519&#39;, &#39;84907056975&#39;, &#39;84947051661&#39;, &#39;84911059592&#39;, &#39;84903995394&#39;, &#39;84921029337&#39;, &#39;84886738410&#39;, &#39;84955069066&#39;, &#39;84902371560&#39;, &#39;84886435449&#39;]),</span>
 <span class="go">&#39;55647751400&#39;: set([]), &#39;56072631800&#39;: set([])}</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -548,22 +546,21 @@ and the second element is a list of sets where each set is a set of authors to d
 <div class="section" id="reading-and-writing-graphs">
 <h2>Reading and Writing Graphs<a class="headerlink" href="#reading-and-writing-graphs" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.save_graph_pickle">
-<code class="descclassname">pyscholar.</code><code class="descname">save_graph_pickle</code><span class="sig-paren">(</span><em>G</em>, <em>path=''</em>, <em>name_graph=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.save_graph_pickle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves graph in <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">pickle</span></code></a> format.</p>
-<p>This function saves a graphic object in pickle format in a directory.</p>
+<dt id="scopus.save_graph_pickle">
+<tt class="descclassname">scopus.</tt><tt class="descname">save_graph_pickle</tt><big>(</big><em>G</em>, <em>path=''</em>, <em>name_graph=''</em><big>)</big><a class="headerlink" href="#scopus.save_graph_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves a graph object using <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">pickle</span></tt></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>G</strong> (<em>NetworkX graph object.</em>) &#8211; The graph that will be saved.</li>
-<li><strong>path</strong> (<em>String.</em>) &#8211; The directory where the graph will be saved.</li>
-<li><strong>name_graph</strong> (<em>String.</em>) &#8211; The name of the graph.</li>
+<li><strong>G</strong> (<a class="reference external" href="https://networkx.readthedocs.io/en/stable/reference/classes.graph.html#graph" title="(in NetworkX v1.11)"><em class="xref std std-ref">networkx.graph</em></a>) &#8211; The graph object to be saved.</li>
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The directory where the graph will be saved.</li>
+<li><strong>name_graph</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The name of the graph.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The function doesn&#8217;t return any value.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><tt class="xref py py-class docutils literal"><span class="pre">NoneType</span></tt></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
@@ -571,33 +568,31 @@ and the second element is a list of sets where each set is a set of authors to d
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">psycholar</span><span class="o">.</span><span class="n">save_graph_pickle</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s2">&quot;~/dir/&quot;</span><span class="p">,</span><span class="s2">&quot;my_graph&quot;</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">psycholar</span><span class="o">.</span><span class="n">save_graph_pickle</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="s">&quot;~/dir/&quot;</span><span class="p">,</span><span class="s">&quot;my_graph&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.load_graph_pickle">
-<code class="descclassname">pyscholar.</code><code class="descname">load_graph_pickle</code><span class="sig-paren">(</span><em>path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.load_graph_pickle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a graph object in <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">pickle</span></code></a> format.</p>
-<p>This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.</p>
+<dt id="scopus.load_graph_pickle">
+<tt class="descclassname">scopus.</tt><tt class="descname">load_graph_pickle</tt><big>(</big><em>path=''</em><big>)</big><a class="headerlink" href="#scopus.load_graph_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a graph object saved using <a class="reference external" href="http://docs.python.org/library/pickle.html#module-pickle" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">pickle</span></tt></a> and returns a networkx graph object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>String.</em>) &#8211; The directory where the object pickle is located.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">str</span></tt></a>) &#8211; The directory where the pickle object is located.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Return a graph G.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A graph G.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Return a NetworkX graph object.</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://networkx.readthedocs.io/en/stable/reference/classes.graph.html#graph" title="(in NetworkX v1.11)"><em class="xref std std-ref">networkx.graph</em></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyscholar</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span> <span class="o">=</span> <span class="n">psycholar</span><span class="o">.</span><span class="n">load_graph_pickle</span><span class="p">(</span><span class="s2">&quot;~/dir/graph.pickle&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span> <span class="o">=</span> <span class="n">psycholar</span><span class="o">.</span><span class="n">load_graph_pickle</span><span class="p">(</span><span class="s">&quot;~/dir/graph.pickle&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_graph</span>
 </pre></div>
 </div>
@@ -607,15 +602,15 @@ and the second element is a list of sets where each set is a set of authors to d
 <div class="section" id="other-functions">
 <h2>Other Functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="pyscholar.disable_graphical_interface">
-<code class="descclassname">pyscholar.</code><code class="descname">disable_graphical_interface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.disable_graphical_interface" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function disables the graphical environment.</p>
+<dt id="scopus.disable_graphical_interface">
+<tt class="descclassname">scopus.</tt><tt class="descname">disable_graphical_interface</tt><big>(</big><big>)</big><a class="headerlink" href="#scopus.disable_graphical_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disables the graphical environment.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyscholar.enable_graphical_interface">
-<code class="descclassname">pyscholar.</code><code class="descname">enable_graphical_interface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyscholar.enable_graphical_interface" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function enables the graphical environment.</p>
+<dt id="scopus.enable_graphical_interface">
+<tt class="descclassname">scopus.</tt><tt class="descname">enable_graphical_interface</tt><big>(</big><big>)</big><a class="headerlink" href="#scopus.enable_graphical_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enables the graphical environment.</p>
 </dd></dl>
 
 </div>
@@ -625,11 +620,11 @@ and the second element is a list of sets where each set is a set of authors to d
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">pyscholar module</a><ul>
+<li><a class="reference internal" href="#">scopus module</a><ul>
 <li><a class="reference internal" href="#scopus-author-co-authors">Scopus Author/Co-Authors</a></li>
 <li><a class="reference internal" href="#scopus-paper">Scopus Paper</a></li>
 <li><a class="reference internal" href="#scopus-affiliation">Scopus Affiliation</a></li>
@@ -646,14 +641,12 @@ and the second element is a list of sets where each set is a set of authors to d
   <h4>Next topic</h4>
   <p class="topless"><a href="tutorial.html"
                         title="next chapter">Tutorial</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/pyscholar.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/scopus.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -670,7 +663,7 @@ and the second element is a list of sets where each set is a set of authors to d
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -682,12 +675,12 @@ and the second element is a list of sets where each set is a set of authors to d
         <li class="right" >
           <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Pyscholar 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2016, DesarrolloDeSoftwareCientífico.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
