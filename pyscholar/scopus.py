@@ -1,6 +1,3 @@
-# from scopus_key import MY_API_KEY
-# print "got", MY_API_KEY
-
 import ConfigParser, os
 
 class Key_Exception(Exception):
@@ -8,8 +5,8 @@ class Key_Exception(Exception):
         return "Scopus key not set."
 
 keys = ConfigParser.ConfigParser()
-dirPath = os.path.dirname(os.path.abspath(__file__))
-keys.read(os.path.join(dirPath, 'keys.cfg'))
+pyscholarDir = os.path.join(os.path.expanduser("~"), ".pyscholar")
+keys.read(os.path.join(pyscholarDir, 'keys.cfg'))
 MY_API_KEY = keys.get('Keys', 'Scopus')
 
 if MY_API_KEY == "":
@@ -17,7 +14,7 @@ if MY_API_KEY == "":
     if ans.lower() == 'y':
         key = raw_input("Your scopus api key: ")
         keys.set('Keys', 'Scopus', key)
-        cfgfile = open(os.path.join(dirPath, 'keys.cfg'), 'w')
+        cfgfile = open(os.path.join(pyscholarDir, 'keys.cfg'), 'w')
         keys.write(cfgfile)
         cfgfile.close()
         MY_API_KEY = key
@@ -38,8 +35,6 @@ search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
 search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
 search_api_affiliation_url = "http://api.elsevier.com/content/search/affiliation?"
 retrieve_api_affiliation_url="http://api.elsevier.com/content/affiliation/affiliation_id/"
-
-
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
@@ -70,21 +65,7 @@ class Scopus_Exception(Exception):
 
 def load_authors_from_file(path=""):
     """
-    This function reads a file where each line of the file is 
-    an author id.
-
-    param path: The directory where the file is located.
-    :type path: String
-    :returns: List with the authors ids.
-    :rtype: List
-
-    :Example:
-
-    >>> import pyscholar
-    >>> pyscholar.load_authors_from_file("/home/dir/authors.txt")
-    >>> ['56013555800', '12645109800', '12645615700', '12646275800', '15740951000', '23388216300', '23398643600', '24171073600', '24512697200', '26032291700', '34870304900', '35566511400', '36117667600', '36117782600', '36118513000', '36141027800', '37107692000', '37111010900', '54792735300', '55439178900', '55468916100', '55669785100', '55918277800', '55943170800', '55993686500', '56002701400', '56013629200', '56013731100', '56013734400', '56240672400', '56263920000', '56279187000']
-    >>>
-
+    Reads a file where each line of the file is an author id.
     """
     try:
         with open(directory, 'r') as f:
@@ -95,22 +76,7 @@ def load_authors_from_file(path=""):
 
 def load_papers_from_file(path=""):
     """
-    This function reads a file where each line of the file is 
-    an paper id.
-
-    param path: The directory where the file is located.
-    :type path: String
-    :returns: List with the papers ids.
-    :rtype: List
-
-    :Example:
-
-    >>> import pyscholar
-    >>> pyscholar.load_papers_from_file("/home/dir/papers.txt")
-    >>> ['78149425675', '79959254005', '84883029526', '84887837079', '84892691931', '84893836569', '84897620666', '84904102369', '84908190310', '84919922003', '84924004559', '84925067887', '84928486421', '84928490197', '84928742486', '84939945186', '84939973084', '84945466401', '84961373040']
-
-    >>>
-    
+    Reads a file where each line of the file is an paper id.
     """
     try:
         with open(directory, 'r') as f:
@@ -120,8 +86,10 @@ def load_papers_from_file(path=""):
 
 
 def _add_scopus_id(scopus_id):
-    """Adds a scopus id to the merged list. Returns False if the ID
-    is already in the merged list and false otherwise"""
+    """
+    Adds a scopus id to the merged list. Returns False if the ID is already in 
+    the merged list and false otherwise
+    """
 
     #Buscamos a ver si ya estaba en algunas lista, de ser
     #asi no hacemos nada
@@ -169,20 +137,17 @@ def _union_alias_id(scopus_id_1,scopus_id_2):
 def _get_alias_id(scopus_id):
     pass
 
-
-
-
 ###FIN DE FUNCIONES de IDs
 def disable_graphical_interface():
     """
-    This function disables the graphical environment.
+    Disables the graphical environment.
     """
     #import matplotlib.pyplot as plt
     plt.switch_backend('Agg')
 
 def enable_graphical_interface():
     """
-     This function enables the graphical environment.
+    Enables the graphical environment.
     """
     #['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
     plt.switch_backend('GTK')
@@ -192,68 +157,19 @@ def enable_graphical_interface():
 
 def load_graph_pickle(path=""):
     """
-    Loads a graph object in :mod:`pickle` format.
-
-    This function loads a graphical object from a directory in the pickle format and returns an object graph of the networkx library.
-
-    :param path: The directory where the object pickle is located.
-    :type path: String.
-    :returns: Return a graph G.
-    :rtype: Return a NetworkX graph object.
-
-    :Example:
-
-    >>> import pyscholar
-    >>> my_graph = psycholar.load_graph_pickle("~/dir/graph.pickle")
-    >>> my_graph
+    Loads a graph object saved using :mod:`pickle` and returns a networkx graph object.
     """
     return nx.read_gpickle(path)
 
 def save_graph_pickle(G,path="",name_graph=""):
     """
-    Saves graph in :mod:`pickle` format.
-
-    This function saves a graphic object in pickle format in a directory.
-
-    :param G: The graph that will be saved.
-    :param path: The directory where the graph will be saved.
-    :param name_graph: The name of the graph.
-    :type G: NetworkX graph object.
-    :type path: String.
-    :type name_graph: String.
-    :returns: The function doesn't return any value.
-
-    :Example:
-
-    >>> import pyscholar
-    >>> psycholar.save_graph_pickle(G,"~/dir/","my_graph")
-    >>>
+    Saves a graph object using :mod:`pickle`.
     """
     nx.write_gpickle(G,path+name_graph+".gpickle")
 
 def find_affiliation_scopus_id_by_name(organization=""):
     """
-    This function returns a data frame which contains all matches found by the search affiliation name.
-
-    :param organization: The name of the affiliation that you want to search.
-    :type organization: String 
-    :returns: A data frame that has different attributes (id,city,country,name_variant,eid,affiliation_name,identifier,document_count).
-    :rtype: DataFrame
-
-    :Example:
-
-    >>> import pyscholar
-    >>> pyscholar.find_affiliation_scopus_id_by_name("CINVESTAV")
-               id                 city      country                 name_variant                        eid                   affiliation_name                              identifier          document_count
-        0    60017323          Mexico City  Mexico        [CINVESTAV-IPN, CINVESTAV]             10-s2.0-60017323  Centro de Investigacion y de Estudios Avanzados    AFFILIATION_ID:60017323       19254  
-        1    60010531        M&eacute;rida  Mexico              [CINVESTAV-IPN]                  10-s2.0-60010531           CINVESTAV Unidad Merida                   AFFILIATION_ID:60010531        1811
-        2    60018216          Guadalajara  Mexico  [CINVESTAV, CINVESTAV Unidad Guadalajara]    10-s2.0-60018216           CINVESTAV Unidad Guadalajara              AFFILIATION_ID:60018216        1010  
-        .
-        .
-        .
-        .
-	>>>   
-
+    Returns a data frame which contains all matches found by the search of an affiliation name.
     """    
     searchQuery = "query=affil("+organization+")"
     fields = ""
