@@ -17,3 +17,4 @@ if not os.path.exists(os.path.join(pyscholarDir, "keys.cfg")):
     keysFile.close()
 
 import scopus
+import network

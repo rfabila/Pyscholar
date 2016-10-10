@@ -7,7 +7,9 @@ class Key_Exception(Exception):
 keys = ConfigParser.ConfigParser()
 pyscholarDir = os.path.join(os.path.expanduser("~"), ".pyscholar")
 keys.read(os.path.join(pyscholarDir, 'keys.cfg'))
-MY_API_KEY = keys.get('Keys', 'Scopus')
+KEY_ARRAY = keys.get('Keys', 'Scopus').split(',')
+key_index=0
+MY_API_KEY = KEY_ARRAY[key_index]
 
 if MY_API_KEY == "":
     ans = raw_input("Scopus key not set. Do you want to set it now? (y/n) ")
@@ -41,6 +43,8 @@ headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
 scopus_references_by_idpaper_cache=dict()
+scopus_paper_info_cache=dict()
+scopus_author_info=dict()
 
 #Un diccionario con las listas
 Scopus_ids_merged_rep={}
@@ -56,6 +60,7 @@ class Scopus_Exception(Exception):
     def __init__(self, resp):
         self.code = resp.status_code
         resp = resp.json()
+        print resp
         resp = resp[u'service-error'][u'status']
         self.statusCode=resp[u'statusCode']
         self.statusText=resp[u'statusText']
@@ -409,6 +414,52 @@ def get_common_papers(id_author_1="",id_author_2=""):
         papers_in_common=papers_author_1.intersection(papers_author_2)
     return papers_in_common
 
+def paper_info(id_paper):
+    """
+    Returns a dictionary with basic information about the paper.
+    """
+    id_paper=str(id_paper)
+    
+    if id_paper in scopus_paper_info_cache:
+        return scopus_paper_info_cache[id_paper]
+    
+    fields = "?field=prism:publicationName,title,prism:coverDate,prism:aggregationType"
+    searchQuery = (id_paper)
+    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    if resp.status_code != 200:
+        raise Scopus_Exception(resp)
+    data=resp.json()
+    D={}
+    D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
+    D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
+    D["date"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:coverDate'])
+    D["venue"]=data['abstracts-retrieval-response'][u'coredata'][u'prism:publicationName']
+    D["authors"]=get_authors_from_paper(id_paper)
+    #print data
+    return D
+
+def author_info(author_id):
+    """Returns a dictionary with basic information about the author_id"""
+    if str(author_id) in scopus_author_info:
+        return scopus_author_info[author_id]
+    fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id"
+    D=dict()
+    searchQuery = str(author_id)
+    resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+    print resp.status_code
+    print resp
+    if resp.status_code != 200:
+        raise Scopus_Exception(resp)
+    data=resp.json()
+    print data
+    data=data['author-retrieval-response'][0]
+    D={'name':data['preferred-name']['given-name'],
+    'surname':data['preferred-name']['surname'],
+    'affiliation-id':data['affiliation-current'][u'@id'],
+    'country':data['affiliation-current']['affiliation-country'],
+    'city':data['affiliation-current']['affiliation-city']}
+    scopus_author_info[str(author_id)]=D
+    return D
 
 def get_title_abstract_by_idpaper(id_paper=""):
     """
@@ -468,6 +519,8 @@ def search_author(list_scopus_id_author):
         attributes=dict()
         searchQuery = str(id_author)
         resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+        print resp.status_code
+        print resp
         if resp.status_code != 200:
             raise Scopus_Exception(resp)
         data=resp.json()
@@ -581,7 +634,7 @@ def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",d
         #print len(list_scopus_id_author)
         #print list_scopus_id_author
         for id_author in list_scopus_id_author:
-            #print id_author
+            print id_author
             if id_author not in nodes:
                 nodes.add(id_author)
                 G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
@@ -709,6 +762,28 @@ def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
         D[G_citation.node[id_node]['distance']].append(id_node)
     return (G_citation,D,paper_not_found)
 
+def get_authors_from_paper(id_paper):
+    #RUY_VERSION
+    "Returns the list of authors ids from the given paper."
+    
+    if id_paper in scopus_authors_by_idpapers_cache:
+        return scopus_authors_by_idpapers_cache[id_paper]
+    
+    fields = "?field=dc:description,authors"
+    authors_by_id_paper=dict()
+    searchQuery = str(id_paper)
+    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    if resp.status_code != 200:
+        raise Scopus_Exception(resp)
+
+    id_authors=[]
+    data=resp.json()
+    data=data["abstracts-retrieval-response"]["authors"]["author"]
+    for author in data:
+        id_authors.append(str(author["@auid"]))
+    scopus_authors_by_idpapers_cache[id_paper]=id_authors
+    return id_authors
+
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """
     This function returns a dictionary where the key is the ID of the
@@ -830,7 +905,13 @@ def check_years(min_year="",max_year=""):
                 return None
 
 
-
+def get_publications(author_id):
+    #Ruy Version
+    "Returns a list of publications id authored by the given author(id)"
+    author_id=str(author_id)
+    papers=get_papers(author_id)[author_id]
+    return papers
+    
 def get_papers(list_scopus_id_author,min_year="",max_year=""):
     """
     This function returns a dictionary where the key is the ID of the
