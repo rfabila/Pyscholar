@@ -1,5 +1,6 @@
 import scopus
 import networkx
+import pickle
 
 def collaboration_network_by_ids(author_ids,distance=0):
     """Creates a collaboration network with the given list of scopus
@@ -54,18 +55,110 @@ def collaboration_network_by_names(names,distance=0):
     G.core_names=IDS
     return G
 
+def load_collaboration_network(filename):
+    file_G=open(filename,"r")
+    G=pickle.load(file_G)
+    return G
+
 class CollaborationNetwork():
-    def __init__(self,G=None,core_names=None):
-        self.G=G
+    def __init__(self,core_names=[],distance=0,core_ids=[]):
+        self.core_ids=core_ids
         self.core_names=core_names
         self.paper_info={}
-        #self.update_paper_info()
+        self.author_info={}
+        self.distance=distance
+        self.network_computed=False
+        self.computed_distance=-1
+        self.nodes_by_distance=[set() for i in range(self.distance+2)]
         
-    def update_paper_info(self):
+        self.current_author=0
+        
+        splitted_names=[n.split(',') for n in self.core_names]
+        self.core_name_IDS={self.core_names[i]:scopus.find_author_scopus_id_by_name(splitted_names[i][0],splitted_names[i][1]) for i in range(len(self.core_names))}
+        for lst in self.core_name_IDS.values():
+            self.core_ids.extend(lst)
+        
+        [self.nodes_by_distance[0].add(str(x)) for x in self.core_ids]
+        self.G=networkx.graph.Graph()
+        [self.G.add_node(str(x)) for x in self.core_ids]
+        
+        
+        #self.create_network()
+        #self.get_paper_info()
+        #self.get_author_info()
+    
+    def copy_from_other(self,G):
+        self.core_ids=G.core_ids
+        self.core_names=G.core_names
+        self.paper_info=G.paper_info
+        self.author_info=G.author_info
+        self.distance=G.distance
+        self.network_computed=G.network_computed
+        self.computed_distance=G.computed_distance
+        self.nodes_by_distance=G.nodes_by_distance
+        self.current_author=G.current_author
+        self.core_name_IDS=G.core_name_IDS
+        self.G=G.G
+    
+    def get_paper_info(self):
         for e in self.G.edges():
-            for p in self.G[e[0]][e[1]]["papers"]:
-                if p not in self.paper_info:
-                    self.paper_info[p]=scopus.paper_info(p)
+            papers=self.G[e[0]][e[1]]["papers"]
+            for paper_id in papers:
+                if paper_id not in self.paper_info:
+                    print paper_id
+                    self.paper_info[paper_id]=scopus.paper_info(paper_id)
+                    
+    def get_author_info(self):
+        for author_id in self.G.nodes():
+            if  author_id not in self.author_info:
+                self.author_info[author_id]=scopus.author_info(author_id)
+                
+    def save(self,file_name):
+        file_G=open(file_name,'w')
+        pickle.dump(self,file_G)
+        file_G.close()
+        
+    
+        
+    
+        
+    def create_network(self,heuristic=None):
+        """Creates the collaboration network."""
+        
+        distance_start=self.computed_distance+1
+        for d in range(distance_start,self.distance+1):
+            Q=list(self.nodes_by_distance[d])
+            start=self.current_author
+            for i in range(start,len(Q)):
+                self.current_author=i
+                papers=scopus.get_publications(Q[i])
+                for paper_id in papers:
+                    authors=scopus.get_authors_from_paper(str(paper_id))
+                    for y in authors:
+                        y=str(y)
+                        if not self.G.has_node(y):
+                            self.nodes_by_distance[d+1].add(y)
+                        if Q[i]!=y:
+                            if self.G.has_edge(Q[i],y):
+                                self.G[Q[i]][y]["papers"].add(str(paper_id))
+                            else:
+                                self.G.add_edge(Q[i],y)
+                                self.G[Q[i]][y]["papers"]=set()
+                                self.G[Q[i]][y]["papers"].add(str(paper_id))
+                                
+            self.current_author=0
+            self.computed_distance=d
+        self.network_computed=True
+                
+        
+        
+        
+        
+    #def update_paper_info(self):
+     #   for e in self.G.edges():
+      #      for p in self.G[e[0]][e[1]]["papers"]:
+       #         if p not in self.paper_info:
+        #            self.paper_info[p]=scopus.paper_info(p)
     
     
     
