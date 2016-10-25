@@ -71,6 +71,7 @@ class CollaborationNetwork():
         self.computed_distance=-1
         self.nodes_by_distance=[set() for i in range(self.distance+2)]
         
+        self.current_paper=0
         self.current_author=0
         
         splitted_names=[n.split(',') for n in self.core_names]
@@ -97,6 +98,7 @@ class CollaborationNetwork():
         self.computed_distance=G.computed_distance
         self.nodes_by_distance=G.nodes_by_distance
         self.current_author=G.current_author
+        self.current_paper=G.current_paper
         self.core_name_IDS=G.core_name_IDS
         self.G=G.G
     
@@ -134,8 +136,10 @@ class CollaborationNetwork():
                 papers=scopus.get_publications(Q[i])
                 for paper_id in papers:
                     authors=scopus.get_authors_from_paper(str(paper_id))
-                    for y in authors:
-                        y=str(y)
+                    start_paper=self.current_paper
+                    for y in range(start_paper,len(authors)):
+                        self.current_paper=y
+                        y=str(authors[y])
                         if not self.G.has_node(y):
                             self.nodes_by_distance[d+1].add(y)
                         if Q[i]!=y:
@@ -145,6 +149,7 @@ class CollaborationNetwork():
                                 self.G.add_edge(Q[i],y)
                                 self.G[Q[i]][y]["papers"]=set()
                                 self.G[Q[i]][y]["papers"].add(str(paper_id))
+                self.current_paper=0
                                 
             self.current_author=0
             self.computed_distance=d
