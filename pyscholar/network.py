@@ -134,12 +134,13 @@ class CollaborationNetwork():
             for i in range(start,len(Q)):
                 self.current_author=i
                 papers=scopus.get_publications(Q[i])
-                for paper_id in papers:
+                start_paper=self.current_paper
+                for paper_id in range(start_paper,len(papers)):
+                    self.current_paper=paper_id
+                    paper_id=papers[paper_id]
                     authors=scopus.get_authors_from_paper(str(paper_id))
-                    start_paper=self.current_paper
-                    for y in range(start_paper,len(authors)):
-                        self.current_paper=y
-                        y=str(authors[y])
+                    for y in authors:
+                        y=str(y)
                         if not self.G.has_node(y):
                             self.nodes_by_distance[d+1].add(y)
                         if Q[i]!=y:
