@@ -134,6 +134,7 @@ class CollaborationNetwork():
             for i in range(start,len(Q)):
                 self.current_author=i
                 papers=scopus.get_publications(Q[i])
+                papers=list(papers)
                 start_paper=self.current_paper
                 for paper_id in range(start_paper,len(papers)):
                     self.current_paper=paper_id
