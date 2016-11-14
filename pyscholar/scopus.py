@@ -1,4 +1,4 @@
-import ConfigParser, os
+import ConfigParser, os, time
 
 class Quota_Exceeded(Exception):
     def __str__(self):
@@ -7,12 +7,29 @@ class Key_Exception(Exception):
     def __str__(self):
         return "Scopus key not set."
 
+#Scopus keys
 keys = ConfigParser.ConfigParser()
 pyscholarDir = os.path.join(os.path.expanduser("~"), ".pyscholar")
 keys.read(os.path.join(pyscholarDir, 'keys.cfg'))
 KEY_ARRAY = keys.get('Keys', 'Scopus').split(',')
 key_index=0
 MY_API_KEY = KEY_ARRAY[key_index]
+
+#Connection parameters conf
+connection=ConfigParser.ConfigParser()
+#print pyscholarDir+"connection.cfg"
+#if os.path.isfile(pyscholarDir+"connection.cfg"):
+#    connnection.read(pyscholarDir,"connection.cfg")
+#    wait_time=int(connection.read("Connection","wait"))
+#    attempts=int(connection.read("Connection","attempt"))
+#else:
+#    wait_time=5
+#    attempts=5
+
+wait_time=5
+attempts=5
+    
+
 
 if MY_API_KEY == "":
     ans = raw_input("Scopus key not set. Do you want to set it now? (y/n) ")
@@ -49,6 +66,8 @@ scopus_references_by_idpaper_cache=dict()
 scopus_paper_info_cache=dict()
 scopus_author_info=dict()
 
+
+
 #Un diccionario con las listas
 Scopus_ids_merged_rep={}
 Scopus_ids_merged_lists={}
@@ -58,6 +77,25 @@ Scopus_ids_merged_lists={}
 #Funciones para manejar las ids, hago implementaciones ingenuas que
 #despues mejoraremos
 #Vean https://en.wikipedia.org/wiki/Disjoint-set_data_structure
+
+def requests_get_wrapper(query):
+    resp = requests.get(query, headers=headers)
+    t=0
+    while resp.status_code!=200  and t < attempts:
+        if resp.status_code==429:
+            _new_key()
+            resp = requests.get(query, headers=headers)
+        else:
+            time.sleep(wait_time)
+            print "waiting ",t
+            print "status", resp.status_code
+            print "json"
+            print resp.json()
+            resp = requests.get(query, headers=headers)
+            t=t+1
+    if resp.status_code==200:
+        return resp
+    raise Scopus_Exception(resp)
 
 def _new_key():
     global MY_API_KEY
@@ -193,14 +231,17 @@ def find_affiliation_scopus_id_by_name(organization=""):
     """    
     searchQuery = "query=affil("+organization+")"
     fields = ""
-    resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
+    resp = requests_get_wrapper(search_api_affiliation_url+searchQuery+fields)
+    
+    #resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
 
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
+    #while resp.status_code==429:
+     #   _new_key()
+     #   resp = requests.get(search_api_affiliation_url+searchQuery+fields, headers=headers)
         
-    if resp.status_code != 200:
-            raise Scopus_Exception(resp)
+    #if resp.status_code != 200:
+    #        raise Scopus_Exception(resp)
+    
     id_affil=[]
     data = resp.json()
     data = data['search-results']
@@ -273,14 +314,16 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
     dict_affiliation_by_id=dict()
     for id_affiliation in list_scopus_id_affiliation:
         searchQuery = str(id_affiliation)
-        resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
+        #resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
+        resp = requests_get_wrapper(retrieve_api_affiliation_url+searchQuery+fields)
         
-        while resp.status_code==429:
-            _new_key()
-            resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
+        #while resp.status_code==429:
+         #   _new_key()
+          #  resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
         
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
+        #if resp.status_code != 200:
+        #    raise Scopus_Exception(resp)
+        
         data=resp.json()
         data=data["affiliation-retrieval-response"]
         date_created=str(data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year'])
@@ -337,14 +380,16 @@ def get_authors_by_id_affiliation(list_scopus_id_affiliation):
                 fields = "&field=dc:identifier&count=199"+"&start="+str(chunks[index_chunk])
             searchQuery = "query=AF-ID("+str(id_affiliation)+")"
             #print search_api_author_url+searchQuery+fields
-            resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+            resp = requests_get_wrapper(search_api_author_url+searchQuery+fields)
+            #resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
             
-            while resp.status_code==429:
-                _new_key()
-                resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+            #while resp.status_code==429:
+             #   _new_key()
+             #   resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
                         
-            if resp.status_code != 200:
-                raise Scopus_Exception(resp)
+            #if resp.status_code != 200:
+             #   raise Scopus_Exception(resp)
+             
             data=resp.json()
             data = data['search-results']
             if data["opensearch:totalResults"] == '0':
@@ -392,15 +437,19 @@ def get_references_by_paper(list_scopus_id_paper):
         else:
             fields = "?view=REF"
             searchQuery = id_paper
-            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
             
-            while resp.status_code==429:
-                _new_key()
-                resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+            resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
+            
+            #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+            
+            #while resp.status_code==429:
+             #   _new_key()
+              #  resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
             
             
-            if resp.status_code != 200:
-                raise Scopus_Exception(resp)
+            #if resp.status_code != 200:
+             #   raise Scopus_Exception(resp)
+             
             data = resp.json()
             if data[u'abstracts-retrieval-response'] is not None:
                 data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
@@ -461,14 +510,18 @@ def paper_info(id_paper):
     
     fields = "?field=prism:publicationName,title,prism:coverDate,prism:aggregationType"
     searchQuery = (id_paper)
-    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
     
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
     
-    if resp.status_code != 200:
-        raise Scopus_Exception(resp)
+    #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    
+    #while resp.status_code==429:
+     #   _new_key()
+      #  resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    
+   # if resp.status_code != 200:
+    #    raise Scopus_Exception(resp)
+    
     data=resp.json()
     D={}
     D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
@@ -486,16 +539,20 @@ def author_info(author_id):
     fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id"
     D=dict()
     searchQuery = str(author_id)
-    resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
     
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+    resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
     
-    print resp.status_code
-    print resp
-    if resp.status_code != 200:
-        raise Scopus_Exception(resp)
+    #resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+    
+    #while resp.status_code==429:
+     #   _new_key()
+     #   resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+    
+    #print resp.status_code
+    #print resp
+    #if resp.status_code != 200:
+    #    raise Scopus_Exception(resp)
+    
     data=resp.json()
     print data
     data=data['author-retrieval-response'][0]
@@ -526,14 +583,17 @@ def get_title_abstract_by_idpaper(id_paper=""):
     fields = "?field=dc:description,title"
 
     searchQuery = (id_paper)
-    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
     
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
     
-    if resp.status_code != 200:
-        raise Scopus_Exception(resp)
+    #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    
+   # while resp.status_code==429:
+    #    _new_key()
+     #   resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+    
+   # if resp.status_code != 200:
+    #    raise Scopus_Exception(resp)
 
     data=resp.json()
     data=data["abstracts-retrieval-response"]["coredata"]
@@ -569,11 +629,12 @@ def search_author(list_scopus_id_author):
     for id_author in list_scopus_id_author:
         attributes=dict()
         searchQuery = str(id_author)
-        resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+        resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
+        #resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
         
-        while resp.status_code==429:
-            _new_key()
-            resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
+        #while resp.status_code==429:
+         #   _new_key()
+          #  resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
         
         print resp.status_code
         print resp
@@ -581,8 +642,25 @@ def search_author(list_scopus_id_author):
             raise Scopus_Exception(resp)
         data=resp.json()
         data=data['author-retrieval-response'][0]
+        #consider el caso en que algunosd de estos valores puede ser None
         attributes={'name':data['preferred-name']['given-name'],
-        'surname':data['preferred-name']['surname'],'h-index':int(data['h-index']),'coauthor-count':int(data['coauthor-count']),'document-count':int(data['coredata']['document-count'])}
+        'surname':data['preferred-name']['surname']}
+        
+        if data['h-index']!=None:
+            attributes['h-index']=int(data['h-index'])
+        else:
+            attributes['h-index']=0
+            
+        if data['coauthor-count']!=None:
+            attributes['coauthor-count']=int(data['coauthor-count'])
+        else:
+            attributes['coauthor-count']=0
+            
+        if data['coredata']['document-count']!=None:
+            attributes['document-count']=int(data['coredata']['document-count'])
+        else:
+            attributes['document-count']=0
+            
         dict_authors[id_author]=attributes
     return dict_authors
 
@@ -828,12 +906,15 @@ def get_authors_from_paper(id_paper):
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
     searchQuery = str(id_paper)
-    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-    if resp.status_code != 200:
-        raise Scopus_Exception(resp)
+    
+    resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
+    
+#    resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+ #   while resp.status_code==429:
+  #      _new_key()
+   #     resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+   # if resp.status_code != 200:
+    #    raise Scopus_Exception(resp)
 
     id_authors=[]
     data=resp.json()
@@ -871,14 +952,17 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper):
 
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
         
-        while resp.status_code==429:
-            _new_key()
-            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
+        
+        #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        
+        #while resp.status_code==429:
+         #   _new_key()
+         #   resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
             
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
+        #if resp.status_code != 200:
+        #    raise Scopus_Exception(resp)
 
         id_authors=[]
         data=resp.json()
@@ -916,14 +1000,17 @@ def count_citations_by_id_paper(list_scopus_id_paper):
 
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
-        resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
         
-        while resp.status_code==429:
-            _new_key()
-            resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
         
-        if resp.status_code != 200:
-            raise Scopus_Exception(resp)
+        #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        
+        #while resp.status_code==429:
+         #   _new_key()
+          #  resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
+        
+       # if resp.status_code != 200:
+        #    raise Scopus_Exception(resp)
 
         number_citations=0
         data=resp.json()
@@ -1042,15 +1129,19 @@ def get_papers(list_scopus_id_author,min_year="",max_year=""):
                 fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
                 searchQuery = "query=AU-ID("+str(id_author)+") "+filter_year
                 #print searchQuery
-                resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
                 
-                while resp.status_code==429:
-                    _new_key()
-                    resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+                resp = requests_get_wrapper(search_api_scopus_url+searchQuery+fields)
                 
-                data = resp.json()
-                if resp.status_code != 200:
-                    raise Scopus_Exception(resp)
+                #resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+                
+                #while resp.status_code==429:
+                 #   _new_key()
+                  #  resp = requests.get(search_api_scopus_url+searchQuery+fields, headers=headers)
+                
+                #data = resp.json()
+                #if resp.status_code != 200:
+                 #   raise Scopus_Exception(resp)
+                 
                 data = resp.json()
                 data = data['search-results']
                 if data["opensearch:totalResults"] == '0':
@@ -1096,14 +1187,17 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
     #print searchQuery
 
     fields = "&field=identifier"
-    resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
     
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+    resp = requests_get_wrapper(search_api_author_url+searchQuery+fields)
+    
+    #resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+    
+    #while resp.status_code==429:
+     #   _new_key()
+      #  resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
 
-    if resp.status_code != 200:
-       raise Scopus_Exception(resp)
+    #if resp.status_code != 200:
+     #  raise Scopus_Exception(resp)
 
     data = resp.json()
     #print "-----------JSON----------"
@@ -1141,15 +1235,18 @@ def get_author_affiliations(firstName="", lastName=""):
    
     #fields = "&field=identifier"
     fields = ""
-    resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+
+    resp = requests_get_wrapper(search_api_author_url+searchQuery+fields)
+
+    #resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
     
-    while resp.status_code==429:
-        _new_key()
-        resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
+    #while resp.status_code==429:
+     #   _new_key()
+     #   resp = requests.get(search_api_author_url+searchQuery+fields, headers=headers)
    
-    if resp.status_code != 200:
-       raise Scopus_Exception(resp)
-   
+  #  if resp.status_code != 200:
+#       raise Scopus_Exception(resp)
+ 
     data = resp.json()
     #print "-----------JSON----------"
     #print json.dumps(resp.json(), sort_keys=True, indent=4, separators=(',', ': '))

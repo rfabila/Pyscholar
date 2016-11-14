@@ -2,6 +2,13 @@ import scopus
 import networkx
 import pickle
 
+def load(filename):
+    G_file=open(filename,"r")
+    G=pickle.load(G_file)
+    G_file.close()
+    return G
+    
+
 def collaboration_network_by_ids(author_ids,distance=0):
     """Creates a collaboration network with the given list of scopus
     author ids.  The distance parameter specifies at what distance from the authors in names will other nodes by included.
@@ -76,6 +83,7 @@ class CollaborationNetwork():
         
         splitted_names=[n.split(',') for n in self.core_names]
         self.core_name_IDS={self.core_names[i]:scopus.find_author_scopus_id_by_name(splitted_names[i][0],splitted_names[i][1]) for i in range(len(self.core_names))}
+        print self.core_name_IDS
         for lst in self.core_name_IDS.values():
             self.core_ids.extend(lst)
         
@@ -133,11 +141,15 @@ class CollaborationNetwork():
             start=self.current_author
             for i in range(start,len(Q)):
                 self.current_author=i
+                print "current_author", self.current_author
+                print "Author_id", Q[i]
                 papers=scopus.get_publications(Q[i])
+                print Q[i]
                 papers=list(papers)
                 start_paper=self.current_paper
                 for paper_id in range(start_paper,len(papers)):
                     self.current_paper=paper_id
+                    print "current paper ", papers[paper_id]
                     paper_id=papers[paper_id]
                     authors=scopus.get_authors_from_paper(str(paper_id))
                     for y in authors:
