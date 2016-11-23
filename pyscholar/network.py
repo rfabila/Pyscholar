@@ -77,6 +77,7 @@ class CollaborationNetwork():
         self.network_computed=False
         self.computed_distance=-1
         self.nodes_by_distance=[set() for i in range(self.distance+2)]
+        self.Q_by_distance=[[] for i in range(self.distance+2)]
         
         self.current_paper=0
         self.current_author=0
@@ -87,9 +88,27 @@ class CollaborationNetwork():
         for lst in self.core_name_IDS.values():
             self.core_ids.extend(lst)
         
-        [self.nodes_by_distance[0].add(str(x)) for x in self.core_ids]
+        
         self.G=networkx.graph.Graph()
-        [self.G.add_node(str(x)) for x in self.core_ids]
+        
+        self.alias={}
+        for x in self.core_ids:
+            if isinstance(x,list):
+                y=min(x)
+                for z in x:
+                    self.alias[str(z)]=str(y)
+                    self.Q_by_distance[0].append(str(z))
+                self.G.add_node(str(y))
+                self.nodes_by_distance[0].add(str(y))
+            else:
+                self.Q_by_distance[0].append(str(x))
+                self.alias[str(x)]=str(x)
+                self.G.add_node(str(x))
+                self.nodes_by_distance[0].add(str(x))
+                
+        
+        
+        #[self.G.add_node(str(x)) for x in self.core_ids]
         
         
         #self.create_network()
@@ -131,6 +150,71 @@ class CollaborationNetwork():
     
         
     
+     
+    def create_network2(self):
+        """Creates the collaboration network."""
+        
+        for current_dist in range(self.distance+2):
+            if len(self.Q_by_distance[current_dist])>0:
+                break
+        while current_dist<=self.distance:
+            while len(self.Q_by_distance[current_dist])>0:
+                print "current distance",current_dist
+                author=self.Q_by_distance[current_dist][-1]                    
+                print "current_author",author
+                papers=scopus.get_publications(author)
+                papers=list(papers)
+                start_paper=self.current_paper
+                for paper_id in range(start_paper,len(papers)):
+                    self.current_paper=paper_id
+                    print "current paper ", papers[paper_id]
+                    paper_id=papers[paper_id]
+                    authors=scopus.get_authors_from_paper(str(paper_id))
+                    for y in authors:
+                        
+                        if str(y) in self.alias:
+                            y=self.alias[str(y)]
+                        else:
+                            y=str(y)
+                            self.alias[y]=y
+                              
+                        if not self.G.has_node(y):
+                            self.nodes_by_distance[current_dist+1].add(y)
+                            if current_dist<self.distance:
+                                self.Q_by_distance[current_dist+1].append(y)
+                                    
+                        if author in self.alias:
+                            x=self.alias[author]
+                        else:
+                            x=author
+                            
+                        if x!=y:
+                            if self.G.has_edge(x,y):
+                                self.G[x][y]["papers"].add(str(paper_id))
+                            else:
+                                self.G.add_edge(x,y)
+                                self.G[x][y]["papers"]=set()
+                                self.G[x][y]["papers"].add(str(paper_id))
+                self.Q_by_distance[current_dist].pop()
+                self.current_paper=0
+            current_dist+=1
+        self.network_computed=True
+    
+    def add_alias(self,author,author_alias):
+        """Add an alias to an author, note that the author must be already part of the network."""
+        author_alias=str(author_alias)
+        if author_alias not in self.alias:
+            author=self.alias[str(author)]
+            self.alias[author_alias]=author
+            self.network_computed=False
+            for d in range(self.distance+1):
+                if author in self.nodes_by_distance[d]:
+                    break
+            self.Q_by_distance[d].append(author_alias)
+            
+            
+            
+            
         
     def create_network(self,heuristic=None):
         """Creates the collaboration network."""
@@ -169,7 +253,8 @@ class CollaborationNetwork():
             self.computed_distance=d
         self.network_computed=True
                 
-        
+    def get_network(self,distance=0,closed=True,start_year=None,end_year=None):
+        pass
         
         
         
