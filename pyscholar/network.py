@@ -1,71 +1,27 @@
 import scopus
 import networkx
 import pickle
+import datetime
+import dateutil.parser
 
 def load(filename):
     G_file=open(filename,"r")
     G=pickle.load(G_file)
     G_file.close()
     return G
+
+
+def save_graphml(G,filename):
+    """Saves a network created get_network to graphml file"""
     
-
-def collaboration_network_by_ids(author_ids,distance=0):
-    """Creates a collaboration network with the given list of scopus
-    author ids.  The distance parameter specifies at what distance from the authors in names will other nodes by included.
-       For example, if distance=0 only those authors in names will be part of the network. If distance=1 then
-       any author who is a coauthor with someone in author_ids will be included."""
-    N=[]
-    C=[]
-    G=networkx.graph.Graph()
-    for x in author_ids:
-        N.append(str(x))
-    #Ver lo de la distancia. Una opcion es calcular las aristas entre vertices
-    #a distancia d o bien dejarlos como hojas.
-    for i in range(distance+1):
-        C=N
-        N=[]
-        for x in C:
-            G.add_node(x)
-        for x in C:
-            #print x
-            papers=scopus.get_publications(x)
-            #print papers
-            for paper_id in papers:
-                #print paper_id
-                authors=scopus.get_authors_from_paper(str(paper_id))
-                for y in authors:
-                    if not G.has_node(y):
-                        N.append(y)
-                    else:
-                        if x!=y:
-                            if G.has_edge(x,y):
-                                G[x][y]["papers"].append(paper_id)
-                            else:
-                                G.add_edge(x,y)
-                                G[x][y]["papers"]=[paper_id]
-    H=CollaborationNetwork(G)
-    return H
-
-def collaboration_network_by_names(names,distance=0):
-    """Creates a collaboration network with a given list of names.
-       The first and last names should be sperated by comma.
-       The distance parameter specifies at what distance from the authors in names will other nodes by included.
-       For example if distance=0 only those authors in names will be part of the network. If distance=1 then
-       any author who is a coauthor with someone in names will be included."""
-    splitted_names=[n.split(',') for n in names]
-    IDS={names[i]:scopus.find_author_scopus_id_by_name(splitted_names[i][0],splitted_names[i][1]) for i in range(len(names))}
-    author_ids=[]
-    for lst in IDS.values():
-        for x in lst:
-            author_ids.append(str(x))
-    G=collaboration_network_by_ids(author_ids,distance=distance)
-    G.core_names=IDS
-    return G
-
-def load_collaboration_network(filename):
-    file_G=open(filename,"r")
-    G=pickle.load(file_G)
-    return G
+    if "paper" in G.edges()[0]:
+        H=networkx.graph.Graph()
+        for e in G.edges():
+            H.add_edge(e[0],e[1])
+            H[e[0]][e[1]]['weight']=len(G[e[0]][e[1]]['papers'])
+        G=H
+    networkx.write_graphml(G,filename)
+    
 
 class CollaborationNetwork():
     def __init__(self,core_names=[],distance=0,core_ids=[]):
@@ -147,9 +103,6 @@ class CollaborationNetwork():
         pickle.dump(self,file_G)
         file_G.close()
         
-    
-        
-    
      
     def create_network(self):
         """Creates the collaboration network."""
@@ -213,55 +166,82 @@ class CollaborationNetwork():
                     break
             self.Q_by_distance[d].append(author_alias)
             
-                    
+                                  
+    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,use_names=True,use_paper_id=False):
+        """Returns a networkX graph with the given parameters."""
+        if not self.network_computed:
+            self.create_network()
+        self.get_paper_info()
         
-    # def create_network(self,heuristic=None):
-    #     """Creates the collaboration network."""
-    #     
-    #     distance_start=self.computed_distance+1
-    #     for d in range(distance_start,self.distance+1):
-    #         Q=list(self.nodes_by_distance[d])
-    #         start=self.current_author
-    #         for i in range(start,len(Q)):
-    #             self.current_author=i
-    #             print "current_author", self.current_author
-    #             print "Author_id", Q[i]
-    #             papers=scopus.get_publications(Q[i])
-    #             print Q[i]
-    #             papers=list(papers)
-    #             start_paper=self.current_paper
-    #             for paper_id in range(start_paper,len(papers)):
-    #                 self.current_paper=paper_id
-    #                 print "current paper ", papers[paper_id]
-    #                 paper_id=papers[paper_id]
-    #                 authors=scopus.get_authors_from_paper(str(paper_id))
-    #                 for y in authors:
-    #                     y=str(y)
-    #                     if not self.G.has_node(y):
-    #                         self.nodes_by_distance[d+1].add(y)
-    #                     if Q[i]!=y:
-    #                         if self.G.has_edge(Q[i],y):
-    #                             self.G[Q[i]][y]["papers"].add(str(paper_id))
-    #                         else:
-    #                             self.G.add_edge(Q[i],y)
-    #                             self.G[Q[i]][y]["papers"]=set()
-    #                             self.G[Q[i]][y]["papers"].add(str(paper_id))
-    #             self.current_paper=0
-    #                             
-    #         self.current_author=0
-    #         self.computed_distance=d
-    #     self.network_computed=True
+        if start_year!=None:
+            start_date=datetime.date(int(start_year),1,1)
+        if end_year!=None:
+            end_date=datetime.date(int(start_year),1,1)
+            
+        if start_date==None:
+            start_date=datetime.date.min
+        
+        if end_date==None:
+            end_date=datetime.date.max
+             
+        H=networkx.graph.Graph()
+        
+        for x in self.G.nodes():
+            H.add_node(x)
+        
+        for e in self.G.edges():
+            for paper_id in self.G[e[0]][e[1]]['papers']:
+                paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
+                if paper_date>=start_date and paper_date<=end_date:
+                    if H.has_edge(e[0],e[1]):
+                        if use_paper_id:
+                            H[e[0]][e[1]]['papers'].add(str(paper_id))
+                        else:
+                            H[e[0]][e[1]]['weight']+=1
+                    else:
+                        H.add_edge(e[0],e[1])
+                        if use_paper_id:
+                            H[e[0]][e[1]]['papers']=set()
+                            H[e[0]][e[1]]['papers'].add(str(paper_id))
+                        else:
+                            H[e[0]][e[1]]['weight']=1
+                            
+        if use_names:
+            F=networkx.graph.Graph()
+            for e in H.edges():
+                print e
+                n1=""
+                n2=""
                 
-    def get_network(self,distance=0,closed=True,start_year=None,end_year=None):
-        pass
+                if self.author_info[e[0]]['name']!=None:
+                    n1+=self.author_info[e[0]]['name']
+                    n1+=" "
+                    
+                if self.author_info[e[0]]['surname']!=None:
+                    n1+=self.author_info[e[0]]['surname']
+                    
+                if self.author_info[e[1]]['name']!=None:
+                    n2+=self.author_info[e[1]]['name']
+                    n2+=" "
+                    
+                if self.author_info[e[1]]['surname']!=None:
+                    n2+=self.author_info[e[1]]['surname']
+                    
+                F.add_edge(n1,n2)
+                print n1
+                print n2
+                F[n1][n2]=H[e[0]][e[1]]
+            H=F
         
-        
-        
-    #def update_paper_info(self):
-     #   for e in self.G.edges():
-      #      for p in self.G[e[0]][e[1]]["papers"]:
-       #         if p not in self.paper_info:
-        #            self.paper_info[p]=scopus.paper_info(p)
+        return H
     
+
+    
+                        
+                
+                
+                
+            
+        
     
     
