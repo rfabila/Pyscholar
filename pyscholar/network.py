@@ -151,7 +151,7 @@ class CollaborationNetwork():
         
     
      
-    def create_network2(self):
+    def create_network(self):
         """Creates the collaboration network."""
         
         for current_dist in range(self.distance+2):
@@ -160,7 +160,13 @@ class CollaborationNetwork():
         while current_dist<=self.distance:
             while len(self.Q_by_distance[current_dist])>0:
                 print "current distance",current_dist
-                author=self.Q_by_distance[current_dist][-1]                    
+                
+                author=self.Q_by_distance[current_dist][-1]
+                if author in self.alias:
+                    x=self.alias[author]
+                else:
+                    x=author
+                
                 print "current_author",author
                 papers=scopus.get_publications(author)
                 papers=list(papers)
@@ -182,11 +188,6 @@ class CollaborationNetwork():
                             self.nodes_by_distance[current_dist+1].add(y)
                             if current_dist<self.distance:
                                 self.Q_by_distance[current_dist+1].append(y)
-                                    
-                        if author in self.alias:
-                            x=self.alias[author]
-                        else:
-                            x=author
                             
                         if x!=y:
                             if self.G.has_edge(x,y):
@@ -212,46 +213,44 @@ class CollaborationNetwork():
                     break
             self.Q_by_distance[d].append(author_alias)
             
-            
-            
-            
+                    
         
-    def create_network(self,heuristic=None):
-        """Creates the collaboration network."""
-        
-        distance_start=self.computed_distance+1
-        for d in range(distance_start,self.distance+1):
-            Q=list(self.nodes_by_distance[d])
-            start=self.current_author
-            for i in range(start,len(Q)):
-                self.current_author=i
-                print "current_author", self.current_author
-                print "Author_id", Q[i]
-                papers=scopus.get_publications(Q[i])
-                print Q[i]
-                papers=list(papers)
-                start_paper=self.current_paper
-                for paper_id in range(start_paper,len(papers)):
-                    self.current_paper=paper_id
-                    print "current paper ", papers[paper_id]
-                    paper_id=papers[paper_id]
-                    authors=scopus.get_authors_from_paper(str(paper_id))
-                    for y in authors:
-                        y=str(y)
-                        if not self.G.has_node(y):
-                            self.nodes_by_distance[d+1].add(y)
-                        if Q[i]!=y:
-                            if self.G.has_edge(Q[i],y):
-                                self.G[Q[i]][y]["papers"].add(str(paper_id))
-                            else:
-                                self.G.add_edge(Q[i],y)
-                                self.G[Q[i]][y]["papers"]=set()
-                                self.G[Q[i]][y]["papers"].add(str(paper_id))
-                self.current_paper=0
-                                
-            self.current_author=0
-            self.computed_distance=d
-        self.network_computed=True
+    # def create_network(self,heuristic=None):
+    #     """Creates the collaboration network."""
+    #     
+    #     distance_start=self.computed_distance+1
+    #     for d in range(distance_start,self.distance+1):
+    #         Q=list(self.nodes_by_distance[d])
+    #         start=self.current_author
+    #         for i in range(start,len(Q)):
+    #             self.current_author=i
+    #             print "current_author", self.current_author
+    #             print "Author_id", Q[i]
+    #             papers=scopus.get_publications(Q[i])
+    #             print Q[i]
+    #             papers=list(papers)
+    #             start_paper=self.current_paper
+    #             for paper_id in range(start_paper,len(papers)):
+    #                 self.current_paper=paper_id
+    #                 print "current paper ", papers[paper_id]
+    #                 paper_id=papers[paper_id]
+    #                 authors=scopus.get_authors_from_paper(str(paper_id))
+    #                 for y in authors:
+    #                     y=str(y)
+    #                     if not self.G.has_node(y):
+    #                         self.nodes_by_distance[d+1].add(y)
+    #                     if Q[i]!=y:
+    #                         if self.G.has_edge(Q[i],y):
+    #                             self.G[Q[i]][y]["papers"].add(str(paper_id))
+    #                         else:
+    #                             self.G.add_edge(Q[i],y)
+    #                             self.G[Q[i]][y]["papers"]=set()
+    #                             self.G[Q[i]][y]["papers"].add(str(paper_id))
+    #             self.current_paper=0
+    #                             
+    #         self.current_author=0
+    #         self.computed_distance=d
+    #     self.network_computed=True
                 
     def get_network(self,distance=0,closed=True,start_year=None,end_year=None):
         pass

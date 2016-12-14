@@ -50,6 +50,7 @@ import itertools as it
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
+import pickle
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
@@ -68,15 +69,29 @@ scopus_author_info=dict()
 
 
 
-#Un diccionario con las listas
-Scopus_ids_merged_rep={}
-Scopus_ids_merged_lists={}
+#cache saves
+def save_cache(filename=None):
+    caches=(scopus_authors_by_idpapers_cache,
+            scopus_papers_by_authorid_cache,
+            scopus_references_by_idpaper_cache,
+            scopus_paper_info_cache,scopus_author_info)
+    if filename==None:
+        filename="lastsession.ch"
+    file_ch=open(filename,"w")
+    pickle.dump(caches,file_ch)
+    file_ch.close()
 
-#Voy a poner aqui lo que falta por hacer (TODO list)
-
-#Funciones para manejar las ids, hago implementaciones ingenuas que
-#despues mejoraremos
-#Vean https://en.wikipedia.org/wiki/Disjoint-set_data_structure
+def load_caches(filename=None):
+    if filename==None:
+        filename="lastsession.ch"
+    file_ch=open(filename,"r")
+    ch=(scopus_authors_by_idpapers_cache,
+        scopus_papers_by_authorid_cache,
+        scopus_references_by_idpaper_cache,
+        scopus_paper_info_cache,scopus_author_info)
+    ch=pickle.load(file_ch)
+    file_ch.close()
+    
 
 def requests_get_wrapper(query):
     resp = requests.get(query, headers=headers)
@@ -523,6 +538,7 @@ def paper_info(id_paper):
     #    raise Scopus_Exception(resp)
     
     data=resp.json()
+    print data
     D={}
     D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
     D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
@@ -554,13 +570,41 @@ def author_info(author_id):
     #    raise Scopus_Exception(resp)
     
     data=resp.json()
+    print author_id
     print data
+    
+    if 'alias' in data['author-retrieval-response']:
+        s=data['author-retrieval-response']['alias']['prism:url']
+        aidx=s.find("author_id")
+        author_id=s[aidx+10:]
+        searchQuery = str(author_id)
+        resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
+        data=resp.json()
+        print author_id
+        print data
+                
+    
     data=data['author-retrieval-response'][0]
     D={'name':data['preferred-name']['given-name'],
-    'surname':data['preferred-name']['surname'],
-    'affiliation-id':data['affiliation-current'][u'@id'],
-    'country':data['affiliation-current']['affiliation-country'],
-    'city':data['affiliation-current']['affiliation-city']}
+    'surname':data['preferred-name']['surname']}
+    
+    if 'affiliation-current' in data:
+        
+        if u'@id' in data['affiliation-current']:
+            D['affiliation-id']=data['affiliation-current'][u'@id']
+        else:
+            D['affiliation-id']=None
+    
+        if 'affiliation-country' in data['affiliation-current']:
+            D['country']=data['affiliation-current']['affiliation-country']
+        else:
+            D['country']=None
+        
+        if 'affiliation-city' in data['affiliation-current']:
+            D['city']=data['affiliation-current']['affiliation-city']
+        else:
+            D['city']=None
+         
     scopus_author_info[str(author_id)]=D
     return D
 
