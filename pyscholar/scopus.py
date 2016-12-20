@@ -1,4 +1,6 @@
 import ConfigParser, os, time
+import Queue
+import threading
 
 class Quota_Exceeded(Exception):
     def __str__(self):
@@ -28,7 +30,8 @@ connection=ConfigParser.ConfigParser()
 
 wait_time=5
 attempts=5
-    
+num_fetch_threads=10
+Errors=[]
 
 
 if MY_API_KEY == "":
@@ -63,6 +66,7 @@ headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
 scopus_authors_by_idpapers_cache=dict()
 scopus_papers_by_authorid_cache=dict()
+scopus_papers_by_authorid_noyear_cache=dict()
 scopus_references_by_idpaper_cache=dict()
 scopus_paper_info_cache=dict()
 scopus_author_info=dict()
@@ -73,6 +77,7 @@ scopus_author_info=dict()
 def save_cache(filename=None):
     caches=(scopus_authors_by_idpapers_cache,
             scopus_papers_by_authorid_cache,
+            scopus_papers_by_authorid_noyear_cache,
             scopus_references_by_idpaper_cache,
             scopus_paper_info_cache,scopus_author_info)
     if filename==None:
@@ -87,6 +92,7 @@ def load_caches(filename=None):
     file_ch=open(filename,"r")
     ch=(scopus_authors_by_idpapers_cache,
         scopus_papers_by_authorid_cache,
+        scopus_papers_by_authorid_noyear_cache,
         scopus_references_by_idpaper_cache,
         scopus_paper_info_cache,scopus_author_info)
     ch=pickle.load(file_ch)
@@ -135,110 +141,6 @@ class Scopus_Exception(Exception):
     def __str__(self):
         return "%s: %s"%(self.statusCode, self.statusText)
 
-
-def load_authors_from_file(path=""):
-    """
-    Reads a file where each line of the file is an author id.
-    """
-    try:
-        with open(directory, 'r') as f:
-            return [str(line.strip()) for line in f]
-    except IOError :
-        print "Could not read file:", directory
-
-
-def load_papers_from_file(path=""):
-    """
-    Reads a file where each line of the file is an paper id.
-    """
-    try:
-        with open(directory, 'r') as f:
-            return [line.strip() for line in f]
-    except IOError :
-        print "Could not read file:", directory
-
-
-def _add_scopus_id(scopus_id):
-    """
-    Adds a scopus id to the merged list. Returns False if the ID is already in 
-    the merged list and false otherwise
-    """
-
-    #Buscamos a ver si ya estaba en algunas lista, de ser
-    #asi no hacemos nada
-    for x in Scopus_ids_merged_lists:
-        if scopus_id in D[x]:
-            return False
-
-
-    #No tiene "padre" y por tanto es la raiz
-    Scopus_ids_merged_rep[scopus_id]=None
-
-    #De momento el es el unico de la lista
-    Scopus_ids_merged_lists[scopus_id]=[scopus_id]
-
-    return list
-
-
-def _get_root_id(scopus_id):
-    """Follows the path of parents until it finds the root"""
-
-    #Si no esta en la lista de representantes pues no hay nada que hacer
-    if scopus_id not in Scopus_ids_merged_rep:
-        return scopus_id
-
-
-    root_scopus_id=scopus_id
-    parent_scopus_id=t_scopus_id
-
-    #seguimos los apuntadores hasta llegar a la raiz
-    while Scopus_ids_merged_rep[root_scopus_id]!=None:
-        root_scopus_id=Scopus_ids_merged_rep[root_scopus_id]
-
-    return root_scopus_id
-
-def _get_alias_list_id(scopus_id):
-    """returns the list of alias id"""
-    #En Scopus_ids_merged_lists[root_id] se van a guardar la lista
-    #de alias
-
-def _union_alias_id(scopus_id_1,scopus_id_2):
-    #Junta a la lista de scopus_id_1 y scopus_id_2
-    pass
-
-
-def _get_alias_id(scopus_id):
-    pass
-
-###FIN DE FUNCIONES de IDs
-def disable_graphical_interface():
-    """
-    Disables the graphical environment.
-    """
-    #import matplotlib.pyplot as plt
-    plt.switch_backend('Agg')
-
-def enable_graphical_interface():
-    """
-    Enables the graphical environment.
-    """
-    #['pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg', 'ps', 'agg', 'cairo', 'MacOSX', 'GTKCairo', 'WXAgg', 'template', 'TkAgg', 'GTK3Cairo', 'GTK3Agg', 'svg', 'WebAgg', 'CocoaAgg', 'emf', 'gdk', 'WX']
-    plt.switch_backend('GTK')
-
-
-
-
-def load_graph_pickle(path=""):
-    """
-    Loads a graph object saved using :mod:`pickle` and returns a networkx graph object.
-    """
-    return nx.read_gpickle(path)
-
-def save_graph_pickle(G,path="",name_graph=""):
-    """
-    Saves a graph object using :mod:`pickle`.
-    """
-    nx.write_gpickle(G,path+name_graph+".gpickle")
 
 def find_affiliation_scopus_id_by_name(organization=""):
     """
@@ -514,6 +416,7 @@ def get_common_papers(id_author_1="",id_author_2=""):
         papers_in_common=papers_author_1.intersection(papers_author_2)
     return papers_in_common
 
+
 def paper_info(id_paper):
     """
     Returns a dictionary with basic information about the paper.
@@ -528,26 +431,66 @@ def paper_info(id_paper):
     
     resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
     
-    #resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-    
-    #while resp.status_code==429:
-     #   _new_key()
-      #  resp = requests.get(search_api_abstract_url+searchQuery+fields, headers=headers)
-    
-   # if resp.status_code != 200:
-    #    raise Scopus_Exception(resp)
-    
     data=resp.json()
     print data
     D={}
     D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
     D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
     D["date"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:coverDate'])
-    D["venue"]=data['abstracts-retrieval-response'][u'coredata'][u'prism:publicationName']
+    
+    if 'prism:publicationName' in data['abstracts-retrieval-response'][u'coredata']:
+        D["venue"]=data['abstracts-retrieval-response'][u'coredata'][u'prism:publicationName']
+    else:
+        D["venue"]=None
+        
     D["authors"]=get_authors_from_paper(id_paper)
     #print data
     return D
 
+def _thread_maker(f,INFO):
+    def t(q,i):
+        while True:
+           print "Fetching "+INFO+".Worker ",i
+           x_id=q.get()
+           try:
+               f(str(x_id))
+           except Exception as e:
+               print e
+               Errors.append((INFO,e))
+           q.task_done()
+    return t
+
+def _download_info(lst,f_thread):
+    
+    q=Queue.Queue()
+    
+    for x in lst:
+        q.put(x)
+    
+    m=min(len(lst),num_fetch_threads)
+    for i in range(m):
+        worker = threading.Thread(target=f_thread, args=(q,i))
+        worker.setDaemon(True)
+        worker.start()
+    
+    q.join()
+
+def download_author_info(author_ids):
+    t=_thread_maker(author_info,"author info")
+    _download_info(author_ids,t)
+
+def download_paper_info(paper_ids):
+    t=_thread_maker(paper_info,"paper info")
+    _download_info(paper_ids,t)
+    
+def download_publications(author_ids):
+    t=_thread_maker(get_publications,"publications by author")
+    _download_info(author_ids,t)
+
+def download_authors_from_papers(paper_ids):
+    t=_thread_maker(get_authors_from_paper,"authors by paper")
+    _download_info(paper_ids,t)
+        
 def author_info(author_id):
     """Returns a dictionary with basic information about the author_id"""
     if str(author_id) in scopus_author_info:
@@ -557,18 +500,6 @@ def author_info(author_id):
     searchQuery = str(author_id)
     
     resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
-    
-    #resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
-    
-    #while resp.status_code==429:
-     #   _new_key()
-     #   resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
-    
-    #print resp.status_code
-    #print resp
-    #if resp.status_code != 200:
-    #    raise Scopus_Exception(resp)
-    
     data=resp.json()
     print author_id
     print data
@@ -1108,9 +1039,41 @@ def check_years(min_year="",max_year=""):
 def get_publications(author_id):
     #Ruy Version
     "Returns a list of publications id authored by the given author(id)"
+    
     author_id=str(author_id)
-    papers=get_papers(author_id)[author_id]
-    return papers
+    
+    if author_id in scopus_papers_by_authorid_noyear_cache:
+        return scopus_papers_by_authorid_noyear_cache[author_id]
+    
+    author_attributes=search_author(author_id)
+    document_count=author_attributes[author_id]['document-count']
+    iterations=math.ceil(document_count/200.0)
+    chunks=[]
+    id_papers=set()
+    for size_chunk in range(0,int(iterations)+1):
+        if size_chunk==0:
+            chunks.append(0)
+        else:
+            chunks.append((200*size_chunk)+1)
+    index_chunk=0
+    while (iterations!=0):
+        #print iterations
+        fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
+        searchQuery = "query=AU-ID("+str(author_id)+") "
+        #print searchQuery
+        resp = requests_get_wrapper(search_api_scopus_url+searchQuery+fields)
+        data = resp.json()
+        data = data['search-results']
+        if data["opensearch:totalResults"] != '0':
+            for entry in data['entry']:
+                paperId = entry['dc:identifier'].split(':')
+                print paperId
+                id_papers.add(str(paperId[1]))
+        iterations-=1
+        index_chunk+=1
+    id_papers=list(id_papers)
+    scopus_papers_by_authorid_noyear_cache[author_id]=list(id_papers)
+    return id_papers
     
 def get_papers(list_scopus_id_author,min_year="",max_year=""):
     """

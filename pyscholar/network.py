@@ -4,6 +4,7 @@ import pickle
 import datetime
 import dateutil.parser
 
+
 def load(filename):
     G_file=open(filename,"r")
     G=pickle.load(G_file)
@@ -86,31 +87,51 @@ class CollaborationNetwork():
         self.G=G.G
     
     def get_paper_info(self):
+        Papers=set()
+        for e in self.G.edges():
+            papers=self.G[e[0]][e[1]]["papers"]
+            for paper_id in papers:
+                if paper_id not in self.paper_info:
+                    Papers.add(paper_id)
+        scopus.download_paper_info(list(Papers))
+        
         for e in self.G.edges():
             papers=self.G[e[0]][e[1]]["papers"]
             for paper_id in papers:
                 if paper_id not in self.paper_info:
                     print paper_id
                     self.paper_info[paper_id]=scopus.paper_info(paper_id)
-                    
+    
+    
     def get_author_info(self):
+        Q=[]
+        for author_id in self.G.nodes():
+            if  author_id not in self.author_info:
+                Q.append(author_id)
+        print "Downloading info"
+        scopus.download_author_info(Q)
+        print "Adding info"
         for author_id in self.G.nodes():
             if  author_id not in self.author_info:
                 self.author_info[author_id]=scopus.author_info(author_id)
+        
                 
     def save(self,file_name):
         file_G=open(file_name,'w')
         pickle.dump(self,file_G)
         file_G.close()
         
-     
     def create_network(self):
         """Creates the collaboration network."""
         
         for current_dist in range(self.distance+2):
             if len(self.Q_by_distance[current_dist])>0:
                 break
+            
         while current_dist<=self.distance:
+            
+            scopus.download_publications(self.Q_by_distance[current_dist])
+            
             while len(self.Q_by_distance[current_dist])>0:
                 print "current distance",current_dist
                 
@@ -122,7 +143,9 @@ class CollaborationNetwork():
                 
                 print "current_author",author
                 papers=scopus.get_publications(author)
-                papers=list(papers)
+                
+                scopus.download_authors_from_papers(papers)
+                
                 start_paper=self.current_paper
                 for paper_id in range(start_paper,len(papers)):
                     self.current_paper=paper_id
@@ -166,7 +189,17 @@ class CollaborationNetwork():
                     break
             self.Q_by_distance[d].append(author_alias)
             
-                                  
+    
+    def get_core_network(self):
+        H=networkx.graph.Graph()
+        for v in self.G.nodes():
+            H.add_node(v)
+        for e in self.G.edges():
+            H.add_edge(e[0],e[1])
+            H[e[0]][e[1]]['weight']=len(G[e[0]][e[1]]['papers'])
+        
+        return H
+    
     def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,use_names=True,use_paper_id=False):
         """Returns a networkX graph with the given parameters."""
         if not self.network_computed:
@@ -191,7 +224,13 @@ class CollaborationNetwork():
         
         for e in self.G.edges():
             for paper_id in self.G[e[0]][e[1]]['papers']:
-                paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
+                
+                try:
+                    paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
+                except ValueError as ex:
+                    print ex
+                    paper_date=datetime.date.min
+                    
                 if paper_date>=start_date and paper_date<=end_date:
                     if H.has_edge(e[0],e[1]):
                         if use_paper_id:
