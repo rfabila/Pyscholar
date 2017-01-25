@@ -616,6 +616,7 @@ def search_author(list_scopus_id_author):
         if resp.status_code != 200:
             raise Scopus_Exception(resp)
         data=resp.json()
+        print data
         data=data['author-retrieval-response'][0]
         #consider el caso en que algunosd de estos valores puede ser None
         attributes={'name':data['preferred-name']['given-name'],
