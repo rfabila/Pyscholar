@@ -8,6 +8,13 @@ class Quota_Exceeded(Exception):
 class Key_Exception(Exception):
     def __str__(self):
         return "Scopus key not set."
+    
+class Alias_Exception(Exception):
+    def __init__(self,author_id,alias):
+        self.author_id=str(author_id)
+        self.alias=str(alias)
+    def __str__(self):
+        return "The given author_id has an alias"
 
 #Scopus keys
 keys = ConfigParser.ConfigParser()
@@ -491,8 +498,10 @@ def download_authors_from_papers(paper_ids):
     t=_thread_maker(get_authors_from_paper,"authors by paper")
     _download_info(paper_ids,t)
         
-def author_info(author_id):
-    """Returns a dictionary with basic information about the author_id"""
+def author_info(author_id,strict=False):
+    """Returns a dictionary with basic information about the author_id.
+    If strict is set to True then an alias response will result in an alias exception.
+    Otherwise, the information associated by the alias is returned."""
     if str(author_id) in scopus_author_info:
         return scopus_author_info[author_id]
     fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id"
@@ -507,6 +516,10 @@ def author_info(author_id):
     if 'alias' in data['author-retrieval-response']:
         s=data['author-retrieval-response']['alias']['prism:url']
         aidx=s.find("author_id")
+        
+        if strict:
+            raise Alias_Exception(author_id,s[aidx+10:])
+        
         author_id=s[aidx+10:]
         searchQuery = str(author_id)
         resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
@@ -575,11 +588,13 @@ def get_title_abstract_by_idpaper(id_paper=""):
     return (id_paper,(data['dc:title']),(data['dc:description']))
 
 
-def search_author(list_scopus_id_author):
+def search_author(list_scopus_id_author,strict=False):
     """
     This function returns a dictionary where the key is the ID of the
     author and the value associated with the key is a dictionary
     with the following keys: name, surname, h-index and coauthor-count.
+    If strict is set to True and an author_id has an alias then
+    an Alias_Exception is thrown.
 
     :param list_scopus_id_affiliation: If you are looking for an author, you can send the id as a string but if you want to multiple authors you can send a list of their ids.
     :type list_scopus_id_affiliation: String or List
@@ -617,8 +632,26 @@ def search_author(list_scopus_id_author):
             raise Scopus_Exception(resp)
         data=resp.json()
         print data
+        
+        if 'alias' in data['author-retrieval-response']:
+            s=data['author-retrieval-response']['alias']['prism:url']
+            aidx=s.find("author_id")
+        
+            if strict:
+                raise Alias_Exception(id_author,s[aidx+10:])
+        
+            id_author=s[aidx+10:]
+            searchQuery = str(id_author)
+            resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
+            print resp.status_code
+            print resp
+            if resp.status_code != 200:
+                raise Scopus_Exception(resp)
+            data=resp.json()
+            print data
+            
         data=data['author-retrieval-response'][0]
-        #consider el caso en que algunosd de estos valores puede ser None
+        #considerar el caso en que algunos de estos valores puede ser None
         attributes={'name':data['preferred-name']['given-name'],
         'surname':data['preferred-name']['surname']}
         
@@ -1037,16 +1070,26 @@ def check_years(min_year="",max_year=""):
                 return None
 
 
-def get_publications(author_id):
+def get_publications(author_id,strict=False):
     #Ruy Version
-    "Returns a list of publications id authored by the given author(id)"
+    """Returns a list of publications id authored by the given author(id).
+       If strict is set to True and the author_id has an alias then an
+       Alias_Exception is returned."""
     
     author_id=str(author_id)
     
     if author_id in scopus_papers_by_authorid_noyear_cache:
         return scopus_papers_by_authorid_noyear_cache[author_id]
     
-    author_attributes=search_author(author_id)
+    try:
+        author_attributes=search_author(author_id,strict=True)
+    except Alias_Exception as e:
+        if strict:
+            raise e
+        author_id=e.alias
+        print author_id
+        author_attributes=search_author(author_id,strict=True)
+        
     document_count=author_attributes[author_id]['document-count']
     iterations=math.ceil(document_count/200.0)
     chunks=[]
