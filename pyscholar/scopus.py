@@ -77,6 +77,7 @@ scopus_papers_by_authorid_noyear_cache=dict()
 scopus_references_by_idpaper_cache=dict()
 scopus_paper_info_cache=dict()
 scopus_author_info=dict()
+scopus_affiliation_info=dict()
 
 
 
@@ -109,6 +110,7 @@ def load_caches(filename=None):
 def requests_get_wrapper(query):
     resp = requests.get(query, headers=headers)
     t=0
+    print query
     while resp.status_code!=200  and t < attempts:
         if resp.status_code==429:
             _new_key()
@@ -210,6 +212,20 @@ def find_affiliation_scopus_id_by_name(organization=""):
 
     return affiliation_table
 
+def affiliation_info(af_id):
+    af_id=str(af_id)
+    print af_id
+    if af_id in scopus_affiliation_info:
+        return scopus_affiliation_info[af_id]
+    
+    resp = requests_get_wrapper(retrieve_api_affiliation_url+af_id)
+    data=resp.json()
+    print data
+    data=data["affiliation-retrieval-response"]
+    scopus_affiliation_info[af_id]=data
+    return data
+    
+
 def search_affiliation_by_id(list_scopus_id_affiliation):
     """
     This function returns a dictionary where the key is the ID of the
@@ -249,9 +265,10 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
         #    raise Scopus_Exception(resp)
         
         data=resp.json()
+        print data
         data=data["affiliation-retrieval-response"]
-        date_created=str(data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year'])
-        preferred_name=str(data["institution-profile"]['preferred-name'])
+        date_created=data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year']
+        preferred_name=data["institution-profile"]['preferred-name']
         author_count=int(data['coredata']['author-count'])
         document_count=int(data['coredata']['document-count'])
         attributes={'date_created':date_created,'preferred_name':preferred_name,'author_count':author_count,'document_count':document_count}
@@ -451,6 +468,8 @@ def paper_info(id_paper):
         D["venue"]=None
         
     D["authors"]=get_authors_from_paper(id_paper)
+    
+    scopus_paper_info_cache[id_paper]=D
     #print data
     return D
 
@@ -483,27 +502,39 @@ def _download_info(lst,f_thread):
     q.join()
 
 def download_author_info(author_ids):
-    t=_thread_maker(author_info,"author info")
+    def f(author_id):
+        return author_info(author_id,strict=False)
+    t=_thread_maker(f,"author info")
     _download_info(author_ids,t)
 
 def download_paper_info(paper_ids):
     t=_thread_maker(paper_info,"paper info")
     _download_info(paper_ids,t)
     
-def download_publications(author_ids):
-    t=_thread_maker(get_publications,"publications by author")
+def download_publications(author_ids,strict=False):
+    def f(author_id):
+        return get_publications(author_id,strict=strict)
+    t=_thread_maker(f,"publications by author")
     _download_info(author_ids,t)
 
 def download_authors_from_papers(paper_ids):
     t=_thread_maker(get_authors_from_paper,"authors by paper")
     _download_info(paper_ids,t)
+
+def download_affiliation_info(af_ids):
+    t=_thread_maker(affiliation_info,"affiliation information")
+    _download_info(af_ids,t)
         
 def author_info(author_id,strict=False):
     """Returns a dictionary with basic information about the author_id.
     If strict is set to True then an alias response will result in an alias exception.
     Otherwise, the information associated by the alias is returned."""
+    
     if str(author_id) in scopus_author_info:
-        return scopus_author_info[author_id]
+        if type(scopus_author_info[str(author_id)])==Alias_Exception:
+            raise scopus_author_info[str(author_id)]
+        return scopus_author_info[str(author_id)]
+    
     fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id"
     D=dict()
     searchQuery = str(author_id)
@@ -518,7 +549,9 @@ def author_info(author_id,strict=False):
         aidx=s.find("author_id")
         
         if strict:
-            raise Alias_Exception(author_id,s[aidx+10:])
+            e=Alias_Exception(author_id,s[aidx+10:])
+            scopus_author_info[str(author_id)]=e
+            raise e
         
         author_id=s[aidx+10:]
         searchQuery = str(author_id)
@@ -652,6 +685,7 @@ def search_author(list_scopus_id_author,strict=False):
             
         data=data['author-retrieval-response'][0]
         #considerar el caso en que algunos de estos valores puede ser None
+        print id_author
         attributes={'name':data['preferred-name']['given-name'],
         'surname':data['preferred-name']['surname']}
         
@@ -1087,6 +1121,10 @@ def get_publications(author_id,strict=False):
         if strict:
             raise e
         author_id=e.alias
+        
+        if author_id in scopus_papers_by_authorid_noyear_cache:
+            return scopus_papers_by_authorid_noyear_cache[author_id]
+        
         print author_id
         author_attributes=search_author(author_id,strict=True)
         
