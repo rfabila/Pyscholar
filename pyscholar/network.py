@@ -102,17 +102,23 @@ class CollaborationNetwork():
         print "Downloading info"
         scopus.download_author_info(Q)
         print "Adding info"
+        internal_id=1
         for x in self.author_info:
             if not self.author_info[x]:
                 try:
                     D=scopus.author_info(x,strict=True)
                     self.author_info[x]=D
+                    self.author_info[x]["internal_id"]=internal_id
+                    internal_id+=1
                 except scopus.Alias_Exception as e:
                     #Whait if the alias has an alias!???
                     self.author_info[x]=e
                     self.alias[e.author_id]=e.alias
-                    D=scopus.author_info(e.alias,strict=True)
-                    self.author_info[e.alias]=D
+                    if e.alias not in self.author_info:
+                        D=scopus.author_info(e.alias,strict=True)
+                        self.author_info[e.alias]=D
+                        self.author_info[e.alias]["internal_id"]=internal_id
+                        internal_id+=1
     
     def get_affiliation_info(self):
         """Get information about the author affiliations. get_author_info
@@ -292,15 +298,42 @@ class CollaborationNetwork():
         af_name=self.affiliation_info[af_id][u'affiliation-name']
         return af_name
     
+    def construct_name_labels(self,first_name_first=False):
+        self.names={}
+        N=set()
+        for x in self.author_info:
+            x=self.get_alias(x)
+            if x not in self.names:
+                name=""
+                if first_name_first:
+                    if self.author_info[x]['name']!=None:
+                        name+=self.author_info[x]['name']
+                        name+=" "
+                    if self.author_info[x]['surname']!=None:
+                        name+=self.author_info[x]['surname']
+                else:
+                    if self.author_info[x]['surname']!=None:
+                        name+=self.author_info[x]['surname']
+                        name+=" "
+                    if self.author_info[x]['name']!=None:
+                        name+=self.author_info[x]['name']
+                                
+                tname=name[:]
+                i=2
+                tname=name[:]
+                while tname in N:
+                    tname=name+"_"+str(i)
+                    i=i+1
+                
+                self.names[x]=tname
+                N.add(tname)
+            
+            
+    
     def name_label(self,x):
-        name=""
-        if self.author_info[x]['name']!=None:
-            name+=self.author_info[x]['name']
-            name+=" "
-        if self.author_info[x]['surname']!=None:
-            name+=self.author_info[x]['surname']
-        return name
-     
+        x=self.get_alias(x)
+        return self.names[x]
+    
     def country_label(self,x):
         country=self.author_info[x]["country"]
         if country==None:
@@ -323,72 +356,96 @@ class CollaborationNetwork():
         self.get_author_info()
         self.get_paper_info()
         self.get_affiliation_info()
+        self.construct_name_labels()
     
-    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,use_names=True,):
-        """Returns a networkX graph with the given parameters."""
-        #if not self.network_computed:
-         #   self.create_network()
-        #self.get_paper_info()
-        
-        if start_year!=None:
-            start_date=datetime.date(int(start_year),1,1)
-        if end_year!=None:
-            end_date=datetime.date(int(start_year),1,1)
-            
-        if start_date==None:
-            start_date=datetime.date.min
-        
-        if end_date==None:
-            end_date=datetime.date.max
-             
-        H=networkx.graph.Graph()
-        names_dict={}
+    def _get_id_from_internal_id(self,i):
         for x in self.author_info:
-            x=self.get_alias(x)
-            if x not in names_dict:
-                names_dict[x]=None
-                
-        for x in names_dict:
-            name=""
-            print x, self.author_info[x]
-            if self.author_info[x]['name']!=None:
-                name+=self.author_info[x]['name']
-                name+=" "
-            if self.author_info[x]['surname']!=None:
-                name+=self.author_info[x]['surname']
-            print name            
-            i=1
-            tname=name[:]
-            while tname in H.nodes():
-                tname=name+"_"+str(i)
-                i=i+1
-            H.add_node(tname)
-            names_dict[x]=tname
+            if self.author_info[x]['internal_id']==i:
+                return x
+        return None
+    
+    def show_authors(self):
+        N={}
+        for x in self.author_info:
+            name=self.name_label(x)
+            if name not in N:
+                N[name]=[x]
+            else:
+                N[name].append(x)
+        Names=N.keys()
+        Names.sort()
+        for name in Names:
+            x=self.get_alias(N[name][0])
+            print str(self.author_info[x]['internal_id'])+".- "+name
+            print "Scopus_ids",N[name]
+            print ""
         
-        for paper_id in self.paper_info:
-            
-            try:
-                paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
-            except ValueError as ex:
-                print ex
-                paper_date=datetime.date.min
-            
-            if paper_date>=start_date and paper_date<=end_date:
-                    print "paper_id",paper_id
-                    paper_authors=self.paper_info[paper_id]['authors']
-                    print "authors",paper_authors
-                    for i in range(len(paper_authors)):
-                        for j in range(i+1,len(paper_authors)):
-                            x=names_dict[self.get_alias(str(paper_authors[i]))]
-                            y=names_dict[self.get_alias(str(paper_authors[j]))]
-                            print x,y
-                            if H.has_edge(x,y):
-                                H[x][y]['weight']+=1
-                            else:
-                                H.add_edge(x,y)
-                                H[x][y]['weight']=1            
-        
-        return H
+    
+    # def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,use_names=True,):
+    #     """Returns a networkX graph with the given parameters."""
+    #     #if not self.network_computed:
+    #      #   self.create_network()
+    #     #self.get_paper_info()
+    #     
+    #     if start_year!=None:
+    #         start_date=datetime.date(int(start_year),1,1)
+    #     if end_year!=None:
+    #         end_date=datetime.date(int(start_year),1,1)
+    #         
+    #     if start_date==None:
+    #         start_date=datetime.date.min
+    #     
+    #     if end_date==None:
+    #         end_date=datetime.date.max
+    #          
+    #     H=networkx.graph.Graph()
+    #     names_dict={}
+    #     for x in self.author_info:
+    #         x=self.get_alias(x)
+    #         if x not in names_dict:
+    #             names_dict[x]=None
+    #             
+    #     for x in names_dict:
+    #         name=""
+    #         print x, self.author_info[x]
+    #         if self.author_info[x]['name']!=None:
+    #             name+=self.author_info[x]['name']
+    #             name+=" "
+    #         if self.author_info[x]['surname']!=None:
+    #             name+=self.author_info[x]['surname']
+    #         print name            
+    #         i=1
+    #         tname=name[:]
+    #         while tname in H.nodes():
+    #             tname=name+"_"+str(i)
+    #             i=i+1
+    #         H.add_node(tname)
+    #         names_dict[x]=tname
+    #     
+    #     for paper_id in self.paper_info:
+    #         
+    #         try:
+    #             paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
+    #         except ValueError as ex:
+    #             print ex
+    #             paper_date=datetime.date.min
+    #         
+    #         if paper_date>=start_date and paper_date<=end_date:
+    #                 print "paper_id",paper_id
+    #                 paper_authors=self.paper_info[paper_id]['authors']
+    #                 print "authors",paper_authors
+    #                 for i in range(len(paper_authors)):
+    #                     for j in range(i+1,len(paper_authors)):
+    #                         x=names_dict[self.get_alias(str(paper_authors[i]))]
+    #                         y=names_dict[self.get_alias(str(paper_authors[j]))]
+    #                         print x,y
+    #                         if H.has_edge(x,y):
+    #                             H[x][y]['weight']+=1
+    #                         else:
+    #                             H.add_edge(x,y)
+    #                             H[x][y]['weight']=1            
+    #     
+    #     return H
     
 
 
