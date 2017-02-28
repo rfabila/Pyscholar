@@ -562,6 +562,11 @@ def author_info(author_id,strict=False):
                 
     
     data=data['author-retrieval-response'][0]
+    #workaround for the way in which scopus is now sending info! It may not
+    #work in the future
+    if type(data)==list:
+        data=data[0]['author-profile']
+        
     D={'name':data['preferred-name']['given-name'],
     'surname':data['preferred-name']['surname']}
     
