@@ -140,7 +140,7 @@ class CollaborationNetwork():
         file_G=open(file_name,'w')
         pickle.dump(self,file_G)
         file_G.close()
-        
+       
     def create_network(self):
         """Creates the collaboration network."""
         
@@ -380,72 +380,30 @@ class CollaborationNetwork():
             print "Scopus_ids",N[name]
             print ""
         
-    
-    # def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,use_names=True,):
-    #     """Returns a networkX graph with the given parameters."""
-    #     #if not self.network_computed:
-    #      #   self.create_network()
-    #     #self.get_paper_info()
-    #     
-    #     if start_year!=None:
-    #         start_date=datetime.date(int(start_year),1,1)
-    #     if end_year!=None:
-    #         end_date=datetime.date(int(start_year),1,1)
-    #         
-    #     if start_date==None:
-    #         start_date=datetime.date.min
-    #     
-    #     if end_date==None:
-    #         end_date=datetime.date.max
-    #          
-    #     H=networkx.graph.Graph()
-    #     names_dict={}
-    #     for x in self.author_info:
-    #         x=self.get_alias(x)
-    #         if x not in names_dict:
-    #             names_dict[x]=None
-    #             
-    #     for x in names_dict:
-    #         name=""
-    #         print x, self.author_info[x]
-    #         if self.author_info[x]['name']!=None:
-    #             name+=self.author_info[x]['name']
-    #             name+=" "
-    #         if self.author_info[x]['surname']!=None:
-    #             name+=self.author_info[x]['surname']
-    #         print name            
-    #         i=1
-    #         tname=name[:]
-    #         while tname in H.nodes():
-    #             tname=name+"_"+str(i)
-    #             i=i+1
-    #         H.add_node(tname)
-    #         names_dict[x]=tname
-    #     
-    #     for paper_id in self.paper_info:
-    #         
-    #         try:
-    #             paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
-    #         except ValueError as ex:
-    #             print ex
-    #             paper_date=datetime.date.min
-    #         
-    #         if paper_date>=start_date and paper_date<=end_date:
-    #                 print "paper_id",paper_id
-    #                 paper_authors=self.paper_info[paper_id]['authors']
-    #                 print "authors",paper_authors
-    #                 for i in range(len(paper_authors)):
-    #                     for j in range(i+1,len(paper_authors)):
-    #                         x=names_dict[self.get_alias(str(paper_authors[i]))]
-    #                         y=names_dict[self.get_alias(str(paper_authors[j]))]
-    #                         print x,y
-    #                         if H.has_edge(x,y):
-    #                             H[x][y]['weight']+=1
-    #                         else:
-    #                             H.add_edge(x,y)
-    #                             H[x][y]['weight']=1            
-    #     
-    #     return H
+    def merge_authors(self,i,j):
+        """Merge author with internal_id i with author with internal_id j. j becomes
+        an alias of i."""
+        
+        for author in self.author_info:
+            if i==self.author_info[author]['internal_id']:
+                x=author
+                break
+        
+        for author in self.author_info:
+            if j==self.author_info[author]['internal_id']:
+                y=author
+                break
+        
+        x=self.get_alias(x)
+        y=self.get_alias(y)
+        
+        print x,y
+        
+        if x==y:
+            return None
+        
+        self.alias[x]=y
+        
     
 
 
