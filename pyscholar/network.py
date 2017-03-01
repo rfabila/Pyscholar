@@ -157,8 +157,7 @@ class CollaborationNetwork():
                 
                 author=self.Q_by_distance[current_dist][-1]
                 
-                if author not in self.author_info:
-                    self.author_info[author]=False
+                
                 # 
                 # if author in self.alias:
                 #     x=self.alias[author]
@@ -211,37 +210,9 @@ class CollaborationNetwork():
         if self.alias[x]==x:
             return x
         return self.get_alias(self.alias[x])
+   
     
-    
-    # def add_alias(self,author,author_alias):
-    #     """Add an alias to an author, note that the author must be already part of the network."""
-    #     author_alias=str(author_alias)
-    #     if author_alias not in self.alias:
-    #         author=self.alias[str(author)]
-    #         self.alias[author_alias]=author
-    #         self.network_computed=False
-    #         for d in range(self.distance+1):
-    #             if author in self.nodes_by_distance[d]:
-    #                 break
-    #         self.Q_by_distance[d].append(author_alias)
-            
-    
-    def get_info(self):
-        self.get_author_info()
-        self.get_paper_info()
-        self.get_affiliation_info()
-    
-    # def get_core_network(self):
-    #     H=networkx.graph.Graph()
-    #     for v in self.G.nodes():
-    #         H.add_node(v)
-    #     for e in self.G.edges():
-    #         H.add_edge(e[0],e[1])
-    #         H[e[0]][e[1]]['weight']=len(G[e[0]][e[1]]['papers'])
-    #     
-    #     return H
-    
-    def get_network2(self,start_year=None,end_year=None,start_date=None,end_date=None,label_function=None):
+    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,label_function=None):
         """Returns a networkX graph with the given parameters."""
         #if not self.network_computed:
          #   self.create_network()
@@ -264,7 +235,6 @@ class CollaborationNetwork():
             x=self.get_alias(x)
             if x not in author_dict:
                 author_dict[x]=label_function(x)
-        #Cuidado!!! tal cual esta agrupa homonimos
         
         for paper_id in self.paper_info:
             
@@ -341,15 +311,15 @@ class CollaborationNetwork():
         return country
         
     def get_network_by_names(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network2(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label)
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label)
         return H
     
     def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network2(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label)
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label)
         return H
     
     def get_network_by_country(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network2(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label)
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label)
         return H
     
     def get_info(self):
@@ -397,16 +367,91 @@ class CollaborationNetwork():
         x=self.get_alias(x)
         y=self.get_alias(y)
         
-        print x,y
-        
         if x==y:
             return None
         
+        for dx in range(self.distance+1):
+            if x in self.nodes_by_distance[dx]:
+                break
+        
+        for dy in range(self.distance+1):
+            if y in self.nodes_by_distance[dy]:
+                break
+        
+        if dx < dy:
+            self.nodes_by_distance[dy].remove(y)
+            self.nodes_by_distance[dx].append(y)
+        
+        if dy < dx:
+            self.nodes_by_distance[dx].remove(x)
+            self.nodes_by_distance[dy].append(x)
+        
+        print x,y
+        
         self.alias[x]=y
         
+    def compute_possible_extra_ids(self):
+        self.extra_ids={}
+        for author in self.author_info:
+            alias=self.get_alias(author)
+            if type(self.author_info[author])!=str:
+                author=alias
+            first_name=self.author_info[author]['name']
+            last_name=self.author_info[author]['surname']
+            
+            if "(" in first_name:
+                idx=first_name.index("(")
+                first_name=first_name[:idx]
+                
+            print first_name,last_name
+            
+            lst_tmp=scopus.find_author_scopus_id_by_name(firstName=first_name,lastName=last_name)
+            lst=[]
+            for x in lst_tmp:
+                if x not in self.author_info:
+                    lst.append(x)
+            if len(lst)>0:
+                if alias not in self.extra_ids:
+                    self.extra_ids[alias]=set()
+                for x in lst:
+                    self.extra_ids[alias].add(x)
+        
+        for author in self.extra_ids:
+            self.extra_ids[author]=list(self.extra_ids[author])
     
+    def show_possible_extra_ids(self):
+        for author in self.extra_ids:
+            name=self.names[author]
+            alias=self.get_alias(author)
+            print ""
+            print str(self.author_info[alias]["internal_id"])+".-"+name
+            print "Possible ids"
+            lst=self.extra_ids[alias]
+            for i in range(len(lst)):
+                print str(i)+".-"+lst[i]
+        
+    def add_new_id(self,internal_id,idx):
+        """Adds the scopus_id stored in extra_ids with index_id. You should have run
+        compute_possible_ids first!"""
+    
+        for author in self.author_info:
+            if self.author_info[author]['internal_id']==internal_id:
+                break
 
-
+        author=self.get_alias(author)
+        print author
+        for d in range(self.distance+2):
+            if author in self.nodes_by_distance[d]:
+                break
+    
+        scopus_id=self.extra_ids[author][idx]
+        if d<=self.distance:
+            self.Q_by_distance[d].append(scopus_id)
+            self.network_computed=False
+            self.current_paper=0
+        
+                
+        
     
                         
                 

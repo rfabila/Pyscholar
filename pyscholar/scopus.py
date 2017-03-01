@@ -78,6 +78,7 @@ scopus_references_by_idpaper_cache=dict()
 scopus_paper_info_cache=dict()
 scopus_author_info=dict()
 scopus_affiliation_info=dict()
+scopus_author_scopus_id_by_name_cache=dict()
 
 
 
@@ -1269,6 +1270,11 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
     """
     Searches for an author scopus id given its name.
     """
+    
+    if lastName in scopus_author_scopus_id_by_name_cache:
+        if firstName in scopus_author_scopus_id_by_name_cache[lastName]:
+            return scopus_author_scopus_id_by_name_cache[lastName][firstName]
+    
     searchQuery = "query="
 
     if firstName:
@@ -1310,7 +1316,13 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
     for entry in data['entry']:
         authorId = entry['dc:identifier'].split(':')
         ids.append(authorId[1])
-
+    
+    if lastName in scopus_author_scopus_id_by_name_cache:
+        scopus_author_scopus_id_by_name_cache[lastName][firstName]=ids
+    else:
+        scopus_author_scopus_id_by_name_cache[lastName]=dict()
+        scopus_author_scopus_id_by_name_cache[lastName][firstName]=ids
+    
     return ids
 
 def get_author_affiliations(firstName="", lastName=""):
