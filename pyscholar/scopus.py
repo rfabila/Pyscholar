@@ -213,13 +213,19 @@ def find_affiliation_scopus_id_by_name(organization=""):
 
     return affiliation_table
 
-def affiliation_info(af_id):
+def affiliation_info(af_id,strict=True):
     af_id=str(af_id)
     print af_id
     if af_id in scopus_affiliation_info:
         return scopus_affiliation_info[af_id]
     
-    resp = requests_get_wrapper(retrieve_api_affiliation_url+af_id)
+    try:
+        resp = requests_get_wrapper(retrieve_api_affiliation_url+af_id)
+    except Exception as e:
+        if strict:
+            raise e
+        else:
+            return None
     data=resp.json()
     print data
     data=data["affiliation-retrieval-response"]
@@ -522,8 +528,10 @@ def download_authors_from_papers(paper_ids):
     t=_thread_maker(get_authors_from_paper,"authors by paper")
     _download_info(paper_ids,t)
 
-def download_affiliation_info(af_ids):
-    t=_thread_maker(affiliation_info,"affiliation information")
+def download_affiliation_info(af_ids,strict=True):
+    def f(af_id):
+        return affiliation_info(af_id,strict=strict)
+    t=_thread_maker(f,"affiliation information")
     _download_info(af_ids,t)
         
 def author_info(author_id,strict=False):

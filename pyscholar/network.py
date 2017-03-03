@@ -127,14 +127,14 @@ class CollaborationNetwork():
         for x in self.author_info:
             print x
             s=self.author_info[x]['affiliation-id']
-            if s!='':
+            if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]!=None)):
                 Q.add(s)
         Q=list(Q)
         print Q
-        scopus.download_affiliation_info(Q)
+        scopus.download_affiliation_info(Q,strict=False)
         for x in Q:
             print x
-            self.affiliation_info[x]=scopus.affiliation_info(x)
+            self.affiliation_info[x]=scopus.affiliation_info(x,strict=False)
     
     def save(self,file_name):
         file_G=open(file_name,'w')
@@ -407,6 +407,8 @@ class CollaborationNetwork():
             
             lst_tmp=scopus.find_author_scopus_id_by_name(firstName=first_name,lastName=last_name)
             lst=[]
+            if lst_tmp==None:
+                lst_tmp=[]
             for x in lst_tmp:
                 if x not in self.author_info:
                     lst.append(x)
@@ -445,10 +447,13 @@ class CollaborationNetwork():
                 break
     
         scopus_id=self.extra_ids[author][idx]
-        if d<=self.distance:
-            self.Q_by_distance[d].append(scopus_id)
-            self.network_computed=False
-            self.current_paper=0
+        if scopus_id not in self.author_info:
+            self.author_info[scopus_id]=False
+            self.alias[scopus_id]=author
+            if d<=self.distance:
+                self.Q_by_distance[d].append(scopus_id)
+                self.network_computed=False
+                self.current_paper=0
         
                 
         
