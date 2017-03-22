@@ -127,7 +127,7 @@ class CollaborationNetwork():
         for x in self.author_info:
             print x
             s=self.author_info[x]['affiliation-id']
-            if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]!=None)):
+            if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]==None)):
                 Q.add(s)
         Q=list(Q)
         print Q
@@ -264,6 +264,8 @@ class CollaborationNetwork():
     def affiliation_label(self,x):
         af_id=self.author_info[x]['affiliation-id']
         if af_id=='':
+            return "UNKWON AFFILIATION"
+        if self.affiliation_info[af_id]==None:
             return "UNKWON AFFILIATION"
         af_name=self.affiliation_info[af_id][u'affiliation-name']
         return af_name

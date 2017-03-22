@@ -576,6 +576,10 @@ def author_info(author_id,strict=False):
     if type(data)==list:
         data=data[0]['author-profile']
         
+    if type(data)==dict:
+        if  'author-profile' in data:
+            data=data['author-profile']
+        
     D={'name':data['preferred-name']['given-name'],
     'surname':data['preferred-name']['surname']}
     
