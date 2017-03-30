@@ -212,7 +212,7 @@ class CollaborationNetwork():
         return self.get_alias(self.alias[x])
    
     
-    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,label_function=None):
+    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,label_function=None,distance=0):
         """Returns a networkX graph with the given parameters."""
         #if not self.network_computed:
          #   self.create_network()
@@ -221,7 +221,7 @@ class CollaborationNetwork():
         if start_year!=None:
             start_date=datetime.date(int(start_year),1,1)
         if end_year!=None:
-            end_date=datetime.date(int(start_year),1,1)
+            end_date=datetime.date(int(end_year),1,1)
             
         if start_date==None:
             start_date=datetime.date.min
@@ -252,12 +252,22 @@ class CollaborationNetwork():
                         for j in range(i+1,len(paper_authors)):
                             x=author_dict[self.get_alias(str(paper_authors[i]))]
                             y=author_dict[self.get_alias(str(paper_authors[j]))]
-                            print x,y
-                            if H.has_edge(x,y):
-                                H[x][y]['weight']+=1
-                            else:
-                                H.add_edge(x,y)
-                                H[x][y]['weight']=1            
+                            for dx in range(distance+1):
+                                if x in self.nodes_by_distance[dx]:
+                                    print "found"
+                                    break
+                            for dy in range(distance+1):
+                                if y in self.nodes_by_distance[dy]:
+                                    print "found"
+                                    break
+                                
+                            #print x,y
+                            if dx<=distance and dy<=distance:
+                                if H.has_edge(x,y):
+                                    H[x][y]['weight']+=1
+                                else:
+                                    H.add_edge(x,y)
+                                    H[x][y]['weight']=1            
         
         return H
     
@@ -312,16 +322,16 @@ class CollaborationNetwork():
             return "UNKNOWN COUNTRY"
         return country
         
-    def get_network_by_names(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label)
+    def get_network_by_names(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0):
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label,distance=distance)
         return H
     
-    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label)
+    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0):
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label,distance=0)
         return H
     
     def get_network_by_country(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label)
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label,distance=0)
         return H
     
     def get_info(self):
