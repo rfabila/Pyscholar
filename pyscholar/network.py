@@ -218,6 +218,9 @@ class CollaborationNetwork():
          #   self.create_network()
         #self.get_paper_info()
         
+        if label_function==None:
+            label_function=self.name_label
+        
         if start_year!=None:
             start_date=datetime.date(int(start_year),1,1)
         if end_year!=None:
