@@ -255,17 +255,21 @@ class CollaborationNetwork():
                         for j in range(i+1,len(paper_authors)):
                             x=author_dict[self.get_alias(str(paper_authors[i]))]
                             y=author_dict[self.get_alias(str(paper_authors[j]))]
+                            found_x=False
+                            found_y=False
                             for dx in range(distance+1):
-                                if x in self.nodes_by_distance[dx]:
+                                if self.get_alias(str(paper_authors[i])) in self.nodes_by_distance[dx]:
                                     print "found"
+                                    found_x=True                                    
                                     break
                             for dy in range(distance+1):
-                                if y in self.nodes_by_distance[dy]:
+                                if self.get_alias(str(paper_authors[j])) in self.nodes_by_distance[dy]:
                                     print "found"
+                                    found_y=True
                                     break
                                 
                             #print x,y
-                            if dx<=distance and dy<=distance:
+                            if found_x and found_y:
                                 if H.has_edge(x,y):
                                     H[x][y]['weight']+=1
                                 else:
