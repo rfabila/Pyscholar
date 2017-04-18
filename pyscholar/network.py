@@ -36,7 +36,8 @@ class CollaborationNetwork():
         self.nodes_by_distance=[set() for i in range(self.distance+2)]
         self.Q_by_distance=[[] for i in range(self.distance+2)]
         self.affiliation_info={}
-        
+        self.extra_ids={}
+        self.authors_searched_for_extra_ids=set()
         self.current_paper=0
         self.current_author=0
         
@@ -141,7 +142,7 @@ class CollaborationNetwork():
         pickle.dump(self,file_G)
         file_G.close()
        
-    def create_network(self):
+    def create_network(self,parallel_download=True):
         """Creates the collaboration network."""
         
         for current_dist in range(self.distance+2):
@@ -150,7 +151,8 @@ class CollaborationNetwork():
             
         while current_dist<=self.distance:
             
-            scopus.download_publications(self.Q_by_distance[current_dist])
+            if parallel_download:
+                scopus.download_publications(self.Q_by_distance[current_dist])
             
             while len(self.Q_by_distance[current_dist])>0:
                 print "current distance",current_dist
@@ -167,7 +169,8 @@ class CollaborationNetwork():
                 print "current_author",author
                 papers=scopus.get_publications(author)
                 
-                scopus.download_authors_from_papers(papers)
+                if parallel_download:
+                    scopus.download_authors_from_papers(papers)
                 
                 start_paper=self.current_paper
                 for paper_id in range(start_paper,len(papers)):
@@ -410,46 +413,62 @@ class CollaborationNetwork():
         self.alias[x]=y
         
     def compute_possible_extra_ids(self):
-        self.extra_ids={}
-        for author in self.author_info:
-            alias=self.get_alias(author)
-            if type(self.author_info[author])!=str:
-                author=alias
-            first_name=self.author_info[author]['name']
-            last_name=self.author_info[author]['surname']
-            
-            if "(" in first_name:
-                idx=first_name.index("(")
-                first_name=first_name[:idx]
-                
-            print first_name,last_name
-            
-            lst_tmp=scopus.find_author_scopus_id_by_name(firstName=first_name,lastName=last_name)
-            lst=[]
-            if lst_tmp==None:
-                lst_tmp=[]
-            for x in lst_tmp:
-                if x not in self.author_info:
-                    lst.append(x)
-            if len(lst)>0:
-                if alias not in self.extra_ids:
-                    self.extra_ids[alias]=set()
-                for x in lst:
-                    self.extra_ids[alias].add(x)
         
+        for author in self.author_info:
+            if author not in self.authors_searched_for_extra_ids:
+                print author
+                alias=self.get_alias(author)
+                if type(self.author_info[author])!=str:
+                    author=alias
+                first_name=self.author_info[author]['name']
+                last_name=self.author_info[author]['surname']
+            
+                print last_name
+                print first_name
+                
+                if first_name!= None and "(" in first_name:
+                    idx=first_name.index("(")
+                    first_name=first_name[:idx]
+                
+                
+                print first_name,last_name
+                
+                lst_tmp=scopus.find_author_scopus_id_by_name(firstName=first_name,lastName=last_name)
+                lst=[]
+                if lst_tmp==None:
+                    lst_tmp=[]
+                for x in lst_tmp:
+                    if x not in self.author_info:
+                        lst.append(x)
+                if len(lst)>0:
+                    if alias not in self.extra_ids:
+                        self.extra_ids[alias]=set()
+                    for x in lst:
+                        self.extra_ids[alias].add(x)
+                
+                self.authors_searched_for_extra_ids.add(author)
+            else:
+                print "author computed already"
+                
         for author in self.extra_ids:
             self.extra_ids[author]=list(self.extra_ids[author])
     
-    def show_possible_extra_ids(self):
+    def show_possible_extra_ids(self,distance=0):
         for author in self.extra_ids:
-            name=self.names[author]
-            alias=self.get_alias(author)
-            print ""
-            print str(self.author_info[alias]["internal_id"])+".-"+name
-            print "Possible ids"
-            lst=self.extra_ids[alias]
-            for i in range(len(lst)):
-                print str(i)+".-"+lst[i]
+            author_in_distance=False
+            for dx in range(distance+1):
+                if author in self.nodes_by_distance[dx]:
+                    author_in_distance=True
+                    break
+            if author_in_distance:
+                name=self.names[author]
+                alias=self.get_alias(author)
+                print ""
+                print str(self.author_info[alias]["internal_id"])+".-"+name
+                print "Possible ids"
+                lst=self.extra_ids[alias]
+                for i in range(len(lst)):
+                    print str(i)+".-"+lst[i]
         
     def add_new_id(self,internal_id,idx):
         """Adds the scopus_id stored in extra_ids with index_id. You should have run

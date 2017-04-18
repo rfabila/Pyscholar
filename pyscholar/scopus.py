@@ -88,7 +88,11 @@ def save_cache(filename=None):
             scopus_papers_by_authorid_cache,
             scopus_papers_by_authorid_noyear_cache,
             scopus_references_by_idpaper_cache,
-            scopus_paper_info_cache,scopus_author_info)
+            scopus_paper_info_cache,
+            scopus_author_info,
+            scopus_affiliation_info,
+            scopus_author_scopus_id_by_name_cache,
+            )
     if filename==None:
         filename="lastsession.ch"
     file_ch=open(filename,"w")
@@ -103,7 +107,10 @@ def load_caches(filename=None):
         scopus_papers_by_authorid_cache,
         scopus_papers_by_authorid_noyear_cache,
         scopus_references_by_idpaper_cache,
-        scopus_paper_info_cache,scopus_author_info)
+        scopus_paper_info_cache,
+        scopus_author_info,
+        scopus_affiliation_info,
+        scopus_author_scopus_id_by_name_cache,)
     ch=pickle.load(file_ch)
     file_ch.close()
     

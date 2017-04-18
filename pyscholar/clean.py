@@ -1,25 +1,80 @@
+#import pyscholar
+
 def homonyms(G):
-    D=[]
+    D={}
     for i in G.author_info:
-        for j in G.author_info:
-            if i != j:
-                if G.author_info[i]['surname'] == G.author_info[j]['surname']:
-                     if G.author_info[i]['name'] == G.author_info[j]['name']:
-                        print G.author_info[i], G.author_info[j]
-                        D.append((i,j))
+        s=""
+        
+        if G.author_info[i]['name']==None:
+            s+="None"
+        else:
+            s+=G.author_info[i]['name']
+        
+        if G.author_info[i]['surname']==None:
+            s+="None"
+        else:
+            s+=" "+G.author_info[i]['surname']
+        
+        if s not in D:
+            D[s]=set()
+            
+        D[s].add(i)
+        
+    K=D.keys()
+    for k in K:
+        if len(D[k])<=1:
+            D.pop(k)
+    
+    i=0
+    for k in D:
+        i+=1
+        print str(i)+".- "+k
+        print D[k]
+                        
     return D
 
 def same_info(G):
-    D=[]
+    D={}
     for i in G.author_info:
-        for j in G.author_info:
-            if i != j:
-                if (G.author_info[i]['surname'] == G.author_info[j]['surname'] and
-                    G.author_info[i]['name'] == G.author_info[j]['name'] and
-                    G.author_info[i]['country'] == G.author_info[j]['country'] and
-                    G.author_info[i]['affiliation-id'] == G.author_info[j]['affiliation-id']):
-                    print G.author_info[i], G.author_info[j]
-                    D.append((i,j))
+        s=""
+        
+        if G.author_info[i]['name']==None:
+            s+="None"
+        else:
+            s+=G.author_info[i]['name']
+            
+        if G.author_info[i]['surname']==None:
+            s+=" None\n"
+        else:
+            s+=" "+G.author_info[i]['surname']+"\n"
+        
+        if G.author_info[i]['affiliation-id']==None:
+            s+=" None\n"
+        else:
+            s+=" "+G.author_info[i]['affiliation-id']+". \n"
+            
+        if G.author_info[i]['country']==None:
+            s+="None"
+        else:
+            s+=" "+G.author_info[i]['country']
+            
+        if s not in D:
+            D[s]=set()
+            
+        D[s].add(i)
+        
+    K=D.keys()
+    for k in K:
+        if len(D[k])<=1:
+            D.pop(k)
+    
+    i=0
+    for k in D:
+        i+=1
+        print str(i)+".- "+k
+        print D[k]
+                        
+    
     return D
         
     
