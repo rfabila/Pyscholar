@@ -551,7 +551,7 @@ def author_info(author_id,strict=False):
             raise scopus_author_info[str(author_id)]
         return scopus_author_info[str(author_id)]
     
-    fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id"
+    fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id,document-count"
     D=dict()
     searchQuery = str(author_id)
     
@@ -579,16 +579,28 @@ def author_info(author_id,strict=False):
     
     data=data['author-retrieval-response'][0]
     #workaround for the way in which scopus is now sending info! It may not
-    #work in the future
+    #work in the future. Update it seems changes are coming to the scopus database
+    #This may be problem in the future!
+    
     if type(data)==list:
         data=data[0]['author-profile']
         
     if type(data)==dict:
         if  'author-profile' in data:
             data=data['author-profile']
-        
-    D={'name':data['preferred-name']['given-name'],
-    'surname':data['preferred-name']['surname']}
+        print data.keys()
+        if 'name-variant' in data:
+            lst=data['name-variant']
+            doc_count=0
+            for x in lst:
+                doc_count+=int(x['@doc-count'])
+            D['document-count']=doc_count
+            
+    D['name']=data['preferred-name']['given-name']
+    D['surname']=data['preferred-name']['surname']
+    
+    if 'document-count' not in D:
+        D['document-count']=int(data['coredata']['document-count'])
     
     if 'affiliation-current' in data:
         
@@ -1141,7 +1153,7 @@ def get_publications(author_id,strict=False):
         return scopus_papers_by_authorid_noyear_cache[author_id]
     
     try:
-        author_attributes=search_author(author_id,strict=True)
+        author_attributes=author_info(author_id,strict=True)
     except Alias_Exception as e:
         if strict:
             raise e
@@ -1151,9 +1163,9 @@ def get_publications(author_id,strict=False):
             return scopus_papers_by_authorid_noyear_cache[author_id]
         
         print author_id
-        author_attributes=search_author(author_id,strict=True)
+        author_attributes=author_info(author_id,strict=True)
         
-    document_count=author_attributes[author_id]['document-count']
+    document_count=author_attributes['document-count']
     iterations=math.ceil(document_count/200.0)
     chunks=[]
     id_papers=set()
