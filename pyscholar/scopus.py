@@ -119,7 +119,7 @@ def requests_get_wrapper(query):
     resp = requests.get(query, headers=headers)
     t=0
     print query
-    while resp.status_code!=200  and t < attempts:
+    while resp.status_code!=200 and resp.status_code!=300 and t < attempts:
         if resp.status_code==429:
             _new_key()
             resp = requests.get(query, headers=headers)
@@ -128,11 +128,14 @@ def requests_get_wrapper(query):
             print "waiting ",t
             print "status", resp.status_code
             print "json"
-            print resp.json()
+            print resp
+            #print resp.json()
             resp = requests.get(query, headers=headers)
             t=t+1
     if resp.status_code==200:
         return resp
+    if resp.status_code==300:
+        raise Exception
     raise Scopus_Exception(resp)
 
 def _new_key():
@@ -150,11 +153,12 @@ def _new_key():
 class Scopus_Exception(Exception):
     def __init__(self, resp):
         self.code = resp.status_code
-        resp = resp.json()
-        print resp
-        resp = resp[u'service-error'][u'status']
-        self.statusCode=resp[u'statusCode']
-        self.statusText=resp[u'statusText']
+        if resp.status_code!=500:
+            resp = resp.json()
+            print resp
+            resp = resp[u'service-error'][u'status']
+            self.statusCode=resp[u'statusCode']
+            self.statusText=resp[u'statusText']
     def __str__(self):
         return "%s: %s"%(self.statusCode, self.statusText)
 
@@ -600,7 +604,10 @@ def author_info(author_id,strict=False):
     D['surname']=data['preferred-name']['surname']
     
     if 'document-count' not in D:
-        D['document-count']=int(data['coredata']['document-count'])
+        if data['coredata']['document-count']==None:
+            D['document-count']=100
+        else:
+            D['document-count']=int(data['coredata']['document-count'])
     
     if 'affiliation-current' in data:
         
@@ -1403,3 +1410,12 @@ def get_author_affiliations(firstName="", lastName=""):
             affiliations.append(entry['affiliation-current'])
                                                                                                                       
     return affiliations
+
+
+
+                
+                
+                
+                
+                
+                

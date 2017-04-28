@@ -83,26 +83,33 @@ class CollaborationNetwork():
         self.current_paper=G.current_paper
         self.core_name_IDS=G.core_name_IDS
     
-    def get_paper_info(self):
+    def get_paper_info(self,parallel_download=True):
         Papers=set()
         for paper_id in self.paper_ids_set:
             if paper_id not in self.paper_info:
                     Papers.add(paper_id)
-        scopus.download_paper_info(list(Papers))
+                    
+        if parallel_download:
+            scopus.download_paper_info(list(Papers))
         
         for paper_id in self.paper_ids_set:
             if paper_id not in self.paper_info:
                 self.paper_info[paper_id]=scopus.paper_info(paper_id)
     
     
-    def get_author_info(self):
+    def get_author_info(self,parallel_download=True):
         Q=[]
         for x in self.author_info:
             if  not self.author_info[x]:
                 Q.append(x)
-        print "Downloading info"
-        scopus.download_author_info(Q)
+        
+        if parallel_download:
+            print "Downloading info"
+            scopus.download_author_info(Q)
+            
         print "Adding info"
+        #the internal IDS will be wrong if get_author_info doesn work
+        #the first try
         internal_id=1
         for x in self.author_info:
             if not self.author_info[x]:
@@ -120,8 +127,12 @@ class CollaborationNetwork():
                         self.author_info[e.alias]=D
                         self.author_info[e.alias]["internal_id"]=internal_id
                         internal_id+=1
-    
-    def get_affiliation_info(self):
+                except scopus.Scopus_Exception as e:
+                    print "Scopus Exception"
+                except:
+                    print "General Exception"
+
+    def get_affiliation_info(self,parallel_download=True):
         """Get information about the author affiliations. get_author_info
         should have been called prior to call this function."""
         Q=set()
@@ -132,7 +143,10 @@ class CollaborationNetwork():
                 Q.add(s)
         Q=list(Q)
         print Q
-        scopus.download_affiliation_info(Q,strict=False)
+        
+        if parallel_download:
+            scopus.download_affiliation_info(Q,strict=False)
+            
         for x in Q:
             print x
             self.affiliation_info[x]=scopus.affiliation_info(x,strict=False)
@@ -344,10 +358,10 @@ class CollaborationNetwork():
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label,distance=0)
         return H
     
-    def get_info(self):
-        self.get_author_info()
-        self.get_paper_info()
-        self.get_affiliation_info()
+    def get_info(self,parallel_download=True):
+        self.get_author_info(parallel_download=parallel_download)
+        self.get_paper_info(parallel_download=parallel_download)
+        self.get_affiliation_info(parallel_download=parallel_download)
         self.construct_name_labels()
     
     def _get_id_from_internal_id(self,i):
@@ -492,8 +506,33 @@ class CollaborationNetwork():
                 self.Q_by_distance[d].append(scopus_id)
                 self.network_computed=False
                 self.current_paper=0
-        
+    
+    #Edit functions
+    def replace_id(self,old_id,new_id):
+        """Mistakes when writing the core_ids of G are common. This function
+        enable us to fix these errors by replacing the mistken id with the correct one."""
+        for i in range(len(self.core_ids)):
+            if self.core_ids[i]==old_id:
+                self.core_ids[i]=new_id
+            
+            if type(self.core_ids[i])==list:               
+                if old_id in self.core_ids[i]:
+                    self.core_ids[i][self.core_ids[i].index(old_id)]=new_id
+                    
+            for d in len(range(self.Q_by_distance)):
+                for i in range(len(self.Q_by_distance[d])):
+                    if self.Q_by_distance[d][i]==old_id:
+                        self.Q_by_distance[d][i]=new_id
+                        
                 
+        
+        #Faltan cosas por hacer! Hay que ver donde andan los old_id en las Q y en las
+        #distance by node etc
+            
+                  
+
+
+                        
         
     
                         
