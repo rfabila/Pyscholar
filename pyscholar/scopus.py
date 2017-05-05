@@ -12,7 +12,7 @@ class Key_Exception(Exception):
 class Alias_Exception(Exception):
     def __init__(self,author_id,alias):
         self.author_id=str(author_id)
-        self.alias=str(alias)
+        self.alias=alias
     def __str__(self):
         return "The given author_id has an alias"
 
@@ -135,7 +135,8 @@ def requests_get_wrapper(query):
     if resp.status_code==200:
         return resp
     if resp.status_code==300:
-        raise Exception
+        return resp
+        #raise Exception
     raise Scopus_Exception(resp)
 
 def _new_key():
@@ -566,14 +567,25 @@ def author_info(author_id,strict=False):
     
     if 'alias' in data['author-retrieval-response']:
         s=data['author-retrieval-response']['alias']['prism:url']
-        aidx=s.find("author_id")
+        idlst=[]
+        if type(s)==list:
+            for x in s:
+                for y in x:
+                    y=x[y]
+                    aidx=y.find("author_id")
+                    idlst.append(y[aidx+10:])
+        else:
+            aidx=s.find("author_id")
+            idlst.append(s[aidx+10:])
+        
+        print idlst
         
         if strict:
-            e=Alias_Exception(author_id,s[aidx+10:])
+            e=Alias_Exception(author_id,idlst)
             scopus_author_info[str(author_id)]=e
             raise e
         
-        author_id=s[aidx+10:]
+        author_id=idlst[0]
         searchQuery = str(author_id)
         resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
         data=resp.json()

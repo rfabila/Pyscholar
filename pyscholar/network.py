@@ -25,9 +25,9 @@ def save_graphml(G,filename):
     
 
 class CollaborationNetwork():
-    def __init__(self,core_names=[],distance=0,core_ids=[]):
+    def __init__(self,distance=0,core_ids=[]):
         self.core_ids=core_ids
-        self.core_names=core_names
+        #self.core_names=core_names
         self.paper_info={}
         self.author_info={}
         self.distance=distance
@@ -41,11 +41,11 @@ class CollaborationNetwork():
         self.current_paper=0
         self.current_author=0
         
-        splitted_names=[n.split(',') for n in self.core_names]
-        self.core_name_IDS={self.core_names[i]:scopus.find_author_scopus_id_by_name(splitted_names[i][0],splitted_names[i][1]) for i in range(len(self.core_names))}
-        print self.core_name_IDS
-        for lst in self.core_name_IDS.values():
-            self.core_ids.extend(lst)
+        #splitted_names=[n.split(',') for n in self.core_names]
+        #self.core_name_IDS={self.core_names[i]:scopus.find_author_scopus_id_by_name(splitted_names[i][0],splitted_names[i][1]) for i in range(len(self.core_names))}
+        #print self.core_name_IDS
+        #for lst in self.core_name_IDS.values():
+         #   self.core_ids.extend(lst)
         
         self.paper_ids_set=set()
         
@@ -99,7 +99,10 @@ class CollaborationNetwork():
     
     def get_author_info(self,parallel_download=True):
         Q=[]
-        for x in self.author_info:
+        
+        IDS=self.author_info.keys()
+        
+        for x in IDS:
             if  not self.author_info[x]:
                 Q.append(x)
         
@@ -108,25 +111,26 @@ class CollaborationNetwork():
             scopus.download_author_info(Q)
             
         print "Adding info"
-        #the internal IDS will be wrong if get_author_info doesn work
-        #the first try
-        internal_id=1
-        for x in self.author_info:
+        
+        for x in IDS:
             if not self.author_info[x]:
                 try:
                     D=scopus.author_info(x,strict=True)
                     self.author_info[x]=D
-                    self.author_info[x]["internal_id"]=internal_id
-                    internal_id+=1
                 except scopus.Alias_Exception as e:
                     #Whait if the alias has an alias!???
                     self.author_info[x]=e
-                    self.alias[e.author_id]=e.alias
-                    if e.alias not in self.author_info:
-                        D=scopus.author_info(e.alias,strict=True)
-                        self.author_info[e.alias]=D
-                        self.author_info[e.alias]["internal_id"]=internal_id
-                        internal_id+=1
+                    root=e.alias[0]
+                    self.alias[e.author_id]=root
+                    print "alias", e.alias
+                    for y in e.alias:
+                        print root, y
+                        if y not in self.author_info:
+                            D=scopus.author_info(y,strict=True)
+                            self.author_info[y]=D
+                        if y!=root:
+                            self.alias[y]=root
+                            
                 except scopus.Scopus_Exception as e:
                     print "Scopus Exception"
                 except:
