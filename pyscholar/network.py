@@ -49,8 +49,6 @@ class CollaborationNetwork():
         
         self.paper_ids_set=set()
         
-        #self.G=networkx.graph.Graph()
-        
         self.alias={}
         
         for x in core_ids:
@@ -72,16 +70,20 @@ class CollaborationNetwork():
     #needs updating
     def copy_from_other(self,G):
         self.core_ids=G.core_ids
-        self.core_names=G.core_names
         self.paper_info=G.paper_info
         self.author_info=G.author_info
         self.distance=G.distance
         self.network_computed=G.network_computed
         self.computed_distance=G.computed_distance
         self.nodes_by_distance=G.nodes_by_distance
+        self.Q_by_distance=G.Q_by_distance
+        self.affiliation_info=G.affiliation_info
+        self.extra_ids=G.extra_ids
+        self.authors_searched_for_extra_ids=G.authors_searched_for_extra_ids
         self.current_author=G.current_author
         self.current_paper=G.current_paper
-        self.core_name_IDS=G.core_name_IDS
+        self.paper_ids_set=G.paper_ids_set
+        self.alias=G.alias
     
     def get_paper_info(self,parallel_download=True):
         Papers=set()
@@ -119,17 +121,31 @@ class CollaborationNetwork():
                     self.author_info[x]=D
                 except scopus.Alias_Exception as e:
                     #Whait if the alias has an alias!???
-                    self.author_info[x]=e
-                    root=e.alias[0]
-                    self.alias[e.author_id]=root
+                    self.author_info[x]=None
+                    root=self.get_alias(x)
+                    #root=e.alias[0]
                     print "alias", e.alias
+                    
+                    for d in range(len(self.nodes_by_distance)):
+                        if x in self.nodes_by_distance[d]:
+                            break
+                    
                     for y in e.alias:
                         print root, y
                         if y not in self.author_info:
                             D=scopus.author_info(y,strict=True)
                             self.author_info[y]=D
-                        if y!=root:
+                            self.nodes_by_distance[d].add(y)
+                            if d <= self.distance:
+                                self.Q_by_distance[d].append(y)
+                                self.network_computed=False
+                            if d==0:
+                                self.core_ids.append(y)
+                                self.network_computed=False
                             self.alias[y]=root
+                    if not self.author_info[root]:
+                        self.author_info[root]=self.author_info[e.alias[0]].copy()
+                        
                             
                 except scopus.Scopus_Exception as e:
                     print "Scopus Exception"
@@ -153,7 +169,14 @@ class CollaborationNetwork():
             
         for x in Q:
             print x
-            self.affiliation_info[x]=scopus.affiliation_info(x,strict=False)
+            try:
+                self.affiliation_info[x]=scopus.affiliation_info(x,strict=True)
+            except scopus.Scopus_Exception as e:
+                print "Scopus Exception for ",x
+                print e
+                for y in self.author_info:
+                    if self.author_info[y]['affiliation-id']==x:
+                        self.author_info[y]['affiliation-id']=''
     
     def save(self,file_name):
         file_G=open(file_name,'w')
@@ -260,6 +283,13 @@ class CollaborationNetwork():
             if x not in author_dict:
                 author_dict[x]=label_function(x)
         
+        S=[set(x) for x in self.nodes_by_distance]
+        
+        for x in author_dict:
+            for i in range(len(S)):
+                if x in S[i] and i <= distance:
+                    H.add_node(author_dict[x])
+        
         for paper_id in self.paper_info:
             
             try:
@@ -299,14 +329,59 @@ class CollaborationNetwork():
         
         return H
     
+    def construct_affiliation_labels(self):
+        self.affiliation_label_dict={}
+        for afid in self.affiliation_info:
+            if afid!='' and self.affiliation_info[afid]!=None:
+                s=self.affiliation_info[afid][u'affiliation-name']+"."
+                
+                afp=self.parent_aff_id(afid)
+                if afp!=None and afp in self.affiliation_info:
+                    s+=" \n"+self.affiliation_info[afp][u'affiliation-name']
+                
+                self.affiliation_label_dict[afid]=s
+                
+    
     def affiliation_label(self,x):
-        af_id=self.author_info[x]['affiliation-id']
-        if af_id=='':
-            return "UNKWON AFFILIATION"
-        if self.affiliation_info[af_id]==None:
-            return "UNKWON AFFILIATION"
-        af_name=self.affiliation_info[af_id][u'affiliation-name']
-        return af_name
+        y=self.author_info[x]['affiliation-id']
+        if y in self.affiliation_label_dict:
+            return self.affiliation_label_dict[y]
+        return "UNKNOWN AFFILIATION"
+        # af_id=self.author_info[x]['affiliation-id']
+        # if af_id=='':
+        #     return "UNKWON AFFILIATION"
+        # if self.affiliation_info[af_id]==None:
+        #     return "UNKWON AFFILIATION"
+        # af_name=self.affiliation_info[af_id][u'affiliation-name']
+        # return af_name
+    
+    
+    def parent_aff_id(self,afid):
+        if type(self.affiliation_info[afid])==dict:
+                if 'coredata' in self.affiliation_info[afid]:
+                    if 'parent-affiliation-id' in self.affiliation_info[afid]['coredata']:
+                        return self.affiliation_info[afid]['coredata']['parent-affiliation-id']
+        return None
+    
+    def download_parent_aff_info(self):
+        Q=set()
+        for afid in self.affiliation_info:
+            x=self.parent_aff_id(afid)
+            if x!=None and x not in self.affiliation_info:
+                Q.add(x)
+        
+        Q=list(Q)
+        for x in Q:
+            print x
+            try:
+                self.affiliation_info[x]=scopus.affiliation_info(x,strict=True)
+            except scopus.Scopus_Exception as e:
+                print "Scopus Exception for ",x
+                print e
+                for y in self.author_info:
+                    if self.author_info[y]['affiliation-id']==x:
+                        self.author_info[y]['affiliation-id']=''
+                
     
     def construct_name_labels(self,first_name_first=False):
         self.names={}
@@ -354,7 +429,7 @@ class CollaborationNetwork():
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label,distance=distance)
         return H
     
-    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0):
+    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0): 
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label,distance=0)
         return H
     
@@ -366,7 +441,9 @@ class CollaborationNetwork():
         self.get_author_info(parallel_download=parallel_download)
         self.get_paper_info(parallel_download=parallel_download)
         self.get_affiliation_info(parallel_download=parallel_download)
+        self.download_parent_aff_info()
         self.construct_name_labels()
+        self.construct_affiliation_labels()
     
     def _get_id_from_internal_id(self,i):
         for x in self.author_info:
@@ -511,6 +588,25 @@ class CollaborationNetwork():
                 self.network_computed=False
                 self.current_paper=0
     
+    def delete_id(self,aid):
+        if aid in self.core_ids:
+            self.core_ids.remove(aid)
+        
+        for d in range(len(self.nodes_by_distance)):
+        
+            if aid in self.nodes_by_distance[d]:
+                self.nodes_by_distance[d].remove(aid)
+        
+        for d in range(len(self.Q_by_distance)):
+            if aid in self.Q_by_distance[d]:
+                self.Q_by_distance[d].remove(aid)
+                
+        if aid in self.author_info:
+            self.author_info.pop(aid)
+        
+        if aid in self.alias:
+            self.alias.pop(aid)
+            
     #Edit functions
     def replace_id(self,old_id,new_id):
         """Mistakes when writing the core_ids of G are common. This function
@@ -528,12 +624,58 @@ class CollaborationNetwork():
                     if self.Q_by_distance[d][i]==old_id:
                         self.Q_by_distance[d][i]=new_id
                         
-                
+    def get_ids_with_missing_info(self):
+        """Returns a list of which author's ids we still need to get their info."""
         
-        #Faltan cosas por hacer! Hay que ver donde andan los old_id en las Q y en las
-        #distance by node etc
+        lst=[]
+        for x in self.author_info:
+            if not self.author_info[x]:
+                lst.append(x)
+                
+        return lst
             
-                  
+    def set_author_info(self,author_id,affiliation_id=None,city=None,country=None,
+                        name=None, document_count=None,surname=None):
+        
+        """Manually set the information on an author. The author must have been
+        discovered by now. Take care to use Unicode encoding"""
+
+        if not self.author_info[author_id]:
+            self.author_info[author_id]=dict()
+        
+        if ("affiliation-id" not in self.author_info[author_id] or
+        affiliation_id!=None):
+            if affiliation_id not in self.affiliation_info:
+                self.affiliation_info[affiliation_id]=None
+            self.author_info[author_id]["affiliation_id"]=affiliation_id
+            
+            
+        
+        if ("city" not in self.author_info[author_id] or
+        city!=None):
+            self.author_info[author_id]["city"]=city
+            
+        if ("name" not in self.author_info[author_id] or
+        name!=None):
+            self.author_info[author_id]["name"]=name
+            
+        if ("country" not in self.author_info[author_id] or
+        country!=None):
+            self.author_info[author_id]["country"]=country
+        
+        if ("document-count" not in self.author_info[author_id] or
+        document_count!=None):
+            self.author_info[author_id]["document-count"]=document_count
+        
+        if ("surname" not in self.author_info[author_id] or
+        surname!=None):
+            self.author_info[author_id]["surname"]=surname
+            
+    def compute_internal_ids(self):
+        i=1
+        for x in self.author_info:
+            self.author_info[x]['internal_id']=i
+        
 
 
                         

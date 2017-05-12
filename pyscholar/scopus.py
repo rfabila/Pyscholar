@@ -602,11 +602,20 @@ def author_info(author_id,strict=False):
         data=data[0]['author-profile']
         
     if type(data)==dict:
+        #workaround
+        if ('coredata'in data and 'document-count'in data['coredata']):
+            if data['coredata']['document-count']==None:
+                D['document-count']=100
+            else:
+                D['document-count']=data['coredata']['document-count']
+                
         if  'author-profile' in data:
             data=data['author-profile']
         print data.keys()
         if 'name-variant' in data:
             lst=data['name-variant']
+            if type(lst)==dict:
+                lst=[lst]
             doc_count=0
             for x in lst:
                 doc_count+=int(x['@doc-count'])
@@ -616,10 +625,11 @@ def author_info(author_id,strict=False):
     D['surname']=data['preferred-name']['surname']
     
     if 'document-count' not in D:
-        if data['coredata']['document-count']==None:
-            D['document-count']=100
-        else:
-            D['document-count']=int(data['coredata']['document-count'])
+        if 'coredata' in data:
+            if data['coredata']['document-count']==None:
+                D['document-count']=100
+            else:
+                D['document-count']=int(data['coredata']['document-count'])
     
     if 'affiliation-current' in data:
         
@@ -1005,6 +1015,8 @@ def get_authors_from_paper(id_paper):
     fields = "?field=dc:description,authors"
     authors_by_id_paper=dict()
     searchQuery = str(id_paper)
+    
+    print search_api_abstract_url+searchQuery+fields
     
     resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
     
