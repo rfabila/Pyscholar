@@ -478,7 +478,10 @@ def paper_info(id_paper):
     print data
     D={}
     D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
-    D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
+    if 'prism:aggregationType' in data['abstracts-retrieval-response'][u'coredata']:
+        D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
+    else:
+        D["type"]=None
     D["date"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:coverDate'])
     
     if 'prism:publicationName' in data['abstracts-retrieval-response'][u'coredata']:
@@ -607,7 +610,7 @@ def author_info(author_id,strict=False):
             if data['coredata']['document-count']==None:
                 D['document-count']=100
             else:
-                D['document-count']=data['coredata']['document-count']
+                D['document-count']=int(data['coredata']['document-count'])
                 
         if  'author-profile' in data:
             data=data['author-profile']
@@ -1196,7 +1199,7 @@ def get_publications(author_id,strict=False):
         print author_id
         author_attributes=author_info(author_id,strict=True)
         
-    document_count=author_attributes['document-count']
+    document_count=int(author_attributes['document-count'])
     iterations=math.ceil(document_count/200.0)
     chunks=[]
     id_papers=set()

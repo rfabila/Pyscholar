@@ -251,6 +251,9 @@ class CollaborationNetwork():
         self.network_computed=True
         
     def get_alias(self,x):
+        if x not in self.alias:
+            return None
+        
         if self.alias[x]==x:
             return x
         return self.get_alias(self.alias[x])
@@ -304,23 +307,30 @@ class CollaborationNetwork():
                     print "authors",paper_authors
                     for i in range(len(paper_authors)):
                         for j in range(i+1,len(paper_authors)):
-                            x=author_dict[self.get_alias(str(paper_authors[i]))]
-                            y=author_dict[self.get_alias(str(paper_authors[j]))]
+                            alias_i=self.get_alias(str(paper_authors[i]))
+                            alias_j=self.get_alias(str(paper_authors[j]))
+                            
                             found_x=False
                             found_y=False
-                            for dx in range(distance+1):
-                                if self.get_alias(str(paper_authors[i])) in self.nodes_by_distance[dx]:
-                                    print "found"
-                                    found_x=True                                    
-                                    break
-                            for dy in range(distance+1):
-                                if self.get_alias(str(paper_authors[j])) in self.nodes_by_distance[dy]:
-                                    print "found"
-                                    found_y=True
-                                    break
+                            
+                            if alias_i!=None:
+                                for dx in range(distance+1):
+                                    if self.get_alias(str(paper_authors[i])) in self.nodes_by_distance[dx]:
+                                        print "found"
+                                        found_x=True                                    
+                                        break
+                            if alias_j!=None:
+                                for dy in range(distance+1):
+                                    if self.get_alias(str(paper_authors[j])) in self.nodes_by_distance[dy]:
+                                        print "found"
+                                        found_y=True
+                                        break
                                 
+                            
                             #print x,y
                             if found_x and found_y:
+                                x=author_dict[self.get_alias(str(paper_authors[i]))]
+                                y=author_dict[self.get_alias(str(paper_authors[j]))]
                                 if H.has_edge(x,y):
                                     H[x][y]['weight']+=1
                                 else:
@@ -564,6 +574,58 @@ class CollaborationNetwork():
                 lst=self.extra_ids[alias]
                 for i in range(len(lst)):
                     print str(i)+".-"+lst[i]
+    
+    def get_distance(self,author_id):
+        for d in range(self.distance+2):
+            if author_id in self.nodes_by_distance[d]:
+                break
+        return d
+    
+    def add_id(self,author_id):
+        """Adds a new author_id. You should rerun create_network
+        and get_info afterwards"""
+        
+        for S in self.nodes_by_distance:
+            try:
+                if author_id in S:
+                    print "found"
+                    S.remove(author_id)
+            except:
+                pass
+        
+        self.core_ids.append(author_id)
+        self.nodes_by_distance[0].add(author_id)
+        self.Q_by_distance[0].append(author_id)
+        self.current_paper=0
+        self.current_author=0
+        self.network_computed=False
+        self.author_info[author_id]=False
+        self.alias[author_id]=str(author_id)
+        
+        
+        
+    def add_alias(self,author_id,alias_id):
+        """Adds and alias to and author_id. You should run
+        create_network and add_info afterwards."""
+        
+        if alias_id in self.author_info:
+            self.merge_authors(self.author_info[author_id]["internal_id"],
+                               self.author_info[alias_id]["internal_id"])
+            return None
+        
+        root=self.get_alias(author_id)
+        d=self.get_distance(root)
+        self.author_info[alias_id]=False
+        self.alias[alias_id]=root
+        self.Q_by_distance[d].append(alias_id)
+        self.network_computed=False
+        self.current_paper=0
+        self.current_author=0
+        
+    def add_aliases(self,author_id,alias_list):
+        for alias_id in alias_list:
+            self.add_alias(author_id,alias_id)
+        
         
     def add_new_id(self,internal_id,idx):
         """Adds the scopus_id stored in extra_ids with index_id. You should have run
