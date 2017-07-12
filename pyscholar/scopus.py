@@ -54,12 +54,12 @@ if MY_API_KEY == "":
         raise Key_Exception
 
 import requests
-import networkx as nx
+#import networkx as nx
 import os
 import itertools as it
 import math
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pickle
 
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
@@ -832,181 +832,181 @@ def get_cache_papers():
     return scopus_authors_by_idpapers_cache
 
 
-def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
-    """
-    This function returns a tuple where the first element is the graph induced by several authors
-    and the second element is a list of sets where each set is a set of authors to distance d.
+# def get_coauthors_graph(list_scopus_id_author,distance,min_year="",max_year="",directory="",name=""):
+#     """
+#     This function returns a tuple where the first element is the graph induced by several authors
+#     and the second element is a list of sets where each set is a set of authors to distance d.
+# 
+#     :param list_scopus_id_author: If you are looking for the paper of an author you can send the id as a string but if you want to get the papers from several authors you can send a list of their ids.
+#     :param min_year: The initial year in the time interval you want to look for papers.
+#     :param max_year: The final year in the time interval you want to look for papers.
+#     :type list_scopus_id_author: String or List.
+#     :type min_year: String
+#     :type max_year: String
+#     :returns: Tuple where the first element is the graph induced by several authors and the second element is a list of sets where each set is a set of authors to distance d.
+#     :rtype: Tuple
+# 
+#     :Example:
+# 
+#     >>> import pyscholar
+#     >>> pyscholar.get_papers("56578611900")
+#     {'56578611900': set(['84959332636'])}
+#     >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'])
+#     {'7006176684': set(['5444229075', '17144467193', '0001031138', '79959322537', '84911059592', '84955069066', '0037233714', '38249018110', '52149122079', '0009416953', '84892551677', '51249164413', '0000772349', '0007057901', '13544277720', '33847670994', '0031146399', '84921029337', '84886394293', '0034363462', '67651172822', '0035869886', '0038931174', '38249040825', '33947675881', '0010211186', '84905729730', '0031285726', '23044528188', '0033072608', '0009247597', '84947051661', '84951039519', '0033531899', '77958482876', '0000385874', '33646915730', '84886435449', '0032221906', '58149129161', '21844489552', '52549094277', '0034656467', '0037953609', '84907056975', '38249018633', '84903995394', '84867339764', '33845367161', '0040629757', '0039530566', '0000740606', '22444453689', '84892368124', '76449084340', '84856747354', '27744453855', '34250143856', '84902675107', '27844526213', '0030078477', '0001503960', '0038980939', '0035636479', '79955933749', '0030602470', '17344380224', '0002130779', '80054044270', '79954497708', '47249108096', '34250110161', '0040631446', '0041195239', '67349106698', '0034347051', '33845783250', '84886738410', '0038625364', '34247172128', '21844507175', '84902371560', '0039529250']),
+#     '55647751400': set(['84924256130', '84924228967', '84876052381']), '56072631800': set(['84896417515', '84947558059'])}
+#     >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'],"2014","2016")
+#     {'7006176684': set(['84902675107', '84905729730', '84892368124', '84951039519', '84907056975', '84947051661', '84911059592', '84903995394', '84921029337', '84886738410', '84955069066', '84902371560', '84886435449']),
+#     '55647751400': set([]), '56072631800': set([])}
+#     >>>
+# 
+#     """
+#     node_colors=["red","blue","green","yellow","brown"]
+#     node_distance=distance
+#     iteration=distance+1
+#     if isinstance(list_scopus_id_author, str):
+#         list_scopus_id_author=[list_scopus_id_author]
+#     nodes=set()
+#     index_color=0
+#     edge_list=[]
+#     attribute_edge=[]
+#     resource_not_found=[]
+#     G_coauthors=nx.Graph()
+#     D=[]
+#     dist_count=0
+#     dict_knowledge_papers=dict()
+#     while(iteration!=0):
+#         new_search=set()
+#         #print "Nivel: "+str(distance)
+#         #print len(list_scopus_id_author)
+#         #print list_scopus_id_author
+#         for id_author in list_scopus_id_author:
+#             print id_author
+#             if id_author not in nodes:
+#                 nodes.add(id_author)
+#                 G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
+#             if(iteration==1):
+#                 continue
+#             else:
+#                 coauthors=get_coauthors(str(id_author),min_year,max_year,dict_knowledge_papers)
+#                 #print coauthors
+#                 dict_knowledge_papers.update(coauthors[2])
+#                 for coauthor in coauthors[1]:
+#                     edge_list.append((id_author,str(coauthor)))
+#                     attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
+#                     new_search.add(str(coauthor))
+#         if (iteration==1):
+#             print "Here"
+#             #print list_scopus_id_author
+#             dict_last_authors=dict()
+#             list_scopus_id_author_found=set()
+#             for id_author in list_scopus_id_author:
+#                 try:
+#                     coauthors_of_author=get_coauthors(id_author,min_year,max_year,dict_knowledge_papers)
+#                     dict_knowledge_papers.update(coauthors_of_author[2])
+#                     dict_last_authors[id_author]=coauthors_of_author[1]
+#                     list_scopus_id_author_found.add(id_author)
+#                 except:
+#                     resource_not_found.append(id_author)
+#                     continue
+#             check_edge=it.combinations(list_scopus_id_author_found,2)
+#             for edge in check_edge:
+#                 print "Check edge"
+#                 print edge[0],edge[1]
+#                 intersection_papers=get_common_papers(edge[0],edge[1])
+#                 if len(intersection_papers)>0:
+#                     edge_list.append((edge[0],edge[1]))
+#                     attribute_edge.append((edge[0],edge[1],intersection_papers))
+#         list_scopus_id_author=new_search.copy()
+#         iteration-=1
+#         index_color+=1
+#         dist_count+=1
+#     G_coauthors.add_edges_from(edge_list)
+#     for dis in range(node_distance+1):
+#         D.append([])
+#     for id_node in G_coauthors.nodes():
+#         D[G_coauthors.node[id_node]['distance']].append(id_node)
+#     """
+#     custom_node_color={}
+#     pos = nx.spring_layout(G_coauthors,k=0.15,iterations=200)
+#     for id_node in G_coauthors.nodes():
+#         custom_node_color[id_node]=G_coauthors.node[id_node]['color']
+#     nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
+#     """
+#     nx.draw(G_coauthors)
+#     if  os.path.exists(directory):
+#         plt.savefig(directory+name+".png")
+#     for atribute in attribute_edge:
+#         if 'papers' in G_coauthors[atribute[0]][atribute[1]]:
+#             G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+#         else:
+#             G_coauthors[atribute[0]][atribute[1]]['papers']=[]
+#             G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
+#     return (G_coauthors,D)
 
-    :param list_scopus_id_author: If you are looking for the paper of an author you can send the id as a string but if you want to get the papers from several authors you can send a list of their ids.
-    :param min_year: The initial year in the time interval you want to look for papers.
-    :param max_year: The final year in the time interval you want to look for papers.
-    :type list_scopus_id_author: String or List.
-    :type min_year: String
-    :type max_year: String
-    :returns: Tuple where the first element is the graph induced by several authors and the second element is a list of sets where each set is a set of authors to distance d.
-    :rtype: Tuple
-
-    :Example:
-
-    >>> import pyscholar
-    >>> pyscholar.get_papers("56578611900")
-    {'56578611900': set(['84959332636'])}
-    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'])
-    {'7006176684': set(['5444229075', '17144467193', '0001031138', '79959322537', '84911059592', '84955069066', '0037233714', '38249018110', '52149122079', '0009416953', '84892551677', '51249164413', '0000772349', '0007057901', '13544277720', '33847670994', '0031146399', '84921029337', '84886394293', '0034363462', '67651172822', '0035869886', '0038931174', '38249040825', '33947675881', '0010211186', '84905729730', '0031285726', '23044528188', '0033072608', '0009247597', '84947051661', '84951039519', '0033531899', '77958482876', '0000385874', '33646915730', '84886435449', '0032221906', '58149129161', '21844489552', '52549094277', '0034656467', '0037953609', '84907056975', '38249018633', '84903995394', '84867339764', '33845367161', '0040629757', '0039530566', '0000740606', '22444453689', '84892368124', '76449084340', '84856747354', '27744453855', '34250143856', '84902675107', '27844526213', '0030078477', '0001503960', '0038980939', '0035636479', '79955933749', '0030602470', '17344380224', '0002130779', '80054044270', '79954497708', '47249108096', '34250110161', '0040631446', '0041195239', '67349106698', '0034347051', '33845783250', '84886738410', '0038625364', '34247172128', '21844507175', '84902371560', '0039529250']),
-    '55647751400': set(['84924256130', '84924228967', '84876052381']), '56072631800': set(['84896417515', '84947558059'])}
-    >>> pyscholar.get_papers(['7006176684','55647751400','56072631800'],"2014","2016")
-    {'7006176684': set(['84902675107', '84905729730', '84892368124', '84951039519', '84907056975', '84947051661', '84911059592', '84903995394', '84921029337', '84886738410', '84955069066', '84902371560', '84886435449']),
-    '55647751400': set([]), '56072631800': set([])}
-    >>>
-
-    """
-    node_colors=["red","blue","green","yellow","brown"]
-    node_distance=distance
-    iteration=distance+1
-    if isinstance(list_scopus_id_author, str):
-        list_scopus_id_author=[list_scopus_id_author]
-    nodes=set()
-    index_color=0
-    edge_list=[]
-    attribute_edge=[]
-    resource_not_found=[]
-    G_coauthors=nx.Graph()
-    D=[]
-    dist_count=0
-    dict_knowledge_papers=dict()
-    while(iteration!=0):
-        new_search=set()
-        #print "Nivel: "+str(distance)
-        #print len(list_scopus_id_author)
-        #print list_scopus_id_author
-        for id_author in list_scopus_id_author:
-            print id_author
-            if id_author not in nodes:
-                nodes.add(id_author)
-                G_coauthors.add_node(str(id_author),color=node_colors[index_color%5],distance=dist_count)
-            if(iteration==1):
-                continue
-            else:
-                coauthors=get_coauthors(str(id_author),min_year,max_year,dict_knowledge_papers)
-                #print coauthors
-                dict_knowledge_papers.update(coauthors[2])
-                for coauthor in coauthors[1]:
-                    edge_list.append((id_author,str(coauthor)))
-                    attribute_edge.append((id_author,str(coauthor),coauthors[2][coauthor]))
-                    new_search.add(str(coauthor))
-        if (iteration==1):
-            print "Here"
-            #print list_scopus_id_author
-            dict_last_authors=dict()
-            list_scopus_id_author_found=set()
-            for id_author in list_scopus_id_author:
-                try:
-                    coauthors_of_author=get_coauthors(id_author,min_year,max_year,dict_knowledge_papers)
-                    dict_knowledge_papers.update(coauthors_of_author[2])
-                    dict_last_authors[id_author]=coauthors_of_author[1]
-                    list_scopus_id_author_found.add(id_author)
-                except:
-                    resource_not_found.append(id_author)
-                    continue
-            check_edge=it.combinations(list_scopus_id_author_found,2)
-            for edge in check_edge:
-                print "Check edge"
-                print edge[0],edge[1]
-                intersection_papers=get_common_papers(edge[0],edge[1])
-                if len(intersection_papers)>0:
-                    edge_list.append((edge[0],edge[1]))
-                    attribute_edge.append((edge[0],edge[1],intersection_papers))
-        list_scopus_id_author=new_search.copy()
-        iteration-=1
-        index_color+=1
-        dist_count+=1
-    G_coauthors.add_edges_from(edge_list)
-    for dis in range(node_distance+1):
-        D.append([])
-    for id_node in G_coauthors.nodes():
-        D[G_coauthors.node[id_node]['distance']].append(id_node)
-    """
-    custom_node_color={}
-    pos = nx.spring_layout(G_coauthors,k=0.15,iterations=200)
-    for id_node in G_coauthors.nodes():
-        custom_node_color[id_node]=G_coauthors.node[id_node]['color']
-    nx.draw(G_coauthors,pos,node_list = custom_node_color.keys(), node_color=custom_node_color.values())
-    """
-    nx.draw(G_coauthors)
-    if  os.path.exists(directory):
-        plt.savefig(directory+name+".png")
-    for atribute in attribute_edge:
-        if 'papers' in G_coauthors[atribute[0]][atribute[1]]:
-            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
-        else:
-            G_coauthors[atribute[0]][atribute[1]]['papers']=[]
-            G_coauthors[atribute[0]][atribute[1]]['papers']+=atribute[2]
-    return (G_coauthors,D)
-
-def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
-    """
-    Returns a tuple where the first element is the graph induced by papers
-    and the second element is a list of sets where each set is a set of papers to distance d.
-    and the last element is a set of papers not found.
-    """
-    node_distance=distance
-    if isinstance(list_scopus_id_paper, str):
-        list_scopus_id_paper=[list_scopus_id_paper]
-    iteration=distance+1
-    G_citation=nx.DiGraph()
-    nodes=set()
-    edge_list=[]
-    paper_not_found=set()
-    dist_count=0
-    D=[]
-    while(iteration!=0):
-        #print list_scopus_id_paper
-        #print len(list_scopus_id_paper)
-        new_search=set()
-        for paper in list_scopus_id_paper:
-            if paper not in nodes:
-                nodes.add(paper)
-                G_citation.add_node(str(paper),distance=dist_count)
-            if(iteration==1):
-                continue
-            else:
-                try:
-                    cites=get_references_by_paper(str(paper))
-                    for cite in cites[str(paper)]:
-                        edge_list.append((str(paper),str(cite)))
-                        new_search.add(str(cite))
-                except:
-                    paper_not_found.add(str(paper))
-                    continue
-        if(iteration==1):
-            dict_last_nodes=dict()
-            for id_paper in list_scopus_id_paper:
-                try:
-                    #print id_paper
-                    cites=get_references_by_paper(str(id_paper))
-                    dict_last_nodes[id_paper]=cites[str(id_paper)]
-                except:
-                    paper_not_found.add(str(id_paper))
-                    continue
-            check_edge=it.permutations(dict_last_nodes.keys(),2)
-            for edge in check_edge:
-                if edge[1] in dict_last_nodes[edge[0]]:
-                    edge_list.append((str(edge[0]),str(edge[1])))
-                    edge_list.append((str(edge[0]),str(edge[1])))
-        list_scopus_id_paper=new_search.copy()
-        iteration-=1
-        dist_count+=1
-    G_citation.add_edges_from(edge_list)
-    for node_to_remove in paper_not_found:
-        G_citation.remove_node(node_to_remove)
-    nx.draw(G_citation)
-    if  os.path.exists(directory):
-        plt.savefig(directory+name+".png")
-    for dis in range(node_distance+1):
-        D.append([])
-    for id_node in G_citation.nodes():
-        D[G_citation.node[id_node]['distance']].append(id_node)
-    return (G_citation,D,paper_not_found)
+# def get_citation_graph(list_scopus_id_paper,distance,directory="",name=""):
+#     """
+#     Returns a tuple where the first element is the graph induced by papers
+#     and the second element is a list of sets where each set is a set of papers to distance d.
+#     and the last element is a set of papers not found.
+#     """
+#     node_distance=distance
+#     if isinstance(list_scopus_id_paper, str):
+#         list_scopus_id_paper=[list_scopus_id_paper]
+#     iteration=distance+1
+#     G_citation=nx.DiGraph()
+#     nodes=set()
+#     edge_list=[]
+#     paper_not_found=set()
+#     dist_count=0
+#     D=[]
+#     while(iteration!=0):
+#         #print list_scopus_id_paper
+#         #print len(list_scopus_id_paper)
+#         new_search=set()
+#         for paper in list_scopus_id_paper:
+#             if paper not in nodes:
+#                 nodes.add(paper)
+#                 G_citation.add_node(str(paper),distance=dist_count)
+#             if(iteration==1):
+#                 continue
+#             else:
+#                 try:
+#                     cites=get_references_by_paper(str(paper))
+#                     for cite in cites[str(paper)]:
+#                         edge_list.append((str(paper),str(cite)))
+#                         new_search.add(str(cite))
+#                 except:
+#                     paper_not_found.add(str(paper))
+#                     continue
+#         if(iteration==1):
+#             dict_last_nodes=dict()
+#             for id_paper in list_scopus_id_paper:
+#                 try:
+#                     #print id_paper
+#                     cites=get_references_by_paper(str(id_paper))
+#                     dict_last_nodes[id_paper]=cites[str(id_paper)]
+#                 except:
+#                     paper_not_found.add(str(id_paper))
+#                     continue
+#             check_edge=it.permutations(dict_last_nodes.keys(),2)
+#             for edge in check_edge:
+#                 if edge[1] in dict_last_nodes[edge[0]]:
+#                     edge_list.append((str(edge[0]),str(edge[1])))
+#                     edge_list.append((str(edge[0]),str(edge[1])))
+#         list_scopus_id_paper=new_search.copy()
+#         iteration-=1
+#         dist_count+=1
+#     G_citation.add_edges_from(edge_list)
+#     for node_to_remove in paper_not_found:
+#         G_citation.remove_node(node_to_remove)
+#     nx.draw(G_citation)
+#     if  os.path.exists(directory):
+#         plt.savefig(directory+name+".png")
+#     for dis in range(node_distance+1):
+#         D.append([])
+#     for id_node in G_citation.nodes():
+#         D[G_citation.node[id_node]['distance']].append(id_node)
+#     return (G_citation,D,paper_not_found)
 
 def get_authors_from_paper(id_paper):
     #RUY_VERSION
