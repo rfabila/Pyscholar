@@ -447,6 +447,12 @@ class CollaborationNetwork():
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label,distance=0)
         return H
     
+    def get_network_by_dict(self,D,start_year=None,end_year=None,start_date=None,end_date=None):
+        def f(aid):
+            return D[aid]
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=f,distance=0)
+        return H
+    
     def get_info(self,parallel_download=True):
         self.get_author_info(parallel_download=parallel_download)
         self.get_paper_info(parallel_download=parallel_download)
@@ -737,6 +743,7 @@ class CollaborationNetwork():
         i=1
         for x in self.author_info:
             self.author_info[x]['internal_id']=i
+            i+=1
         
 
 
