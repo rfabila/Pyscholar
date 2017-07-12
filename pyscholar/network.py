@@ -467,14 +467,19 @@ class CollaborationNetwork():
                 return x
         return None
     
-    def show_authors(self):
+    def show_authors(self,distance=0):
         N={}
         for x in self.author_info:
-            name=self.name_label(x)
-            if name not in N:
-                N[name]=[x]
-            else:
-                N[name].append(x)
+            author_within_distance=False
+            for d in range(distance+1):
+                if x in self.nodes_by_distance[d]:
+                    author_within_distance=True
+            if author_within_distance:
+                name=self.name_label(x)
+                if name not in N:
+                    N[name]=[x]
+                else:
+                    N[name].append(x)
         Names=N.keys()
         Names.sort()
         for name in Names:
