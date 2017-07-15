@@ -99,13 +99,13 @@ class CollaborationNetwork():
                 self.paper_info[paper_id]=scopus.paper_info(paper_id)
     
     
-    def get_author_info(self,parallel_download=True):
+    def get_author_info(self,parallel_download=True,distance=0):
         Q=[]
         
         IDS=self.author_info.keys()
         
         for x in IDS:
-            if  not self.author_info[x]:
+            if  not self.author_info[x] and self.get_distance(x)<=distance:
                 Q.append(x)
         
         if parallel_download:
@@ -114,8 +114,9 @@ class CollaborationNetwork():
             
         print "Adding info"
         
-        for x in IDS:
+        for x in Q:
             if not self.author_info[x]:
+                print x
                 try:
                     D=scopus.author_info(x,strict=True)
                     self.author_info[x]=D
@@ -152,15 +153,16 @@ class CollaborationNetwork():
                 except:
                     print "General Exception"
 
-    def get_affiliation_info(self,parallel_download=True):
+    def get_affiliation_info(self,parallel_download=True,distance=0):
         """Get information about the author affiliations. get_author_info
         should have been called prior to call this function."""
         Q=set()
         for x in self.author_info:
             print x
-            s=self.author_info[x]['affiliation-id']
-            if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]==None)):
-                Q.add(s)
+            if self.get_distance(x)<=distance:
+                s=self.author_info[x]['affiliation-id']
+                if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]==None)):
+                    Q.add(s)
         Q=list(Q)
         print Q
         
@@ -175,8 +177,9 @@ class CollaborationNetwork():
                 print "Scopus Exception for ",x
                 print e
                 for y in self.author_info:
-                    if self.author_info[y]['affiliation-id']==x:
-                        self.author_info[y]['affiliation-id']=''
+                    if self.get_distance(y) <=distance:
+                        if self.author_info[y]['affiliation-id']==x:
+                            self.author_info[y]['affiliation-id']=''
     
     def save(self,file_name):
         file_G=open(file_name,'w')
@@ -259,7 +262,8 @@ class CollaborationNetwork():
         return self.get_alias(self.alias[x])
    
     
-    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,label_function=None,distance=0):
+    def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,
+                    label_function=None,distance=0,loops=False):
         """Returns a networkX graph with the given parameters."""
         #if not self.network_computed:
          #   self.create_network()
@@ -283,7 +287,8 @@ class CollaborationNetwork():
         author_dict={}
         for x in self.author_info:
             x=self.get_alias(x)
-            if x not in author_dict:
+            if x not in author_dict and self.get_distance(x)<=distance:
+
                 author_dict[x]=label_function(x)
         
         S=[set(x) for x in self.nodes_by_distance]
@@ -331,11 +336,12 @@ class CollaborationNetwork():
                             if found_x and found_y:
                                 x=author_dict[self.get_alias(str(paper_authors[i]))]
                                 y=author_dict[self.get_alias(str(paper_authors[j]))]
-                                if H.has_edge(x,y):
-                                    H[x][y]['weight']+=1
-                                else:
-                                    H.add_edge(x,y)
-                                    H[x][y]['weight']=1            
+                                if x!=y or loops:
+                                    if H.has_edge(x,y):
+                                        H[x][y]['weight']+=1
+                                    else:
+                                        H.add_edge(x,y)
+                                        H[x][y]['weight']=1            
         
         return H
     
@@ -393,35 +399,36 @@ class CollaborationNetwork():
                         self.author_info[y]['affiliation-id']=''
                 
     
-    def construct_name_labels(self,first_name_first=False):
+    def construct_name_labels(self,first_name_first=False,distance=0):
         self.names={}
         N=set()
         for x in self.author_info:
-            x=self.get_alias(x)
-            if x not in self.names:
-                name=""
-                if first_name_first:
-                    if self.author_info[x]['name']!=None:
-                        name+=self.author_info[x]['name']
-                        name+=" "
-                    if self.author_info[x]['surname']!=None:
-                        name+=self.author_info[x]['surname']
-                else:
-                    if self.author_info[x]['surname']!=None:
-                        name+=self.author_info[x]['surname']
-                        name+=" "
-                    if self.author_info[x]['name']!=None:
-                        name+=self.author_info[x]['name']
+            if self.get_distance(x)<=distance:
+                x=self.get_alias(x)
+                if x not in self.names:
+                    name=""
+                    if first_name_first:
+                        if self.author_info[x]['name']!=None:
+                            name+=self.author_info[x]['name']
+                            name+=" "
+                        if self.author_info[x]['surname']!=None:
+                            name+=self.author_info[x]['surname']
+                    else:
+                        if self.author_info[x]['surname']!=None:
+                            name+=self.author_info[x]['surname']
+                            name+=" "
+                        if self.author_info[x]['name']!=None:
+                            name+=self.author_info[x]['name']
                                 
-                tname=name[:]
-                i=2
-                tname=name[:]
-                while tname in N:
-                    tname=name+"_"+str(i)
-                    i=i+1
+                    tname=name[:]
+                    i=2
+                    tname=name[:]
+                    while tname in N:
+                        tname=name+"_"+str(i)
+                        i=i+1
                 
-                self.names[x]=tname
-                N.add(tname)
+                    self.names[x]=tname
+                    N.add(tname)
             
             
     
@@ -434,31 +441,52 @@ class CollaborationNetwork():
         if country==None:
             return "UNKNOWN COUNTRY"
         return country
-        
-    def get_network_by_names(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0):
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.name_label,distance=distance)
+    
+    def get_network_by_ids(self,start_year=None,end_year=None,start_date=None,
+                           end_date=None,distance=0,loops=False):
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
+                           end_date=end_date,label_function=self.get_alias,distance=distance,
+                           loops=False)
         return H
     
-    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,end_date=None,distance=0): 
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.affiliation_label,distance=0)
+    def get_network_by_names(self,start_year=None,end_year=None,start_date=None,
+                             end_date=None,distance=0,loops=False):
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
+                           end_date=end_date,label_function=self.name_label,distance=distance,
+                           loops=False)
         return H
     
-    def get_network_by_country(self,start_year=None,end_year=None,start_date=None,end_date=None):
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=self.country_label,distance=0)
+    def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,
+                                   end_date=None,distance=0,loops=False): 
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
+                           end_date=end_date,label_function=self.affiliation_label,distance=0,
+                           loops=False)
         return H
     
-    def get_network_by_dict(self,D,start_year=None,end_year=None,start_date=None,end_date=None):
+    def get_network_by_country(self,start_year=None,end_year=None,start_date=None,
+                               end_date=None,loops=False):
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
+                           end_date=end_date,label_function=self.country_label,distance=0,
+                           loops=False)
+        return H
+    
+    def get_network_by_dict(self,D,start_year=None,end_year=None,start_date=None,
+                            end_date=None,loops=False):
         def f(aid):
+            print aid
+            aid=self.get_alias(aid)
+            print aid
             return D[aid]
-        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,end_date=end_date,label_function=f,distance=0)
+        H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
+                           end_date=end_date,label_function=f,distance=0,loops=False)
         return H
     
-    def get_info(self,parallel_download=True):
-        self.get_author_info(parallel_download=parallel_download)
+    def get_info(self,parallel_download=True,distance=0):
+        self.get_author_info(parallel_download=parallel_download,distance=distance)
         self.get_paper_info(parallel_download=parallel_download)
-        self.get_affiliation_info(parallel_download=parallel_download)
+        self.get_affiliation_info(parallel_download=parallel_download,distance=distance)
         self.download_parent_aff_info()
-        self.construct_name_labels()
+        self.construct_name_labels(distance=distance)
         self.construct_affiliation_labels()
     
     def _get_id_from_internal_id(self,i):
@@ -586,12 +614,6 @@ class CollaborationNetwork():
                 for i in range(len(lst)):
                     print str(i)+".-"+lst[i]
     
-    def get_distance(self,author_id):
-        for d in range(self.distance+2):
-            if author_id in self.nodes_by_distance[d]:
-                break
-        return d
-    
     def add_id(self,author_id):
         """Adds a new author_id. You should rerun create_network
         and get_info afterwards"""
@@ -687,15 +709,29 @@ class CollaborationNetwork():
         for i in range(len(self.core_ids)):
             if self.core_ids[i]==old_id:
                 self.core_ids[i]=new_id
-            
+                
             if type(self.core_ids[i])==list:               
                 if old_id in self.core_ids[i]:
                     self.core_ids[i][self.core_ids[i].index(old_id)]=new_id
                     
-            for d in len(range(self.Q_by_distance)):
-                for i in range(len(self.Q_by_distance[d])):
-                    if self.Q_by_distance[d][i]==old_id:
-                        self.Q_by_distance[d][i]=new_id
+        for S in self.nodes_by_distance:
+                if old_id in S:
+                    S.remove(old_id)    
+        
+        for S in self.Q_by_distance:
+            if old_id in S:
+                S.remove(old_id)
+        
+        if old_id in self.author_info:
+            self.author_info.pop(old_id)
+        
+        self.nodes_by_distance[0].add(new_id)
+        self.Q_by_distance[0].append(new_id)
+        self.network_computed=False
+        self.current_author=0
+        self.current_paper=0
+        
+            
                         
     def get_ids_with_missing_info(self):
         """Returns a list of which author's ids we still need to get their info."""
@@ -749,7 +785,12 @@ class CollaborationNetwork():
         for x in self.author_info:
             self.author_info[x]['internal_id']=i
             i+=1
-        
+    
+    def get_distance(self,aid):
+        for i in range(len(self.nodes_by_distance)):
+            if aid in self.nodes_by_distance[i]:
+                return i
+        return len(self.nodes_by_distance)
 
 
                         
