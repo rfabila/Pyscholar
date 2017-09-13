@@ -261,9 +261,30 @@ class CollaborationNetwork():
             return x
         return self.get_alias(self.alias[x])
    
+    def construct_first_publication_dict(self):
+        """Constructs a dictionary that for each author, stores
+        the date of his/her fist publication."""
+        
+        self.first_publication={}
+        
+        for paper in self.paper_info:
+            
+            try:
+                paper_date=dateutil.parser.parse(self.paper_info[paper]['date']).date()
+            except ValueError as ex:
+                print ex
+                paper_date=datetime.date.max
+            
+            for aid in self.paper_info[paper]['authors']:
+                aid=self.get_alias(aid)
+                if (aid not in self.first_publication or
+                    self.first_publication[aid]>paper_date):
+                    self.first_publication[aid]=paper_date
+
+            
     
     def get_network(self,start_year=None,end_year=None,start_date=None,end_date=None,
-                    label_function=None,distance=0,loops=False):
+                    label_function=None,distance=0,loops=False,author_filter=lambda x: True):
         """Returns a networkX graph with the given parameters."""
         #if not self.network_computed:
          #   self.create_network()
@@ -275,7 +296,7 @@ class CollaborationNetwork():
         if start_year!=None:
             start_date=datetime.date(int(start_year),1,1)
         if end_year!=None:
-            end_date=datetime.date(int(end_year),1,1)
+            end_date=datetime.date(int(end_year),12,31)
             
         if start_date==None:
             start_date=datetime.date.min
@@ -285,9 +306,11 @@ class CollaborationNetwork():
              
         H=networkx.graph.Graph()
         author_dict={}
+        
         for x in self.author_info:
             x=self.get_alias(x)
-            if x not in author_dict and self.get_distance(x)<=distance:
+            if( x not in author_dict and self.get_distance(x)<=distance
+               and author_filter(self.get_alias(x))):
 
                 author_dict[x]=label_function(x)
         
@@ -320,20 +343,20 @@ class CollaborationNetwork():
                             
                             if alias_i!=None:
                                 for dx in range(distance+1):
-                                    if self.get_alias(str(paper_authors[i])) in self.nodes_by_distance[dx]:
+                                    if alias_i in self.nodes_by_distance[dx]:
                                         print "found"
                                         found_x=True                                    
                                         break
                             if alias_j!=None:
                                 for dy in range(distance+1):
-                                    if self.get_alias(str(paper_authors[j])) in self.nodes_by_distance[dy]:
+                                    if alias_j in self.nodes_by_distance[dy]:
                                         print "found"
                                         found_y=True
                                         break
                                 
                             
                             #print x,y
-                            if found_x and found_y:
+                            if found_x and found_y and author_filter(alias_i) and author_filter(alias_j):
                                 x=author_dict[self.get_alias(str(paper_authors[i]))]
                                 y=author_dict[self.get_alias(str(paper_authors[j]))]
                                 if x!=y or loops:
@@ -443,43 +466,62 @@ class CollaborationNetwork():
         return country
     
     def get_network_by_ids(self,start_year=None,end_year=None,start_date=None,
-                           end_date=None,distance=0,loops=False):
+                           end_date=None,distance=0,loops=False, author_filter=lambda x: True):
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
                            end_date=end_date,label_function=self.get_alias,distance=distance,
-                           loops=False)
+                           loops=loops, author_filter=author_filter)
         return H
     
     def get_network_by_names(self,start_year=None,end_year=None,start_date=None,
-                             end_date=None,distance=0,loops=False):
+                             end_date=None,distance=0,loops=False, author_filter=lambda x: True):
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
                            end_date=end_date,label_function=self.name_label,distance=distance,
-                           loops=False)
+                           loops=loops,author_filter=author_filter)
         return H
     
     def get_network_by_affiliation(self,start_year=None,end_year=None,start_date=None,
-                                   end_date=None,distance=0,loops=False): 
+                                   end_date=None,distance=0,loops=False, author_filter=lambda x: True): 
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
                            end_date=end_date,label_function=self.affiliation_label,distance=0,
-                           loops=False)
+                           loops=loops,author_filter=author_filter)
         return H
     
     def get_network_by_country(self,start_year=None,end_year=None,start_date=None,
-                               end_date=None,loops=False):
+                               end_date=None,loops=False, author_filter=lambda x: True):
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
                            end_date=end_date,label_function=self.country_label,distance=0,
-                           loops=False)
+                           loops=loops,author_filter=author_filter)
         return H
     
     def get_network_by_dict(self,D,start_year=None,end_year=None,start_date=None,
-                            end_date=None,loops=False):
+                            end_date=None,loops=False, author_filter=lambda x: True):
         def f(aid):
             print aid
             aid=self.get_alias(aid)
             print aid
             return D[aid]
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
-                           end_date=end_date,label_function=f,distance=0,loops=False)
+                           end_date=end_date,label_function=f,distance=0,
+                           loops=loops,author_filter=author_filter)
         return H
+    
+    def first_publication_filter_funct(self,date=None,year=None):
+        """It returns a function that filters the authors whose
+        first publication is no later than the given dates."""
+        if not hasattr(self,"first_publication"):
+            self.construct_first_publication_dict()
+        if year!=None:
+            date=datetime.date(int(year),1,1)    
+        if date==None:
+            date=datetime.date.max
+        
+        def f(aid):
+            aid=self.get_alias(aid)
+            if self.first_publication[aid]<=date:
+                return True
+            return False
+        
+        return f
     
     def get_info(self,parallel_download=True,distance=0):
         self.get_author_info(parallel_download=parallel_download,distance=distance)
