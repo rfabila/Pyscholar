@@ -295,8 +295,10 @@ class CollaborationNetwork():
         
         if start_year!=None:
             start_date=datetime.date(int(start_year),1,1)
+            print start_date
         if end_year!=None:
             end_date=datetime.date(int(end_year),12,31)
+            print end_date
             
         if start_date==None:
             start_date=datetime.date.min
@@ -330,9 +332,9 @@ class CollaborationNetwork():
                 paper_date=datetime.date.min
             
             if paper_date>=start_date and paper_date<=end_date:
-                    print "paper_id",paper_id
+                    #print "paper_id",paper_id
                     paper_authors=self.paper_info[paper_id]['authors']
-                    print "authors",paper_authors
+                    #print "authors",paper_authors
                     for i in range(len(paper_authors)):
                         for j in range(i+1,len(paper_authors)):
                             alias_i=self.get_alias(str(paper_authors[i]))
@@ -344,13 +346,13 @@ class CollaborationNetwork():
                             if alias_i!=None:
                                 for dx in range(distance+1):
                                     if alias_i in self.nodes_by_distance[dx]:
-                                        print "found"
+                                        #print "found"
                                         found_x=True                                    
                                         break
                             if alias_j!=None:
                                 for dy in range(distance+1):
                                     if alias_j in self.nodes_by_distance[dy]:
-                                        print "found"
+                                        #print "found"
                                         found_y=True
                                         break
                                 
@@ -364,8 +366,8 @@ class CollaborationNetwork():
                                         H[x][y]['weight']+=1
                                     else:
                                         H.add_edge(x,y)
-                                        H[x][y]['weight']=1            
-        
+                                        H[x][y]['weight']=1
+
         return H
     
     def construct_affiliation_labels(self):
