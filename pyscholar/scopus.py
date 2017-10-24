@@ -1,6 +1,16 @@
-import ConfigParser, os, time
+import ConfigParser
+import os
+import time
 import Queue
 import threading
+import itertools as it
+import math
+import pickle
+
+import requests
+#import networkx as nx
+import pandas as pd
+#import matplotlib.pyplot as plt
 
 class Quota_Exceeded(Exception):
     def __str__(self):
@@ -10,9 +20,9 @@ class Key_Exception(Exception):
         return "Scopus key not set."
     
 class Alias_Exception(Exception):
-    def __init__(self,author_id,alias):
-        self.author_id=str(author_id)
-        self.alias=alias
+    def __init__(self, author_id, alias):
+        self.author_id = str(author_id)
+        self.alias = alias
     def __str__(self):
         return "The given author_id has an alias"
 
@@ -21,11 +31,11 @@ keys = ConfigParser.ConfigParser()
 pyscholarDir = os.path.join(os.path.expanduser("~"), ".pyscholar")
 keys.read(os.path.join(pyscholarDir, 'keys.cfg'))
 KEY_ARRAY = keys.get('Keys', 'Scopus').split(',')
-key_index=0
+key_index = 0
 MY_API_KEY = KEY_ARRAY[key_index]
 
 #Connection parameters conf
-connection=ConfigParser.ConfigParser()
+connection = ConfigParser.ConfigParser()
 #print pyscholarDir+"connection.cfg"
 #if os.path.isfile(pyscholarDir+"connection.cfg"):
 #    connnection.read(pyscholarDir,"connection.cfg")
@@ -35,10 +45,10 @@ connection=ConfigParser.ConfigParser()
 #    wait_time=5
 #    attempts=5
 
-wait_time=5
-attempts=5
-num_fetch_threads=10
-Errors=[]
+wait_time = 5
+attempts = 5
+num_fetch_threads = 10
+Errors = []
 
 
 if MY_API_KEY == "":
@@ -53,100 +63,97 @@ if MY_API_KEY == "":
     else:
         raise Key_Exception
 
-import requests
-#import networkx as nx
-import os
-import itertools as it
-import math
-import pandas as pd
-#import matplotlib.pyplot as plt
-import pickle
-
 search_api_author_url = "http://api.elsevier.com/content/search/author?"
 search_api_scopus_url = "http://api.elsevier.com/content/search/scopus?"
 search_api_abstract_url = "http://api.elsevier.com/content/abstract/scopus_id/"
-search_api_author_id_url="http://api.elsevier.com/content/author/author_id/"
+search_api_author_id_url = "http://api.elsevier.com/content/author/author_id/"
 search_api_affiliation_url = "http://api.elsevier.com/content/search/affiliation?"
-retrieve_api_affiliation_url="http://api.elsevier.com/content/affiliation/affiliation_id/"
+retrieve_api_affiliation_url = "http://api.elsevier.com/content/affiliation/affiliation_id/"
 
 headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
 
-scopus_authors_by_idpapers_cache=dict()
-scopus_papers_by_authorid_cache=dict()
-scopus_papers_by_authorid_noyear_cache=dict()
-scopus_references_by_idpaper_cache=dict()
-scopus_paper_info_cache=dict()
-scopus_author_info=dict()
-scopus_affiliation_info=dict()
-scopus_author_scopus_id_by_name_cache=dict()
-
+scopus_authors_by_idpapers_cache = dict()
+scopus_papers_by_authorid_cache = dict()
+scopus_papers_by_authorid_noyear_cache = dict()
+scopus_references_by_idpaper_cache = dict()
+scopus_paper_info_cache = dict()
+scopus_author_info = dict()
+scopus_affiliation_info = dict()
+scopus_author_scopus_id_by_name_cache = dict()
 
 
 #cache saves
 def save_cache(filename=None):
-    caches=(scopus_authors_by_idpapers_cache,
-            scopus_papers_by_authorid_cache,
-            scopus_papers_by_authorid_noyear_cache,
-            scopus_references_by_idpaper_cache,
-            scopus_paper_info_cache,
-            scopus_author_info,
-            scopus_affiliation_info,
-            scopus_author_scopus_id_by_name_cache,
-            )
-    if filename==None:
-        filename="lastsession.ch"
-    file_ch=open(filename,"w")
-    pickle.dump(caches,file_ch)
+    caches = (scopus_authors_by_idpapers_cache,
+              scopus_papers_by_authorid_cache,
+              scopus_papers_by_authorid_noyear_cache,
+              scopus_references_by_idpaper_cache,
+              scopus_paper_info_cache,
+              scopus_author_info,
+              scopus_affiliation_info,
+              scopus_author_scopus_id_by_name_cache,
+             )
+
+    if filename == None:
+        filename = "lastsession.ch"
+
+    file_ch = open(filename, "w")
+    pickle.dump(caches, file_ch)
     file_ch.close()
 
 def load_caches(filename=None):
-    if filename==None:
-        filename="lastsession.ch"
-    file_ch=open(filename,"r")
-    ch=(scopus_authors_by_idpapers_cache,
-        scopus_papers_by_authorid_cache,
-        scopus_papers_by_authorid_noyear_cache,
-        scopus_references_by_idpaper_cache,
-        scopus_paper_info_cache,
-        scopus_author_info,
-        scopus_affiliation_info,
-        scopus_author_scopus_id_by_name_cache,)
-    ch=pickle.load(file_ch)
+    if filename == None:
+        filename = "lastsession.ch"
+    file_ch = open(filename, "r")
+    ch = (scopus_authors_by_idpapers_cache,
+          scopus_papers_by_authorid_cache,
+          scopus_papers_by_authorid_noyear_cache,
+          scopus_references_by_idpaper_cache,
+          scopus_paper_info_cache,
+          scopus_author_info,
+          scopus_affiliation_info,
+          scopus_author_scopus_id_by_name_cache,)
+    
+    ch = pickle.load(file_ch)
     file_ch.close()
     
 
 def requests_get_wrapper(query):
     resp = requests.get(query, headers=headers)
-    t=0
+    t = 0
     print query
-    while resp.status_code!=200 and resp.status_code!=300 and t < attempts:
-        if resp.status_code==429:
+    while resp.status_code != 200 and resp.status_code != 300 and t < attempts:
+        if resp.status_code == 429:
             _new_key()
             resp = requests.get(query, headers=headers)
         else:
             time.sleep(wait_time)
-            print "waiting ",t
+            print "waiting ", t
             print "status", resp.status_code
             print "json"
             print resp
             #print resp.json()
             resp = requests.get(query, headers=headers)
-            t=t+1
-    if resp.status_code==200:
+            t = t+1
+
+    if resp.status_code == 200:
         return resp
-    if resp.status_code==300:
+
+    if resp.status_code == 300:
         return resp
         #raise Exception
     raise Scopus_Exception(resp)
+
 
 def _new_key():
     global MY_API_KEY
     global key_index
     global headers
+
     print MY_API_KEY
     
     headers = {"Accept":"application/json", "X-ELS-APIKey": MY_API_KEY}
-    key_index+=1
+    key_index += 1
     if key_index >= len(KEY_ARRAY):
         raise Quota_Exceeded
     MY_API_KEY = KEY_ARRAY[key_index]
@@ -154,12 +161,12 @@ def _new_key():
 class Scopus_Exception(Exception):
     def __init__(self, resp):
         self.code = resp.status_code
-        if resp.status_code!=500:
+        if resp.status_code != 500:
             resp = resp.json()
             print resp
             resp = resp[u'service-error'][u'status']
-            self.statusCode=resp[u'statusCode']
-            self.statusText=resp[u'statusText']
+            self.statusCode = resp[u'statusCode']
+            self.statusText = resp[u'statusText']
     def __str__(self):
         return "%s: %s"%(self.statusCode, self.statusText)
 
@@ -181,52 +188,65 @@ def find_affiliation_scopus_id_by_name(organization=""):
     #if resp.status_code != 200:
     #        raise Scopus_Exception(resp)
     
-    id_affil=[]
+    id_affil = []
     data = resp.json()
     data = data['search-results']
     if data["opensearch:totalResults"] == '0':
         print "None"
         return None
-    affiliation_scopus_id_by_name=dict()
+    affiliation_scopus_id_by_name = dict()
     for entry in data['entry']:
-        affiliation_name=entry['affiliation-name']
-        identifier=entry['dc:identifier']
-        ident=entry['dc:identifier'].split(":")[1]
+        affiliation_name = entry['affiliation-name']
+        identifier = entry['dc:identifier']
+        ident = entry['dc:identifier'].split(":")[1]
         #affil_id = entry['dc:identifier'].split(':')
-        eid= entry["eid"]
-        document_count=entry['document-count']
+        eid = entry["eid"]
+        document_count = entry['document-count']
         if 'country' in entry.keys():
-            country =entry['country']
+            country = entry['country']
         else:
-            country=""
+            country = ""
         if 'city' in entry.keys():
-            city =entry['city']
+            city = entry['city']
         else:
-            city=""
-        list_names_variants=[]
+            city = ""
+        list_names_variants = []
         if 'name-variant' in entry.keys():
             for name_variant in entry['name-variant']:
                 list_names_variants.append(name_variant['$'])
 
-        affiliation_scopus_id_by_name[str(ident)]={'affiliation_name':affiliation_name,'identifier':str(identifier),'eid':str(eid),'document_count':int(document_count),'country':str(country),'city':str(city),'name_variant':list_names_variants}
-    table=[]
-    for id_affiliation,attributes_affil in affiliation_scopus_id_by_name.items():
-        register=[]
+        affiliation_scopus_id_by_name[str(ident)] = {'affiliation_name':affiliation_name,
+                                                     'identifier':str(identifier),
+                                                     'eid':str(eid),
+                                                     'document_count':int(document_count),
+                                                     'country':str(country), 'city':str(city),
+                                                     'name_variant':list_names_variants}
+
+    table = []
+
+    for id_affiliation, attributes_affil in affiliation_scopus_id_by_name.items():
+        register = []
         register.append(id_affiliation)
-        for key_val,val_affil in attributes_affil.items():
+        for key_val, val_affil in attributes_affil.items():
             register.append(val_affil)
         table.append(register)
-    headers_table=['id', 'city', 'country', 'name_variant', 'eid', 'affiliation_name', 'identifier', 'document_count']
-    affiliation_table=pd.DataFrame(table)
+
+    headers_table = ['id', 'city', 'country', 'name_variant', 'eid',
+                     'affiliation_name', 'identifier', 'document_count']
+
+    affiliation_table = pd.DataFrame(table)
+
     for i in range(len(headers_table)):
-        affiliation_table.rename(index=str, columns={i:headers_table[i]},inplace=True)
-    affiliation_table.sort_values(['document_count'],ascending=[False],inplace=True)
+        affiliation_table.rename(index=str, columns={i:headers_table[i]}, inplace=True)
+
+    affiliation_table.sort_values(['document_count'], ascending=[False], inplace=True)
     affiliation_table = affiliation_table.reset_index(drop=True)
 
     return affiliation_table
 
-def affiliation_info(af_id,strict=True):
-    af_id=str(af_id)
+
+def affiliation_info(af_id, strict=True):
+    af_id = str(af_id)
     print af_id
     if af_id in scopus_affiliation_info:
         return scopus_affiliation_info[af_id]
@@ -238,12 +258,12 @@ def affiliation_info(af_id,strict=True):
             raise e
         else:
             return None
-    data=resp.json()
+    data = resp.json()
     print data
-    data=data["affiliation-retrieval-response"]
-    scopus_affiliation_info[af_id]=data
+    data = data["affiliation-retrieval-response"]
+    scopus_affiliation_info[af_id] = data
     return data
-    
+
 
 def search_affiliation_by_id(list_scopus_id_affiliation):
     """
@@ -268,9 +288,10 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
     
     """
     if isinstance(list_scopus_id_affiliation, str):
-        list_scopus_id_affiliation=[list_scopus_id_affiliation]
-    fields=""
-    dict_affiliation_by_id=dict()
+        list_scopus_id_affiliation = [list_scopus_id_affiliation]
+    fields = ""
+    dict_affiliation_by_id = dict()
+
     for id_affiliation in list_scopus_id_affiliation:
         searchQuery = str(id_affiliation)
         #resp = requests.get(retrieve_api_affiliation_url+searchQuery+fields, headers=headers)
@@ -283,16 +304,18 @@ def search_affiliation_by_id(list_scopus_id_affiliation):
         #if resp.status_code != 200:
         #    raise Scopus_Exception(resp)
         
-        data=resp.json()
+        data = resp.json()
         print data
-        data=data["affiliation-retrieval-response"]
-        date_created=data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year']
-        preferred_name=data["institution-profile"]['preferred-name']
-        author_count=int(data['coredata']['author-count'])
-        document_count=int(data['coredata']['document-count'])
-        attributes={'date_created':date_created,'preferred_name':preferred_name,'author_count':author_count,'document_count':document_count}
-        dict_affiliation_by_id[id_affiliation]=attributes
+        data = data["affiliation-retrieval-response"]
+        date_created = data["institution-profile"]['date-created']['@day']+"/"+data["institution-profile"]['date-created']['@month']+"/"+data["institution-profile"]['date-created']['@year']
+        preferred_name = data["institution-profile"]['preferred-name']
+        author_count = int(data['coredata']['author-count'])
+        document_count = int(data['coredata']['document-count'])
+        attributes = {'date_created':date_created, 'preferred_name':preferred_name,
+                      'author_count':author_count, 'document_count':document_count}
+        dict_affiliation_by_id[id_affiliation] = attributes
     return dict_affiliation_by_id
+
 
 def get_authors_by_id_affiliation(list_scopus_id_affiliation):
     """
@@ -314,30 +337,30 @@ def get_authors_by_id_affiliation(list_scopus_id_affiliation):
 
     """    
     if isinstance(list_scopus_id_affiliation, str):
-        list_scopus_id_affiliation=[list_scopus_id_affiliation]
-    authors_by_id_affiliation=dict()
+        list_scopus_id_affiliation = [list_scopus_id_affiliation]
+    authors_by_id_affiliation = dict()
     for id_affiliation in list_scopus_id_affiliation:
-        affiliation_attributes=search_affiliation_by_id(id_affiliation)
-        author_count=affiliation_attributes[id_affiliation]["author_count"]
-        iterations=math.ceil(author_count/200.0)
-        chunks=[]
-        for size_chunk in range(0,int(iterations)+1):
-            if size_chunk==0:
+        affiliation_attributes = search_affiliation_by_id(id_affiliation)
+        author_count = affiliation_attributes[id_affiliation]["author_count"]
+        iterations = math.ceil(author_count/200.0)
+        chunks = []
+        for size_chunk in range(0, int(iterations) + 1):
+            if size_chunk == 0:
                 chunks.append(0)
             else:
-                if ((200*size_chunk)+1+200)<=5000:
-                    chunks.append((200*size_chunk)+1)
+                if ((200 * size_chunk) + 1 + 200) <= 5000:
+                    chunks.append((200 * size_chunk) + 1)
                 else:
                     if 4801 not in chunks:
                         chunks.append(4801)
-        iterations=len(chunks)
-        index_chunk=0
-        ids_author=set()
-        while(iterations!=0):
-            if chunks[index_chunk]!=4801:
-                fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
+        iterations = len(chunks)
+        index_chunk = 0
+        ids_author = set()
+        while(iterations != 0):
+            if chunks[index_chunk] != 4801:
+                fields = "&field=dc:identifier&count=200"+"&start=" + str(chunks[index_chunk])
             else:
-                fields = "&field=dc:identifier&count=199"+"&start="+str(chunks[index_chunk])
+                fields = "&field=dc:identifier&count=199"+"&start=" + str(chunks[index_chunk])
             searchQuery = "query=AF-ID("+str(id_affiliation)+")"
             #print search_api_author_url+searchQuery+fields
             resp = requests_get_wrapper(search_api_author_url+searchQuery+fields)
@@ -350,7 +373,7 @@ def get_authors_by_id_affiliation(list_scopus_id_affiliation):
             #if resp.status_code != 200:
              #   raise Scopus_Exception(resp)
              
-            data=resp.json()
+            data = resp.json()
             data = data['search-results']
             if data["opensearch:totalResults"] == '0':
                 #Check after.
@@ -359,18 +382,19 @@ def get_authors_by_id_affiliation(list_scopus_id_affiliation):
             for entry in data['entry']:
                 authorId = entry['dc:identifier'].split(':')
                 ids_author.add(str(authorId[1]))
-            iterations-=1
-            index_chunk+=1
-        authors_by_id_affiliation[id_affiliation]=ids_author
+            iterations -= 1
+            index_chunk += 1
+        authors_by_id_affiliation[id_affiliation] = ids_author
 
     return authors_by_id_affiliation
+
 
 def get_references_by_paper(list_scopus_id_paper):
     """
     This function returns a dictionary where the key is the ID of the paper and 
     the value associated with the key is a set of the ids of the papers cited by each paper searched.
 
-    :param list_scopus_id_paper: If you are looking for the ids of the papers cited by an paper, you can send the id as a string but if you want to get the ids of the papers cited from several papers you can send a list of their ids.
+    :param list_scopus_id_paper: If you are looking for the ids of the papers cited by an paper,you can send the id as a string but if you want to get the ids of the papers cited from several papers you can send a list of their ids.
     :type list_scopus_id_author: String or List
     :returns: Dictionary where the key is the ID of the paper and the value associated with the key is a set of the ids of the papers cited by each paper.
     :rtype: Dictionary
@@ -386,14 +410,14 @@ def get_references_by_paper(list_scopus_id_paper):
     
     """
     if isinstance(list_scopus_id_paper, str):
-        list_scopus_id_paper=[list_scopus_id_paper]
+        list_scopus_id_paper = [list_scopus_id_paper]
 
-    references_by_paper=dict()
+    references_by_paper = dict()
     for id_paper in list_scopus_id_paper:
         if id_paper in scopus_references_by_idpaper_cache.keys():
-            if len(scopus_references_by_idpaper_cache[id_paper])==0:
+            if len(scopus_references_by_idpaper_cache[id_paper]) == 0:
                 print "I didn't find references for this paper."
-            references_by_paper[id_paper]=scopus_references_by_idpaper_cache[id_paper]
+            references_by_paper[id_paper] = scopus_references_by_idpaper_cache[id_paper]
         else:
             fields = "?view=REF"
             searchQuery = id_paper
@@ -412,17 +436,18 @@ def get_references_by_paper(list_scopus_id_paper):
              
             data = resp.json()
             if data[u'abstracts-retrieval-response'] is not None:
-                data=data[u'abstracts-retrieval-response'][u'references'][u'reference']
-                references_ids=set()
+                data = data[u'abstracts-retrieval-response'][u'references'][u'reference']
+                references_ids = set()
                 for id_reference in data:
                     references_ids.add(str(id_reference['scopus-id']))
-                references_by_paper[id_paper]=references_ids
+                references_by_paper[id_paper] = references_ids
                 scopus_references_by_idpaper_cache.update({id_paper:references_ids})
             else:
                 print "I didn't find references for this paper."
                 scopus_references_by_idpaper_cache.update({id_paper:set()})
 
     return references_by_paper
+
 
 def get_cache_references_by_idpaper():
     """
@@ -433,7 +458,7 @@ def get_cache_references_by_idpaper():
     return scopus_references_by_idpaper_cache
 
 
-def get_common_papers(id_author_1="",id_author_2=""):
+def get_common_papers(id_author_1="", id_author_2=""):
     """
     This function returns the intercession of papers between two authors.
     
@@ -451,12 +476,13 @@ def get_common_papers(id_author_1="",id_author_2=""):
     {'84924004559', '84925067887'}
     >>>
     """
-    if id_author_1=="" and id_author_2=="":
+
+    if id_author_1 == "" and id_author_2 == "":
         print "Give me the two Authors"
     else:
-        papers_author_1=get_papers([id_author_1])[id_author_1]
-        papers_author_2=get_papers([id_author_2])[id_author_2]
-        papers_in_common=papers_author_1.intersection(papers_author_2)
+        papers_author_1 = get_papers([id_author_1])[id_author_1]
+        papers_author_2 = get_papers([id_author_2])[id_author_2]
+        papers_in_common = papers_author_1.intersection(papers_author_2)
     return papers_in_common
 
 
@@ -464,7 +490,8 @@ def paper_info(id_paper):
     """
     Returns a dictionary with basic information about the paper.
     """
-    id_paper=str(id_paper)
+
+    id_paper = str(id_paper)
     
     if id_paper in scopus_paper_info_cache:
         return scopus_paper_info_cache[id_paper]
@@ -474,185 +501,194 @@ def paper_info(id_paper):
     
     resp = requests_get_wrapper(search_api_abstract_url+searchQuery+fields)
     
-    data=resp.json()
+    data = resp.json()
     print data
-    D={}
-    D["title"]=data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
+    D = {}
+    D["title"] = data['abstracts-retrieval-response'][u'coredata'][u'dc:title']
+
     if 'prism:aggregationType' in data['abstracts-retrieval-response'][u'coredata']:
-        D["type"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
+        D["type"] = str(data['abstracts-retrieval-response'][u'coredata'][u'prism:aggregationType'])
     else:
-        D["type"]=None
-    D["date"]=str(data['abstracts-retrieval-response'][u'coredata'][u'prism:coverDate'])
+        D["type"] = None
+    D["date"] = str(data['abstracts-retrieval-response'][u'coredata'][u'prism:coverDate'])
     
     if 'prism:publicationName' in data['abstracts-retrieval-response'][u'coredata']:
-        D["venue"]=data['abstracts-retrieval-response'][u'coredata'][u'prism:publicationName']
+        D["venue"] = data['abstracts-retrieval-response'][u'coredata'][u'prism:publicationName']
     else:
-        D["venue"]=None
+        D["venue"] = None
         
-    D["authors"]=get_authors_from_paper(id_paper)
+    D["authors"] = get_authors_from_paper(id_paper)
     
-    scopus_paper_info_cache[id_paper]=D
+    scopus_paper_info_cache[id_paper] = D
     #print data
     return D
 
-def _thread_maker(f,INFO):
-    def t(q,i):
+
+def _thread_maker(f, INFO):
+    def t(q, i):
         while True:
-           print "Fetching "+INFO+".Worker ",i
-           x_id=q.get()
-           try:
-               f(str(x_id))
-           except Exception as e:
-               print e
-               Errors.append((INFO,e))
-           q.task_done()
+            print "Fetching "+INFO+".Worker ", i
+            x_id = q.get()
+            try:
+                f(str(x_id))
+            except Exception as e:
+                print e
+                Errors.append((INFO, e))
+            q.task_done()
     return t
 
-def _download_info(lst,f_thread):
+def _download_info(lst, f_thread):
     
-    q=Queue.Queue()
+    q = Queue.Queue()
     
     for x in lst:
         q.put(x)
     
-    m=min(len(lst),num_fetch_threads)
+    m = min(len(lst), num_fetch_threads)
     for i in range(m):
-        worker = threading.Thread(target=f_thread, args=(q,i))
+        worker = threading.Thread(target=f_thread, args=(q, i))
         worker.setDaemon(True)
         worker.start()
     
     q.join()
 
+
 def download_author_info(author_ids):
     def f(author_id):
-        return author_info(author_id,strict=False)
-    t=_thread_maker(f,"author info")
-    _download_info(author_ids,t)
+        return author_info(author_id, strict=False)
+    t = _thread_maker(f, "author info")
+    _download_info(author_ids, t)
+
 
 def download_paper_info(paper_ids):
-    t=_thread_maker(paper_info,"paper info")
-    _download_info(paper_ids,t)
-    
-def download_publications(author_ids,strict=False):
+    t = _thread_maker(paper_info, "paper info")
+    _download_info(paper_ids, t)
+
+
+def download_publications(author_ids, strict=False):
     def f(author_id):
-        return get_publications(author_id,strict=strict)
-    t=_thread_maker(f,"publications by author")
-    _download_info(author_ids,t)
+        return get_publications(author_id, strict=strict)
+    t = _thread_maker(f, "publications by author")
+    _download_info(author_ids, t)
+
 
 def download_authors_from_papers(paper_ids):
-    t=_thread_maker(get_authors_from_paper,"authors by paper")
-    _download_info(paper_ids,t)
+    t = _thread_maker(get_authors_from_paper, "authors by paper")
+    _download_info(paper_ids, t)
 
-def download_affiliation_info(af_ids,strict=True):
+
+def download_affiliation_info(af_ids, strict=True):
     def f(af_id):
-        return affiliation_info(af_id,strict=strict)
-    t=_thread_maker(f,"affiliation information")
-    _download_info(af_ids,t)
-        
-def author_info(author_id,strict=False):
+        return affiliation_info(af_id, strict=strict)
+    t = _thread_maker(f, "affiliation information")
+    _download_info(af_ids, t)
+
+
+def author_info(author_id, strict=False):
     """Returns a dictionary with basic information about the author_id.
     If strict is set to True then an alias response will result in an alias exception.
     Otherwise, the information associated by the alias is returned."""
     
     if str(author_id) in scopus_author_info:
-        if type(scopus_author_info[str(author_id)])==Alias_Exception:
+        if type(scopus_author_info[str(author_id)]) == Alias_Exception:
             raise scopus_author_info[str(author_id)]
         return scopus_author_info[str(author_id)]
     
     fields = "?field=given-name,surname,affiliation-city,affiliation-country,affiliation-id,document-count"
-    D=dict()
+    D = dict()
     searchQuery = str(author_id)
     
     resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
-    data=resp.json()
+    data = resp.json()
     print author_id
     print data
     
     if 'alias' in data['author-retrieval-response']:
-        s=data['author-retrieval-response']['alias']['prism:url']
-        idlst=[]
-        if type(s)==list:
+        s = data['author-retrieval-response']['alias']['prism:url']
+        idlst = []
+        if type(s) == list:
             for x in s:
                 for y in x:
-                    y=x[y]
-                    aidx=y.find("author_id")
+                    y = x[y]
+                    aidx = y.find("author_id")
                     idlst.append(y[aidx+10:])
         else:
-            aidx=s.find("author_id")
+            aidx = s.find("author_id")
             idlst.append(s[aidx+10:])
         
         print idlst
         
         if strict:
-            e=Alias_Exception(author_id,idlst)
-            scopus_author_info[str(author_id)]=e
+            e = Alias_Exception(author_id, idlst)
+            scopus_author_info[str(author_id)] = e
             raise e
         
-        author_id=idlst[0]
+        author_id = idlst[0]
         searchQuery = str(author_id)
-        resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
-        data=resp.json()
+        resp = requests_get_wrapper(search_api_author_id_url + searchQuery + fields)
+        data = resp.json()
         print author_id
         print data
                 
     
-    data=data['author-retrieval-response'][0]
+    data = data['author-retrieval-response'][0]
     #workaround for the way in which scopus is now sending info! It may not
     #work in the future. Update it seems changes are coming to the scopus database
     #This may be problem in the future!
     
-    if type(data)==list:
-        data=data[0]['author-profile']
+    if type(data) == list:
+        data = data[0]['author-profile']
         
-    if type(data)==dict:
+    if type(data) == dict:
         #workaround
         if ('coredata'in data and 'document-count'in data['coredata']):
-            if data['coredata']['document-count']==None:
-                D['document-count']=100
+            if data['coredata']['document-count'] == None:
+                D['document-count'] = 100
             else:
-                D['document-count']=int(data['coredata']['document-count'])
+                D['document-count'] = int(data['coredata']['document-count'])
                 
         if  'author-profile' in data:
-            data=data['author-profile']
+            data = data['author-profile']
         print data.keys()
         if 'name-variant' in data:
-            lst=data['name-variant']
-            if type(lst)==dict:
-                lst=[lst]
-            doc_count=0
+            lst = data['name-variant']
+            if type(lst) == dict:
+                lst = [lst]
+            doc_count = 0
             for x in lst:
-                doc_count+=int(x['@doc-count'])
-            D['document-count']=doc_count
+                doc_count += int(x['@doc-count'])
+            D['document-count'] = doc_count
             
-    D['name']=data['preferred-name']['given-name']
-    D['surname']=data['preferred-name']['surname']
+    D['name'] = data['preferred-name']['given-name']
+    D['surname'] = data['preferred-name']['surname']
     
     if 'document-count' not in D:
         if 'coredata' in data:
-            if data['coredata']['document-count']==None:
-                D['document-count']=100
+            if data['coredata']['document-count'] == None:
+                D['document-count'] = 100
             else:
-                D['document-count']=int(data['coredata']['document-count'])
+                D['document-count'] = int(data['coredata']['document-count'])
     
     if 'affiliation-current' in data:
         
         if u'@id' in data['affiliation-current']:
-            D['affiliation-id']=data['affiliation-current'][u'@id']
+            D['affiliation-id'] = data['affiliation-current'][u'@id']
         else:
-            D['affiliation-id']=None
+            D['affiliation-id'] = None
     
         if 'affiliation-country' in data['affiliation-current']:
-            D['country']=data['affiliation-current']['affiliation-country']
+            D['country'] = data['affiliation-current']['affiliation-country']
         else:
-            D['country']=None
+            D['country'] = None
         
         if 'affiliation-city' in data['affiliation-current']:
-            D['city']=data['affiliation-current']['affiliation-city']
+            D['city'] = data['affiliation-current']['affiliation-city']
         else:
-            D['city']=None
+            D['city'] = None
          
-    scopus_author_info[str(author_id)]=D
+    scopus_author_info[str(author_id)] = D
     return D
+
 
 def get_title_abstract_by_idpaper(id_paper=""):
     """
@@ -685,12 +721,12 @@ def get_title_abstract_by_idpaper(id_paper=""):
    # if resp.status_code != 200:
     #    raise Scopus_Exception(resp)
 
-    data=resp.json()
-    data=data["abstracts-retrieval-response"]["coredata"]
-    return (id_paper,(data['dc:title']),(data['dc:description']))
+    data = resp.json()
+    data = data["abstracts-retrieval-response"]["coredata"]
+    return (id_paper, (data['dc:title']), (data['dc:description']))
 
 
-def search_author(list_scopus_id_author,strict=False):
+def search_author(list_scopus_id_author, strict=False):
     """
     This function returns a dictionary where the key is the ID of the
     author and the value associated with the key is a dictionary
@@ -715,11 +751,11 @@ def search_author(list_scopus_id_author,strict=False):
 
     """
     fields = "?field=dc:identifier,given-name,surname,h-index,coauthor-count,document-count"
-    dict_authors=dict()
+    dict_authors = dict()
     if isinstance(list_scopus_id_author, str):
-        list_scopus_id_author=[list_scopus_id_author]
+        list_scopus_id_author = [list_scopus_id_author]
     for id_author in list_scopus_id_author:
-        attributes=dict()
+        attributes = dict()
         searchQuery = str(id_author)
         resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
         #resp = requests.get(search_api_author_id_url+searchQuery+fields, headers=headers)
@@ -732,51 +768,52 @@ def search_author(list_scopus_id_author,strict=False):
         print resp
         if resp.status_code != 200:
             raise Scopus_Exception(resp)
-        data=resp.json()
+        data = resp.json()
         print data
         
         if 'alias' in data['author-retrieval-response']:
-            s=data['author-retrieval-response']['alias']['prism:url']
-            aidx=s.find("author_id")
+            s = data['author-retrieval-response']['alias']['prism:url']
+            aidx = s.find("author_id")
         
             if strict:
-                raise Alias_Exception(id_author,s[aidx+10:])
+                raise Alias_Exception(id_author, s[aidx+10:])
         
-            id_author=s[aidx+10:]
+            id_author = s[aidx+10:]
             searchQuery = str(id_author)
             resp = requests_get_wrapper(search_api_author_id_url+searchQuery+fields)
             print resp.status_code
             print resp
             if resp.status_code != 200:
                 raise Scopus_Exception(resp)
-            data=resp.json()
+            data = resp.json()
             print data
             
-        data=data['author-retrieval-response'][0]
+        data = data['author-retrieval-response'][0]
         #considerar el caso en que algunos de estos valores puede ser None
         print id_author
-        attributes={'name':data['preferred-name']['given-name'],
-        'surname':data['preferred-name']['surname']}
+        attributes = {'name':data['preferred-name']['given-name'],
+                      'surname':data['preferred-name']['surname']}
         
-        if data['h-index']!=None:
-            attributes['h-index']=int(data['h-index'])
+        if data['h-index'] != None:
+            attributes['h-index'] = int(data['h-index'])
         else:
-            attributes['h-index']=0
+            attributes['h-index'] = 0
             
-        if data['coauthor-count']!=None:
-            attributes['coauthor-count']=int(data['coauthor-count'])
+        if data['coauthor-count'] != None:
+            attributes['coauthor-count'] = int(data['coauthor-count'])
         else:
-            attributes['coauthor-count']=0
+            attributes['coauthor-count'] = 0
             
-        if data['coredata']['document-count']!=None:
-            attributes['document-count']=int(data['coredata']['document-count'])
+        if data['coredata']['document-count'] != None:
+            attributes['document-count'] = int(data['coredata']['document-count'])
         else:
-            attributes['document-count']=0
+            attributes['document-count'] = 0
             
-        dict_authors[id_author]=attributes
+        dict_authors[id_author] = attributes
     return dict_authors
 
-def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
+
+def get_coauthors(id_author, min_year="", max_year="", dict_knowledge=dict()):
     """
     This function returns a tuple in certain time interval with the next elemets id_author,set of co-authors associated with an id of an author 
     and a dictionary where the key is the ID of the co-authors 
@@ -800,28 +837,29 @@ def get_coauthors(id_author,min_year="",max_year="",dict_knowledge=dict()):
     >>>
     """
     scopus_authors_by_idpapers_cache.update(dict_knowledge)
-    papers_author=get_papers([id_author],min_year,max_year)[id_author]
-    papers_with_coauthors=dict()
-    list_authors=set()
+    papers_author = get_papers([id_author], min_year, max_year)[id_author]
+    papers_with_coauthors = dict()
+    list_authors = set()
     for paper in papers_author:
         if paper in scopus_authors_by_idpapers_cache.keys():
             #print "Here"
             for coauthor in scopus_authors_by_idpapers_cache[paper]:
-                if coauthor!=id_author:
+                if coauthor != id_author:
                     list_authors.add(coauthor)
-                    papers_with_coauthors[coauthor]=papers_with_coauthors.setdefault(coauthor,[])+[paper]
+                    papers_with_coauthors[coauthor] = papers_with_coauthors.setdefault(coauthor, []) + [paper]
         else:
-            authors=get_ids_authors_by_id_paper(paper)
+            authors = get_ids_authors_by_id_paper(paper)
             scopus_authors_by_idpapers_cache.update(authors)
             for author in authors[paper]:
-                if author not in list_authors and author!=id_author:
+                if author not in list_authors and author != id_author:
                     list_authors.add(author)
-                    papers_with_coauthors[author]=[paper]
-                elif author!=id_author:
+                    papers_with_coauthors[author] = [paper]
+                elif author != id_author:
                     papers_with_coauthors[author].append(paper)
 
 
-    return (id_author,list_authors,papers_with_coauthors)
+    return (id_author, list_authors, papers_with_coauthors)
+
 
 def get_cache_papers():
     """
@@ -1016,7 +1054,7 @@ def get_authors_from_paper(id_paper):
         return scopus_authors_by_idpapers_cache[id_paper]
     
     fields = "?field=dc:description,authors"
-    authors_by_id_paper=dict()
+    authors_by_id_paper = dict()
     searchQuery = str(id_paper)
     
     print search_api_abstract_url+searchQuery+fields
@@ -1030,13 +1068,14 @@ def get_authors_from_paper(id_paper):
    # if resp.status_code != 200:
     #    raise Scopus_Exception(resp)
 
-    id_authors=[]
-    data=resp.json()
-    data=data["abstracts-retrieval-response"]["authors"]["author"]
+    id_authors = []
+    data = resp.json()
+    data = data["abstracts-retrieval-response"]["authors"]["author"]
     for author in data:
         id_authors.append(str(author["@auid"]))
-    scopus_authors_by_idpapers_cache[id_paper]=id_authors
+    scopus_authors_by_idpapers_cache[id_paper] = id_authors
     return id_authors
+
 
 def get_ids_authors_by_id_paper(list_scopus_id_paper):
     """
@@ -1059,10 +1098,10 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper):
     >>>
     """
     if isinstance(list_scopus_id_paper, str):
-        list_scopus_id_paper=[list_scopus_id_paper]
+        list_scopus_id_paper = [list_scopus_id_paper]
 
     fields = "?field=dc:description,authors"
-    authors_by_id_paper=dict()
+    authors_by_id_paper = dict()
 
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
@@ -1078,13 +1117,15 @@ def get_ids_authors_by_id_paper(list_scopus_id_paper):
         #if resp.status_code != 200:
         #    raise Scopus_Exception(resp)
 
-        id_authors=[]
-        data=resp.json()
-        data=data["abstracts-retrieval-response"]["authors"]["author"]
+        id_authors = []
+        data = resp.json()
+        data = data["abstracts-retrieval-response"]["authors"]["author"]
         for author in data:
             id_authors.append(str(author["@auid"]))
-        authors_by_id_paper[id_paper]=id_authors
+        authors_by_id_paper[id_paper] = id_authors
+
     return authors_by_id_paper
+
 
 def count_citations_by_id_paper(list_scopus_id_paper):
     """
@@ -1107,10 +1148,10 @@ def count_citations_by_id_paper(list_scopus_id_paper):
     >>>
     """
     if isinstance(list_scopus_id_paper, str):
-        list_scopus_id_paper=[list_scopus_id_paper]
+        list_scopus_id_paper = [list_scopus_id_paper]
 
     fields = "?field=dc:description,citedby-count"
-    cited_by_count=dict()
+    cited_by_count = dict()
 
     for id_paper in list_scopus_id_paper:
         searchQuery = str(id_paper)
@@ -1126,42 +1167,43 @@ def count_citations_by_id_paper(list_scopus_id_paper):
        # if resp.status_code != 200:
         #    raise Scopus_Exception(resp)
 
-        number_citations=0
-        data=resp.json()
-        data=data["abstracts-retrieval-response"]["coredata"]
-        number_citations=int(data['citedby-count'])
-        cited_by_count[id_paper]=number_citations
+        number_citations = 0
+        data = resp.json()
+        data = data["abstracts-retrieval-response"]["coredata"]
+        number_citations = int(data['citedby-count'])
+        cited_by_count[id_paper] = number_citations
+
     return cited_by_count
 
-def check_years(min_year="",max_year=""):
+def check_years(min_year="", max_year=""):
     """
     Return the filter if the given interval is correct
     otherwise returns None
     """
-    filtr=""
-    if min_year =="":
-        if max_year=="":
-            filtr=""
+    filtr = ""
+    if min_year == "":
+        if max_year == "":
+            filtr = ""
             return filtr
         else:
             if max_year.isdigit():
-               filtr+="AND (PUBYEAR < "+ str(int(max_year)+1) +")"
-               return filtr
+                filtr += "AND (PUBYEAR < "+ str(int(max_year)+1) +")"
+                return filtr
             else:
                 print "max_year must be a number"
                 return None
     else:
         if min_year.isdigit():
-            if max_year=="":
-                filtr+="AND (PUBYEAR > "+ str(int(min_year)-1) +")"
+            if max_year == "":
+                filtr += "AND (PUBYEAR > "+ str(int(min_year)-1) +")"
                 return filtr
             else:
                 if max_year.isdigit():
-                    if int(max_year)<int(min_year):
+                    if int(max_year) < int(min_year):
                         print "Max_year must be greater than min_year"
                         return None
                     else:
-                        filtr+="AND (PUBYEAR > "+ str(int(min_year)-1) +") AND (PUBYEAR < "+ str(int(max_year)+1)+")"
+                        filtr += "AND (PUBYEAR > "+ str(int(min_year)-1) +") AND (PUBYEAR < "+ str(int(max_year)+1)+")"
                         return filtr
                 else:
                     print "max_year must be a number"
@@ -1175,41 +1217,41 @@ def check_years(min_year="",max_year=""):
                 return None
 
 
-def get_publications(author_id,strict=False):
+def get_publications(author_id, strict=False):
     #Ruy Version
     """Returns a list of publications id authored by the given author(id).
        If strict is set to True and the author_id has an alias then an
        Alias_Exception is returned."""
     
-    author_id=str(author_id)
+    author_id = str(author_id)
     
     if author_id in scopus_papers_by_authorid_noyear_cache:
         return scopus_papers_by_authorid_noyear_cache[author_id]
     
     try:
-        author_attributes=author_info(author_id,strict=True)
+        author_attributes = author_info(author_id, strict=True)
     except Alias_Exception as e:
         if strict:
             raise e
-        author_id=e.alias
+        author_id = e.alias
         
         if author_id in scopus_papers_by_authorid_noyear_cache:
             return scopus_papers_by_authorid_noyear_cache[author_id]
         
         print author_id
-        author_attributes=author_info(author_id,strict=True)
+        author_attributes = author_info(author_id, strict=True)
         
-    document_count=int(author_attributes['document-count'])
-    iterations=math.ceil(document_count/200.0)
-    chunks=[]
-    id_papers=set()
-    for size_chunk in range(0,int(iterations)+1):
-        if size_chunk==0:
+    document_count = int(author_attributes['document-count'])
+    iterations = math.ceil(document_count/200.0)
+    chunks = []
+    id_papers = set()
+    for size_chunk in range(0, int(iterations)+1):
+        if size_chunk == 0:
             chunks.append(0)
         else:
             chunks.append((200*size_chunk)+1)
-    index_chunk=0
-    while (iterations!=0):
+    index_chunk = 0
+    while (iterations != 0):
         #print iterations
         fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
         searchQuery = "query=AU-ID("+str(author_id)+") "
@@ -1222,13 +1264,14 @@ def get_publications(author_id,strict=False):
                 paperId = entry['dc:identifier'].split(':')
                 print paperId
                 id_papers.add(str(paperId[1]))
-        iterations-=1
-        index_chunk+=1
-    id_papers=list(id_papers)
-    scopus_papers_by_authorid_noyear_cache[author_id]=list(id_papers)
+        iterations -= 1
+        index_chunk += 1
+    id_papers = list(id_papers)
+    scopus_papers_by_authorid_noyear_cache[author_id] = list(id_papers)
     return id_papers
-    
-def get_papers(list_scopus_id_author,min_year="",max_year=""):
+
+
+def get_papers(list_scopus_id_author, min_year="", max_year=""):
     """
     This function returns a dictionary where the key is the ID of the
     author and the value associated with the key
@@ -1260,34 +1303,36 @@ def get_papers(list_scopus_id_author,min_year="",max_year=""):
 
     """
     if isinstance(list_scopus_id_author, str):
-        list_scopus_id_author=[list_scopus_id_author]
+        list_scopus_id_author = [list_scopus_id_author]
 
-    papers_by_author=dict()
-    filter_year=""
-    filter_year=check_years(min_year,max_year)
-    if filter_year==None:
+    papers_by_author = dict()
+    filter_year = ""
+    filter_year = check_years(min_year, max_year)
+    if filter_year == None:
         return None
 
     for id_author in list_scopus_id_author:
         if (id_author in scopus_papers_by_authorid_cache.keys()) and (min_year+"-"+max_year in scopus_papers_by_authorid_cache[id_author].keys()):
-            papers_by_author[id_author]=set()
-            papers_by_author[id_author]=papers_by_author[id_author].union(scopus_papers_by_authorid_cache[id_author][min_year+"-"+max_year])
+            papers_by_author[id_author] = set()
+            papers_by_author[id_author] = papers_by_author[id_author].union(scopus_papers_by_authorid_cache[id_author][min_year+"-"+max_year])
         else:
-            author_attributes=search_author(id_author)
-            document_count=author_attributes[id_author]['document-count']
-            iterations=math.ceil(document_count/200.0)
-            chunks=[]
-            for size_chunk in range(0,int(iterations)+1):
-                if size_chunk==0:
+            author_attributes = search_author(id_author)
+            document_count = author_attributes[id_author]['document-count']
+            iterations = math.ceil(document_count/200.0)
+            chunks = []
+            for size_chunk in range(0, int(iterations)+1):
+                if size_chunk == 0:
                     chunks.append(0)
                 else:
                     chunks.append((200*size_chunk)+1)
-            index_chunk=0
-            id_papers=set()
-            while (iterations!=0):
+
+            index_chunk = 0
+            id_papers = set()
+
+            while (iterations != 0):
                 #print iterations
                 fields = "&field=dc:identifier&count=200"+"&start="+str(chunks[index_chunk])
-                searchQuery = "query=AU-ID("+str(id_author)+") "+filter_year
+                searchQuery = "query=AU-ID("+str(id_author)+") " + filter_year
                 #print searchQuery
                 
                 resp = requests_get_wrapper(search_api_scopus_url+searchQuery+fields)
@@ -1305,22 +1350,23 @@ def get_papers(list_scopus_id_author,min_year="",max_year=""):
                 data = resp.json()
                 data = data['search-results']
                 if data["opensearch:totalResults"] == '0':
-                    papers_by_author[id_author]=dict()
+                    papers_by_author[id_author] = dict()
                     papers_by_author[id_author].update({min_year+"-"+max_year:id_papers})
                 else:
                     for entry in data['entry']:
                         paperId = entry['dc:identifier'].split(':')
                         id_papers.add(str(paperId[1]))
-                iterations-=1
-                index_chunk+=1
-            papers_by_author[id_author]=set()
-            papers_by_author[id_author]=papers_by_author[id_author].union(id_papers)
+                iterations -= 1
+                index_chunk += 1
+            papers_by_author[id_author] = set()
+            papers_by_author[id_author] = papers_by_author[id_author].union(id_papers)
             if id_author not in scopus_papers_by_authorid_cache.keys():
-                scopus_papers_by_authorid_cache[id_author]=dict()
+                scopus_papers_by_authorid_cache[id_author] = dict()
                 scopus_papers_by_authorid_cache[id_author].update({min_year+"-"+max_year:id_papers})
             else:
                 scopus_papers_by_authorid_cache[id_author].update({min_year+"-"+max_year:id_papers})
     return papers_by_author
+
 
 def get_cache_papers_by_authorid():
     """
@@ -1330,6 +1376,7 @@ def get_cache_papers_by_authorid():
     the time interval whose associated value is a set of papers.
     """
     return scopus_papers_by_authorid_cache
+
 
 def find_author_scopus_id_by_name(firstName="", lastName=""):
     """
@@ -1383,12 +1430,13 @@ def find_author_scopus_id_by_name(firstName="", lastName=""):
         ids.append(authorId[1])
     
     if lastName in scopus_author_scopus_id_by_name_cache:
-        scopus_author_scopus_id_by_name_cache[lastName][firstName]=ids
+        scopus_author_scopus_id_by_name_cache[lastName][firstName] = ids
     else:
-        scopus_author_scopus_id_by_name_cache[lastName]=dict()
-        scopus_author_scopus_id_by_name_cache[lastName][firstName]=ids
+        scopus_author_scopus_id_by_name_cache[lastName] = dict()
+        scopus_author_scopus_id_by_name_cache[lastName][firstName] = ids
     
     return ids
+
 
 def get_author_affiliations(firstName="", lastName=""):
     """Searches for an author scopus id given its name."""
@@ -1433,16 +1481,7 @@ def get_author_affiliations(firstName="", lastName=""):
     affiliations = []
                                                                                           
     for entry in data['entry']:
-	if 'affiliation-current' in entry:
+        if 'affiliation-current' in entry:
             affiliations.append(entry['affiliation-current'])
-                                                                                                                      
+                                                                                                          
     return affiliations
-
-
-
-                
-                
-                
-                
-                
-                
