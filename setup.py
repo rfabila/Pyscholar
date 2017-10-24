@@ -1,11 +1,12 @@
+''' Python Package Setup '''
 from setuptools import setup, find_packages
-import ConfigParser
-import sys
-import os
+
 
 def readme():
-    with open('README.rst') as f:
-        return f.read()
+    ''' Opens reStructuredText README file
+    '''
+    with open('README.rst') as readme_f:
+        return readme_f.read()
 
 setup(name='pyscholar',
       version='1.0.0.dev3',
