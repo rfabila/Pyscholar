@@ -5,10 +5,10 @@ Pyscholar
 |pyversion| |license|
 ---------------------
 
-A library to create collaboration science networks. 
+A library to create science collaboration networks.
 
 Requirements
--------------
+------------
 
 - `Python <https://www.python.org/download/releases/2.7/>`_  ≥ 2.7
 - `Networkx <http://networkx.github.io/documentation/networkx-1.7/install.html>`_
@@ -33,12 +33,12 @@ Then you must run setup.py and enter your API KEY
 .. code-block:: sh
 
     $ python setup.py
-    $ Your scopus api key:(Here you enter your API Key)
+    $ Your Scopus API key:(Enter here your API Key)
 
 Basic Usage
----------------
+-----------
 
-First navigate to the instalation directory:
+First navigate to the installation directory:
 
 .. code:: sh
 
@@ -54,7 +54,7 @@ Then execute python
     Type "help", "copyright", "credits" or "license" for more information.
     >>> 
 
-And import the pyscholar package
+And import the Pyscholar package in the REPL
 
 .. code:: python
 
@@ -62,8 +62,11 @@ And import the pyscholar package
 
 And now you can do some searching.
 
-For example, the following function performs a search by author. It
-receives the first and last name, and returns a list of IDs associated
+Examples
+--------
+
+The following function performs a search by author.
+It receives the first and last name, and returns a list of IDs associated
 with the author.
 
 .. code:: python
@@ -72,11 +75,11 @@ with the author.
     >>> [u'56013555800', u'16635924700']
 
 License
------------
+-------
 
-This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the
+This project is licensed under the GNU General Public License v2.0 - see the
 `LICENSE <https://github.com/rfabila/Pyscholar/blob/master/LICENSE>`__
-file for details
+file for details.
 
 .. |pyversion| image:: https://img.shields.io/badge/python-2.7-brightgreen.svg
 .. |license| image:: https://img.shields.io/badge/license-GNU-blue.svg
