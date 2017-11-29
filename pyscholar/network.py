@@ -831,10 +831,12 @@ class CollaborationNetwork():
             i+=1
     
     def get_distance(self,aid):
+
         for i in range(len(self.nodes_by_distance)):
             if aid in self.nodes_by_distance[i]:
                 return i
         return len(self.nodes_by_distance)
+
 
 
                         
