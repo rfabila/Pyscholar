@@ -10,7 +10,7 @@ A library to create collaboration science networks.
 Requirements
 -------------
 
-- `Python <https://www.python.org/download/releases/3.0/`_  ≥ 3.x
+- `Python <https://www.python.org/download/releases/3.0/>`_  ≥ 3.x
 - `Networkx <http://networkx.github.io/documentation/networkx-1.7/install.html>`_
 - `Matplotlib <http://matplotlib.org/users/installing.html>`_
 
