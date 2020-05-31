@@ -17,6 +17,6 @@ if not os.path.exists(os.path.join(pyscholarDir, "keys.cfg")):
     keysParser.write(keysFile)
     keysFile.close()
 
-from . import scopus2
-from . import network
+from .scopus2 import * 
+from .network import * 
 
