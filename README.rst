@@ -10,11 +10,10 @@ A library to create collaboration science networks.
 Requirements
 -------------
 
-- `Python <https://www.python.org/download/releases/2.7/>`_  ≥ 2.7
+- `Python <https://www.python.org/download/releases/3.0/>`_  ≥ 3.x
 - `Networkx <http://networkx.github.io/documentation/networkx-1.7/install.html>`_
 - `Matplotlib <http://matplotlib.org/users/installing.html>`_
 
-**Pyscholar does not support Python 3.x**
 
 Installation
 ------------
@@ -78,5 +77,5 @@ This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the
 `LICENSE <https://github.com/rfabila/Pyscholar/blob/master/LICENSE>`__
 file for details
 
-.. |pyversion| image:: https://img.shields.io/badge/python-2.7-brightgreen.svg
+.. |pyversion| image:: https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg
 .. |license| image:: https://img.shields.io/badge/license-GNU-blue.svg

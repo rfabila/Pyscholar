@@ -1,4 +1,4 @@
-import scopus
+import scopus2 as scopus
 import networkx
 import pickle
 import datetime
@@ -109,14 +109,14 @@ class CollaborationNetwork():
                 Q.append(x)
         
         if parallel_download:
-            print "Downloading info"
+            print ("Downloading info")
             scopus.download_author_info(Q)
             
-        print "Adding info"
+        print ("Adding info")
         
         for x in Q:
             if not self.author_info[x]:
-                print x
+                print (x)
                 try:
                     D=scopus.author_info(x,strict=True)
                     self.author_info[x]=D
@@ -125,14 +125,14 @@ class CollaborationNetwork():
                     self.author_info[x]=None
                     root=self.get_alias(x)
                     #root=e.alias[0]
-                    print "alias", e.alias
+                    print ("alias", e.alias)
                     
                     for d in range(len(self.nodes_by_distance)):
                         if x in self.nodes_by_distance[d]:
                             break
                     
                     for y in e.alias:
-                        print root, y
+                        print (root, y)
                         if y not in self.author_info:
                             D=scopus.author_info(y,strict=True)
                             self.author_info[y]=D
@@ -149,33 +149,33 @@ class CollaborationNetwork():
                         
                             
                 except scopus.Scopus_Exception as e:
-                    print "Scopus Exception"
+                    print ("Scopus Exception")
                 except:
-                    print "General Exception"
+                    print ("General Exception")
 
     def get_affiliation_info(self,parallel_download=True,distance=0):
         """Get information about the author affiliations. get_author_info
         should have been called prior to call this function."""
         Q=set()
         for x in self.author_info:
-            print x
+            print (x)
             if self.get_distance(x)<=distance:
                 s=self.author_info[x]['affiliation-id']
                 if (s!='' and ((s not in self.affiliation_info) or self.affiliation_info[s]==None)):
                     Q.add(s)
         Q=list(Q)
-        print Q
+        print (Q)
         
         if parallel_download:
             scopus.download_affiliation_info(Q,strict=False)
             
         for x in Q:
-            print x
+            print (x)
             try:
                 self.affiliation_info[x]=scopus.affiliation_info(x,strict=True)
             except scopus.Scopus_Exception as e:
-                print "Scopus Exception for ",x
-                print e
+                print ("Scopus Exception for ",x)
+                print (e)
                 for y in self.author_info:
                     if self.get_distance(y) <=distance:
                         if self.author_info[y]['affiliation-id']==x:
@@ -199,7 +199,7 @@ class CollaborationNetwork():
                 scopus.download_publications(self.Q_by_distance[current_dist])
             
             while len(self.Q_by_distance[current_dist])>0:
-                print "current distance",current_dist
+                print ("current distance",current_dist)
                 
                 author=self.Q_by_distance[current_dist][-1]
                 
@@ -210,7 +210,7 @@ class CollaborationNetwork():
                 # else:
                 #     x=author
                 
-                print "current_author",author
+                print ("current_author",author)
                 papers=scopus.get_publications(author)
                 
                 if parallel_download:
@@ -219,7 +219,7 @@ class CollaborationNetwork():
                 start_paper=self.current_paper
                 for paper_id in range(start_paper,len(papers)):
                     self.current_paper=paper_id
-                    print "current paper ", papers[paper_id]
+                    print ("current paper ", papers[paper_id])
                     paper_id=papers[paper_id]
                     self.paper_ids_set.add(str(paper_id))
                     authors=scopus.get_authors_from_paper(str(paper_id))
@@ -272,7 +272,7 @@ class CollaborationNetwork():
             try:
                 paper_date=dateutil.parser.parse(self.paper_info[paper]['date']).date()
             except ValueError as ex:
-                print ex
+                print (ex)
                 paper_date=datetime.date.max
             
             for aid in self.paper_info[paper]['authors']:
@@ -326,13 +326,13 @@ class CollaborationNetwork():
             try:
                 paper_date=dateutil.parser.parse(self.paper_info[paper_id]['date']).date()
             except ValueError as ex:
-                print ex
+                print (ex)
                 paper_date=datetime.date.min
             
             if paper_date>=start_date and paper_date<=end_date:
-                    print "paper_id",paper_id
+                    print ("paper_id",paper_id)
                     paper_authors=self.paper_info[paper_id]['authors']
-                    print "authors",paper_authors
+                    print ("authors",paper_authors)
                     for i in range(len(paper_authors)):
                         for j in range(i+1,len(paper_authors)):
                             alias_i=self.get_alias(str(paper_authors[i]))
@@ -344,13 +344,13 @@ class CollaborationNetwork():
                             if alias_i!=None:
                                 for dx in range(distance+1):
                                     if alias_i in self.nodes_by_distance[dx]:
-                                        print "found"
+                                        print ("found")
                                         found_x=True                                    
                                         break
                             if alias_j!=None:
                                 for dy in range(distance+1):
                                     if alias_j in self.nodes_by_distance[dy]:
-                                        print "found"
+                                        print ("found")
                                         found_y=True
                                         break
                                 
@@ -411,12 +411,12 @@ class CollaborationNetwork():
         
         Q=list(Q)
         for x in Q:
-            print x
+            print (x)
             try:
                 self.affiliation_info[x]=scopus.affiliation_info(x,strict=True)
             except scopus.Scopus_Exception as e:
-                print "Scopus Exception for ",x
-                print e
+                print ("Scopus Exception for ",x)
+                print (e)
                 for y in self.author_info:
                     if self.author_info[y]['affiliation-id']==x:
                         self.author_info[y]['affiliation-id']=''
@@ -496,9 +496,9 @@ class CollaborationNetwork():
     def get_network_by_dict(self,D,start_year=None,end_year=None,start_date=None,
                             end_date=None,loops=False, author_filter=lambda x: True):
         def f(aid):
-            print aid
+            print (aid)
             aid=self.get_alias(aid)
-            print aid
+            print (aid)
             return D[aid]
         H=self.get_network(start_year=start_year,end_year=end_year,start_date=start_date,
                            end_date=end_date,label_function=f,distance=0,
@@ -554,9 +554,9 @@ class CollaborationNetwork():
         Names.sort()
         for name in Names:
             x=self.get_alias(N[name][0])
-            print str(self.author_info[x]['internal_id'])+".- "+name
-            print "Scopus_ids",N[name]
-            print ""
+            print (str(self.author_info[x]['internal_id'])+".- "+name)
+            print ("Scopus_ids",N[name])
+            print ("")
         
     def merge_authors(self,i,j):
         """Merge author with internal_id i with author with internal_id j. j becomes
@@ -594,7 +594,7 @@ class CollaborationNetwork():
             self.nodes_by_distance[dx].remove(x)
             self.nodes_by_distance[dy].append(x)
         
-        print x,y
+        print (x,y)
         
         self.alias[x]=y
         
@@ -602,22 +602,22 @@ class CollaborationNetwork():
         
         for author in self.author_info:
             if author not in self.authors_searched_for_extra_ids:
-                print author
+                print (author)
                 alias=self.get_alias(author)
                 if type(self.author_info[author])!=str:
                     author=alias
                 first_name=self.author_info[author]['name']
                 last_name=self.author_info[author]['surname']
             
-                print last_name
-                print first_name
+                print (last_name)
+                print (first_name)
                 
                 if first_name!= None and "(" in first_name:
                     idx=first_name.index("(")
                     first_name=first_name[:idx]
                 
                 
-                print first_name,last_name
+                print (first_name,last_name)
                 
                 lst_tmp=scopus.find_author_scopus_id_by_name(firstName=first_name,lastName=last_name)
                 lst=[]
@@ -634,7 +634,7 @@ class CollaborationNetwork():
                 
                 self.authors_searched_for_extra_ids.add(author)
             else:
-                print "author computed already"
+                print ("author computed already")
                 
         for author in self.extra_ids:
             self.extra_ids[author]=list(self.extra_ids[author])
@@ -649,12 +649,12 @@ class CollaborationNetwork():
             if author_in_distance:
                 name=self.names[author]
                 alias=self.get_alias(author)
-                print ""
-                print str(self.author_info[alias]["internal_id"])+".-"+name
-                print "Possible ids"
+                print ("")
+                print (str(self.author_info[alias]["internal_id"])+".-"+name)
+                print ("Possible ids")
                 lst=self.extra_ids[alias]
                 for i in range(len(lst)):
-                    print str(i)+".-"+lst[i]
+                    print (str(i)+".-"+lst[i])
     
     def add_id(self,author_id):
         """Adds a new author_id. You should rerun create_network
@@ -663,7 +663,7 @@ class CollaborationNetwork():
         for S in self.nodes_by_distance:
             try:
                 if author_id in S:
-                    print "found"
+                    print ("found")
                     S.remove(author_id)
             except:
                 pass
@@ -711,7 +711,7 @@ class CollaborationNetwork():
                 break
 
         author=self.get_alias(author)
-        print author
+        print (author)
         for d in range(self.distance+2):
             if author in self.nodes_by_distance[d]:
                 break
@@ -834,15 +834,3 @@ class CollaborationNetwork():
                 return i
         return len(self.nodes_by_distance)
 
-
-                        
-        
-    
-                        
-                
-                
-                
-            
-        
-    
-    
